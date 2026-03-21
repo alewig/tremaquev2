@@ -383,6 +383,35 @@
       const widget = document.querySelector('.previsao-entrega-widget');
       if (!estimateText || !widget) return;
 
+      const variantShippingData = {
+        {%- for variant in product.variants -%}
+          {%- assign variant_altura = variant.metafields.frenet.altura.value | split: ' ' | first -%}
+          {%- assign variant_comprimento = variant.metafields.frenet.comprimento.value | split: ' ' | first -%}
+          {%- assign variant_largura = variant.metafields.frenet.largura.value | split: ' ' | first -%}
+          "{{ variant.id }}": {
+            "priceCents": {{ variant.price | default: 0 }},
+            "weightGrams": {{ variant.weight | default: 300 }},
+            "sku": {{ variant.sku | default: '' | json }},
+            "height": {% if variant_altura != blank %}{{ variant_altura }}{% else %}null{% endif %},
+            "length": {% if variant_comprimento != blank %}{{ variant_comprimento }}{% else %}null{% endif %},
+            "width": {% if variant_largura != blank %}{{ variant_largura }}{% else %}null{% endif %}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      };
+      let currentVariantId = '{{ product.selected_or_first_available_variant.id }}';
+
+      function getCurrentVariantId() {
+        const productFormVariantInput = document.querySelector('#product-form-{{ section.id }} input[name="id"], form[data-type="add-to-cart-form"] input[name="id"]');
+        if (productFormVariantInput && productFormVariantInput.value) {
+          return String(productFormVariantInput.value);
+        }
+        return String(currentVariantId || '{{ product.selected_or_first_available_variant.id }}');
+      }
+
+      function getCurrentVariantShippingData() {
+        return variantShippingData[getCurrentVariantId()] || variantShippingData['{{ product.selected_or_first_available_variant.id }}'] || null;
+      }
+
       function formatarData(diasADepois) {
         var d = new Date();
         d.setDate(d.getDate() + diasADepois);
@@ -419,10 +448,8 @@
           return;
         }
 
-        // Obter informações do produto via Liquid individual (seguro para descrições com HTML)
-        const shipmentInvoiceValue = {{ product.price | divided_by: 100.0 }};
-        {%- assign _v = product.variants.first -%}
-        {%- assign _sku_raw = _v.sku | default: '' -%}
+        const currentVariantShippingData = getCurrentVariantShippingData();
+        const shipmentInvoiceValue = ((currentVariantShippingData && currentVariantShippingData.priceCents) || {{ product.selected_or_first_available_variant.price | default: 0 }}) / 100;
 
         function formatWeight(weightInGrams) {
           return parseFloat(((weightInGrams || 0) / 1000).toFixed(3));
@@ -440,28 +467,14 @@
         const defaultProductInfo = {
           Height: 21,
           Length: 7,
-          Weight: formatWeight({{ _v.weight | default: 300 }}),
+          Weight: formatWeight(currentVariantShippingData && currentVariantShippingData.weightGrams),
           Width: 14,
-          SKU: {{ _sku_raw | json }},
+          SKU: (currentVariantShippingData && currentVariantShippingData.sku) || '',
           Category: {{ product.product_type | default: '' | json }}
         };
-        {%- assign v = product.variants.first -%}
-        {%- if v != blank -%}
-          {%- assign m_altura = v.metafields.frenet.altura.value -%}
-          {%- assign m_comprimento = v.metafields.frenet.comprimento.value -%}
-          {%- assign m_largura = v.metafields.frenet.largura.value -%}
-        {%- else -%}
-          {%- assign m_altura = nil -%}
-          {%- assign m_comprimento = nil -%}
-          {%- assign m_largura = nil -%}
-        {%- endif -%}
-        {%- comment -%} .value retorna "45 cm" - extrair número com split {%- endcomment -%}
-        {%- assign num_altura = m_altura | split: ' ' | first -%}
-        {%- assign num_comprimento = m_comprimento | split: ' ' | first -%}
-        {%- assign num_largura = m_largura | split: ' ' | first -%}
-        var frenetComprimento = {% if num_comprimento != blank %}(parseFloat("{{ num_comprimento }}") || null){% else %}null{% endif %};
-        var frenetAltura = {% if num_altura != blank %}(parseFloat("{{ num_altura }}") || null){% else %}null{% endif %};
-        var frenetLargura = {% if num_largura != blank %}(parseFloat("{{ num_largura }}") || null){% else %}null{% endif %};
+        var frenetComprimento = currentVariantShippingData && currentVariantShippingData.length != null ? parseFloat(currentVariantShippingData.length) || null : null;
+        var frenetAltura = currentVariantShippingData && currentVariantShippingData.height != null ? parseFloat(currentVariantShippingData.height) || null : null;
+        var frenetLargura = currentVariantShippingData && currentVariantShippingData.width != null ? parseFloat(currentVariantShippingData.width) || null : null;
         if (frenetComprimento != null) defaultProductInfo.Length = parseFloat(frenetComprimento);
         if (frenetAltura != null) defaultProductInfo.Height = parseFloat(frenetAltura);
         if (frenetLargura != null) defaultProductInfo.Width = parseFloat(frenetLargura);
@@ -634,6 +647,14 @@
         cepInput.addEventListener('input', function () {
           var v = this.value.replace(/\D/g, '').slice(0, 8);
           this.value = v.length <= 5 ? v : v.slice(0, 5) + '-' + v.slice(5);
+        });
+      }
+
+      if (typeof subscribe === 'function' && typeof PUB_SUB_EVENTS !== 'undefined' && PUB_SUB_EVENTS.variantChange) {
+        subscribe(PUB_SUB_EVENTS.variantChange, function (event) {
+          if (event && event.data && event.data.variant && event.data.variant.id) {
+            currentVariantId = String(event.data.variant.id);
+          }
         });
       }
 

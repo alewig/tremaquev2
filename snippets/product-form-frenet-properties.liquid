@@ -28,9 +28,12 @@
     </script>
     <script>
       (function() {
-        var variantsJson = document.querySelector('[data-frenet-variants]');
+        var currentScript = document.currentScript;
+        var variantsJson = currentScript && currentScript.previousElementSibling && currentScript.previousElementSibling.matches('[data-frenet-variants]')
+          ? currentScript.previousElementSibling
+          : null;
         if (!variantsJson) return;
-        var form = variantsJson.closest('form');
+        var form = currentScript && currentScript.closest('form');
         if (!form) return;
         var variantsData = {};
         try { variantsData = JSON.parse(variantsJson.textContent); } catch (e) { return; }

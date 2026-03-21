@@ -131,6 +131,7 @@
                 data-sticky-buy-variant-input
                 {% unless available %}disabled{% endunless %}
               >
+              {%- render 'product-form-frenet-properties', product: product -%}
               <button
                 type="submit"
                 name="add"
@@ -158,6 +159,7 @@
               data-sticky-buy-variant-input
               {% unless available %}disabled{% endunless %}
             >
+            {%- render 'product-form-frenet-properties', product: product -%}
             <button
               type="submit"
               name="add"
