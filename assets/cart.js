@@ -388,3 +388,283 @@ if (!customElements.get('cart-note')) {
     }
   );
 }
+
+(function () {
+  var SHIPPING_CALC_TOKEN = '622110E8R81CER4B0DR97CBRF44173A82224';
+  var productDimensionsCache = {};
+
+  function normalizeDimensionValue(value) {
+    if (value == null || value === '') return '';
+    return String(value).replace(',', '.');
+  }
+
+  function formatCep(value) {
+    var digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+    if (digits.length < 8) return digits.padEnd(8, '0');
+    return digits;
+  }
+
+  function formatWeight(weightGrams) {
+    return parseFloat(((Number(weightGrams) || 0) / 1000).toFixed(3));
+  }
+
+  function formatDimension(value, fallback) {
+    var parsed = parseFloat(normalizeDimensionValue(value));
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  function toQueryString(obj, prefix) {
+    var str = [];
+    for (var p in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, p)) continue;
+      var k = prefix ? prefix + '[' + p + ']' : p;
+      var v = obj[p];
+      str.push(
+        v !== null && typeof v === 'object'
+          ? toQueryString(v, k)
+          : encodeURIComponent(k) + '=' + encodeURIComponent(v)
+      );
+    }
+    return str.join('&');
+  }
+
+  function updateCartFooterTotalWithShipping(priceValue) {
+    var totalsDiv = document.getElementById('cart-total-with-shipping');
+    var totalValueEl = document.getElementById('totals-total-value');
+    if (!totalsDiv || !totalValueEl) return;
+
+    var cartTotalCents = parseInt(totalsDiv.getAttribute('data-cart-total-cents') || '0', 10);
+    var shippingCents = priceValue ? Math.round(parseFloat(priceValue) * 100) : 0;
+    var totalCents = cartTotalCents + shippingCents;
+    var symbol = totalsDiv.getAttribute('data-currency-symbol') || 'R$';
+
+    totalValueEl.textContent = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(totalCents / 100).replace('R$', symbol);
+
+    var pixValueEl = document.getElementById('totals-pix-value');
+    var parcelasValueEl = document.getElementById('totals-parcelas-value');
+    var pixDiscountPct = parseInt(totalsDiv.getAttribute('data-pix-discount-pct') || '0', 10);
+    var parcelas = parseInt(totalsDiv.getAttribute('data-parcelas') || '3', 10);
+    var pixEnabled = totalsDiv.getAttribute('data-pix-enabled') === 'true';
+
+    if (pixValueEl && pixEnabled && pixDiscountPct > 0) {
+      pixValueEl.textContent = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format((Math.round(totalCents * (1 - pixDiscountPct * 0.01))) / 100).replace('R$', symbol);
+    }
+
+    if (parcelasValueEl && parcelas > 0) {
+      parcelasValueEl.textContent = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format((Math.floor(totalCents / parcelas)) / 100).replace('R$', symbol);
+    }
+  }
+
+  async function fetchCartJson() {
+    var response = await fetch('/cart.js', { credentials: 'same-origin' });
+    if (!response.ok) throw new Error('cart.js request failed');
+    return response.json();
+  }
+
+  async function fetchProductDimensions(itemUrl) {
+    if (!itemUrl) return null;
+    if (productDimensionsCache[itemUrl]) return productDimensionsCache[itemUrl];
+
+    var request = fetch(itemUrl, { credentials: 'same-origin' })
+      .then(function (response) {
+        if (!response.ok) throw new Error('product page request failed');
+        return response.text();
+      })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+
+        function readInput(name) {
+          var input = doc.querySelector('input[name="properties[' + name + ']"]');
+          return input ? normalizeDimensionValue(input.value) : '';
+        }
+
+        return {
+          height: readInput('_frenet_altura'),
+          length: readInput('_frenet_comprimento'),
+          width: readInput('_frenet_largura'),
+        };
+      })
+      .catch(function () {
+        return null;
+      });
+
+    productDimensionsCache[itemUrl] = request;
+    return request;
+  }
+
+  async function buildLiveCartShippingData() {
+    var cart = await fetchCartJson();
+    var items = await Promise.all(
+      (cart.items || []).map(async function (item) {
+        var properties = item.properties || {};
+        var height = normalizeDimensionValue(properties._frenet_altura);
+        var length = normalizeDimensionValue(properties._frenet_comprimento);
+        var width = normalizeDimensionValue(properties._frenet_largura);
+
+        if (!height || !length || !width) {
+          var fallbackDimensions = await fetchProductDimensions(item.url);
+          if (fallbackDimensions) {
+            height = height || fallbackDimensions.height;
+            length = length || fallbackDimensions.length;
+            width = width || fallbackDimensions.width;
+          }
+        }
+
+        return {
+          sku: item.sku || '',
+          height: height || '21',
+          length: length || '7',
+          width: width || '14',
+          weightGrams: item.grams || 300,
+          quantity: item.quantity || 1,
+        };
+      })
+    );
+
+    return {
+      shipmentInvoiceValueCents: cart.total_price || 0,
+      items: items,
+    };
+  }
+
+  function renderShippingOptions(opcoesEl, services) {
+    var valid = (services || []).filter(function (item) {
+      return item.ShippingPrice != null && item.DeliveryTime != null;
+    });
+
+    if (!valid.length) {
+      opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Nenhuma opção de frete encontrada para este CEP.</p>';
+      return;
+    }
+
+    opcoesEl.innerHTML = valid
+      .map(function (item, index) {
+        var price = parseFloat(item.ShippingPrice);
+        var prazo = item.DeliveryTime + ' dias úteis';
+        var nome = item.Carrier || item.ServiceDescription || item.CarrierName || 'Forma de Entrega';
+        var checked = index === 0 ? ' checked' : '';
+
+        return (
+          '<label class="shipping-calc-cart__opcoes-item">' +
+          '<input type="radio" name="shipping-calc-cart-option" value="' +
+          index +
+          '" data-price="' +
+          price +
+          '" data-name="' +
+          nome.replace(/"/g, '&quot;') +
+          '" data-prazo="' +
+          prazo.replace(/"/g, '&quot;') +
+          '"' +
+          checked +
+          '>' +
+          '<span class="shipping-calc-cart__opcoes-item-radio" aria-hidden="true"></span>' +
+          '<span class="shipping-calc-cart__opcoes-item-text"><strong>' +
+          nome +
+          '</strong><span class="shipping-calc-cart__opcoes-item-prazo">' +
+          prazo +
+          '</span></span>' +
+          '<span class="shipping-calc-cart__opcoes-item-price">R$ ' +
+          price.toFixed(2).replace('.', ',') +
+          '</span>' +
+          '</label>'
+        );
+      })
+      .join('');
+
+    opcoesEl.setAttribute('role', 'radiogroup');
+    opcoesEl.setAttribute('aria-label', 'Opções de frete');
+
+    function updateSelected() {
+      var selected = opcoesEl.querySelector('input[name="shipping-calc-cart-option"]:checked');
+      if (!selected) return;
+      opcoesEl.dataset.selectedPrice = selected.dataset.price || '';
+      opcoesEl.dataset.selectedName = selected.dataset.name || '';
+      opcoesEl.dataset.selectedPrazo = selected.dataset.prazo || '';
+      updateCartFooterTotalWithShipping(selected.dataset.price || '');
+    }
+
+    opcoesEl.querySelectorAll('input[name="shipping-calc-cart-option"]').forEach(function (radio) {
+      radio.addEventListener('change', updateSelected);
+    });
+
+    updateSelected();
+  }
+
+  document.addEventListener(
+    'click',
+    async function (event) {
+      var btn =
+        event.target.id === 'shipping-calc-cart-button'
+          ? event.target
+          : event.target.closest && event.target.closest('#shipping-calc-cart-button');
+      if (!btn) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      var input = document.getElementById('shipping-calc-cart-cep');
+      var opcoesEl = document.getElementById('shipping-calc-cart-opcoes');
+      if (!input || !opcoesEl) return;
+
+      var raw = input.getAttribute('data-cep-raw') || input.value.replace(/\D/g, '');
+      if (raw.length < 8) {
+        opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Digite um CEP válido (8 dígitos).</p>';
+        opcoesEl.hidden = false;
+        return;
+      }
+
+      opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-loading">Calculando frete...</p>';
+      opcoesEl.hidden = false;
+      btn.disabled = true;
+
+      try {
+        var cartShippingData = await buildLiveCartShippingData();
+        if (!cartShippingData.items || !cartShippingData.items.length || !cartShippingData.shipmentInvoiceValueCents) {
+          opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Adicione produtos ao carrinho para calcular o frete.</p>';
+          return;
+        }
+
+        var shippingItemArray = cartShippingData.items.map(function (item) {
+          return {
+            Height: formatDimension(item.height, 21),
+            Length: formatDimension(item.length, 7),
+            Quantity: item.quantity || 1,
+            Weight: formatWeight(item.weightGrams || 300),
+            Width: formatDimension(item.width, 14),
+            SKU: item.sku || '',
+            Category: 'Produto',
+          };
+        });
+
+        var params = {
+          SellerCEP: '86065270',
+          RecipientCEP: formatCep(raw),
+          ShipmentInvoiceValue: cartShippingData.shipmentInvoiceValueCents / 100,
+          ShippingItemArray: JSON.stringify(shippingItemArray),
+          RecipientCountry: 'Brasil',
+        };
+
+        var response = await fetch(
+          'https://calc-wig.vercel.app/shipping/quote?' + toQueryString(params) + '&token=' + SHIPPING_CALC_TOKEN
+        );
+        var data = await response.json();
+
+        renderShippingOptions(opcoesEl, data && data.ShippingSevicesArray);
+      } catch (error) {
+        opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Não foi possível calcular o frete. Tente novamente.</p>';
+      } finally {
+        btn.disabled = false;
+      }
+    },
+    true
+  );
+})();
