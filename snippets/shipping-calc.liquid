@@ -1,0 +1,218 @@
+<div class="unique-container-wig">
+  <div class="unique-form-group">
+    <input type="text" id="unique-cep" name="cep" placeholder="Seu CEP" class="unique-input-field">
+    <button id="unique-buscar" class="unique-search-button"><p>CALCULAR FRETE</p></button>
+  </div>
+
+  <div id="unique-resultado" style="display: none;">
+    <table class="unique-result-table">
+      <thead>
+        <tr>
+          <th>Serviço</th>
+          <th>Preço</th>
+          <th>Prazo</th>
+        </tr>
+      </thead>
+      <tbody id="unique-tabela-resultados">
+        <!-- Os resultados serão inseridos aqui -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .unique-container-wig{
+           max-width: 60rem;
+    width: 100%;
+  }
+      .unique-input-field {
+        padding: 11px;
+        text-align: left;
+        font-size: 14px;
+       border: 1px solid black;
+        border-radius: 10px 0px 0px 10px;
+
+      }
+      .unique-search-button {
+        border-radius: 0px 10px 10px 0px;
+    border: 1px solid  black;
+    background: black;
+      }
+    .unique-search-button p{
+      font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+      color: white;
+    }
+      .unique-form-group {
+        display: grid;
+        grid-auto-flow: column;
+
+        width: 100%;
+        margin: 0 auto;
+        margin-bottom: 18px;
+      }
+      .unique-label {
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .unique-result-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .unique-result-table th,
+      .unique-result-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+      .unique-result-table th {
+        background-color: black;
+        color: #fff;
+      }
+      .unique-result-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+      .unique-result-table tr:hover {
+        background-color: #ddd;
+      }
+      @media (max-width: 600px) {
+        .unique-input-field,
+        .unique-search-button {
+          font-size: 14px;
+          padding: 8px;
+        }
+        .unique-result-table th,
+        .unique-result-table td {
+          padding: 8px;
+        }
+        .unique-container-wig{
+              max-width: 60rem;
+    width: 100%;
+        }
+      }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const product = {{ product | json }};
+  const hasConsultaTag = product.tags.includes('CONSULTA');
+
+  if (hasConsultaTag) {
+    document.querySelector('.unique-container-wig').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('unique-buscar').addEventListener('click', function () {
+    const cep = document.getElementById('unique-cep').value.replace("-", "");
+
+    if (!cep) {
+      alert('Por favor, insira um CEP.');
+      return;
+    }
+
+    const shipmentInvoiceValue = {{ product.price | divided_by: 100.0 }};
+
+    function formatWeight(weightInGrams) {
+      return (weightInGrams / 1000).toFixed(3);
+    }
+
+    const defaultProductInfo = {
+      Height: 21,
+      Length: 7,
+      Weight: formatWeight(300),
+      Width: 14,
+      SKU: '{{ product.variants[0].sku }}',
+      Category: '{{ product.product_type }}'
+    };
+
+    const productVariant = product.variants[0];
+    if (productVariant) {
+      if (productVariant.weight) defaultProductInfo.Weight = formatWeight(productVariant.weight);
+      {% if product.metafields.custom %}
+      const customFields = {{ product.metafields.custom | json }};
+      if (customFields.largura) {
+        defaultProductInfo.Width = parseFloat(customFields.largura);
+      }
+      if (customFields.comprimento) {
+        defaultProductInfo.Length = parseFloat(customFields.comprimento);
+      }
+      if (customFields.altura) {
+        defaultProductInfo.Height = parseFloat(customFields.altura);
+      }
+      {% endif %}
+    }
+
+    const params = {
+      SellerCEP: '30510080',
+      RecipientCEP: cep,
+      ShipmentInvoiceValue: shipmentInvoiceValue,
+      ShippingItemArray: JSON.stringify([{
+        Height: defaultProductInfo.Height,
+        Length: defaultProductInfo.Length,
+        Quantity: 1,
+        Weight: defaultProductInfo.Weight,
+        Width: defaultProductInfo.Width,
+        SKU: defaultProductInfo.SKU,
+        Category: defaultProductInfo.Category
+      }]),
+      RecipientCountry: 'Brasil'
+    };
+
+    function toQueryString(obj, prefix) {
+      const str = [];
+      for (const p in obj) {
+        if (obj.hasOwnProperty(p)) {
+          const k = prefix ? `${prefix}[${p}]` : p,
+            v = obj[p];
+          str.push(
+            v !== null && typeof v === 'object'
+              ? toQueryString(v, k)
+              : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
+          );
+        }
+      }
+      return str.join('&');
+    }
+
+    const queryString = toQueryString(params);
+    const token = '7C429332RD2ACR4833R890ARD43CFC37B1FD';
+
+    fetch(`https://calc-wig.vercel.app/shipping/quote?${queryString}&token=${token}`)
+      .then(response => response.json())
+      .then(data => {
+        const tabelaResultados = document.getElementById('unique-tabela-resultados');
+        tabelaResultados.innerHTML = '';
+
+        if (data.ShippingSevicesArray.length === 0) {
+          tabelaResultados.innerHTML = '<tr><td colspan="4">Nenhum resultado encontrado.</td></tr>';
+        } else {
+          data.ShippingSevicesArray.forEach(item => {
+            if (item.ShippingPrice != null) {
+              const row = document.createElement('tr');
+              const shippingPrice = parseFloat(item.ShippingPrice);
+              row.innerHTML = `
+                <td>${item.ServiceDescription}</td>
+                <td>${shippingPrice === 0 ? 'GRÁTIS' : `R$ ${shippingPrice.toFixed(2)}`}</td>
+                <td>${item.DeliveryTime} dias</td>
+              `;
+              tabelaResultados.appendChild(row);
+            }
+          });
+        }
+
+        document.getElementById('unique-resultado').style.display = 'block';
+      })
+      .catch(error => {
+        console.error('Error fetching the shipping quote:', error);
+        alert('Ocorreu um erro ao buscar a cotação. Por favor, tente novamente.');
+      });
+  });
+});
+
+document.getElementById('unique-cep').addEventListener('input', function (e) {
+  let x = e.target.value.replace(/\D/g, '').match(/(\d{0,5})(\d{0,3})/);
+  e.target.value = !x[2] ? x[1] : x[1] + '-' + x[2];
+});
+</script>

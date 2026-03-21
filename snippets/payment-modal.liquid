@@ -1,0 +1,650 @@
+{% comment %}
+  Payment Modal - Shows all payment options
+  Based on Figma design (14061:2406)
+
+  Usage:
+  {% render 'payment-modal', product: product %}
+{% endcomment %}
+
+{%- liquid
+  assign target = product.selected_or_first_available_variant | default: product
+  assign price = target.price | default: 1999
+
+  # Configurações
+  assign pix_discount = settings.pix_discount | default: 5
+  assign parcelas = settings.parcelas_sem_juros | default: 12
+
+  # WhatsApp
+  assign whatsapp_number = settings.number_contato | default: ''
+-%}
+
+<!-- Modal Overlay - hidden inline para não piscar ao carregar a página -->
+<div 
+  class="payment-modal" 
+  id="payment-modal" 
+  aria-hidden="true"
+  data-pix-discount="{{ pix_discount }}"
+  data-parcelas="{{ parcelas }}"
+  data-initial-price="{{ price }}"
+  style="visibility: hidden; opacity: 0; pointer-events: none;"
+>
+  <div class="payment-modal__overlay" data-close-payment-modal>&nbsp;</div>
+  
+  <div class="payment-modal__content" role="dialog" aria-labelledby="payment-modal-title">
+    <!-- Close Button -->
+    <button type="button" class="payment-modal__close" data-close-payment-modal aria-label="Fechar">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="#5d5d5d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- Title -->
+    <h2 class="payment-modal__title" id="payment-modal-title">Formas de pagamento</h2>
+
+    <!-- Payment Options -->
+    <div class="payment-modal__options">
+      
+      <!-- Cartão de Crédito -->
+      <div class="payment-modal__option">
+        <div class="payment-modal__option-icon payment-modal__option-icon--orange">
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="22" viewBox="0 0 30 22" fill="none">
+            <path d="M7.5 13.5C6.67157 13.5 6 14.1716 6 15C6 15.8284 6.67157 16.5 7.5 16.5H13C13.8284 16.5 14.5 15.8284 14.5 15C14.5 14.1716 13.8284 13.5 13 13.5H7.5Z" fill="#F6F6F6"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M0 5.5C0 2.46243 2.46243 0 5.5 0H24.5C27.5376 0 30 2.46243 30 5.5V16.5C30 19.5376 27.5376 22 24.5 22H5.5C2.46243 22 0 19.5376 0 16.5V5.5ZM24.5 3C25.8807 3 27 4.11929 27 5.5L3 5.5C3 4.11929 4.11929 3 5.5 3H24.5ZM27 9.5H3V16.5C3 17.8807 4.11929 19 5.5 19H24.5C25.8807 19 27 17.8807 27 16.5V9.5Z" fill="#F6F6F6"/>
+          </svg>
+        </div>
+        <div class="payment-modal__option-info">
+          <div class="payment-modal__option-header">
+            <span class="payment-modal__option-name">Cartão de crédito</span>
+            <span class="payment-modal__option-badge payment-modal__option-badge--orange" data-modal-parcelas-badge>{{ parcelas }}x sem juros</span>
+          </div>
+          <p class="payment-modal__option-total">
+            Valor Total <strong data-modal-total-price>R$ 0,00</strong>
+          </p>
+          <p class="payment-modal__option-value"><strong data-modal-installment-price>12x de R$ 0,00/mês</strong></p>
+          <p class="payment-modal__option-note">Ou até 24x com juros</p>
+        </div>
+      </div>
+
+      <!-- PIX -->
+      <div class="payment-modal__option">
+        <div class="payment-modal__option-icon payment-modal__option-icon--green">
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+            <path d="M19.2156 22.7197C19.6972 23.2028 20.259 23.5976 20.8748 23.8877L17.1589 27.6055C15.9662 28.7982 14.0295 28.7982 12.8367 27.6055L9.24097 24.0098C9.95188 23.7127 10.5977 23.2796 11.1414 22.7334L15.1853 18.6895L19.2156 22.7197ZM14.9978 1.5C15.7073 1.50002 16.3912 1.7467 16.9353 2.19238L17.1589 2.39453L20.8748 6.11035C20.2587 6.40087 19.6971 6.79657 19.2156 7.28027L15.1873 11.3086L11.1394 7.26074C10.5878 7.7092 9.94379 6.28037 9.24292 5.9873L12.8367 2.39453C13.41 1.82177 14.1874 1.5 14.9978 1.5Z" stroke="white" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M6.95898 9.85147C7.38134 9.85257 7.78659 10.0203 8.08594 10.3183L12.6006 14.8349C12.6569 14.8914 12.7156 14.9453 12.7754 14.998C12.7242 15.0416 12.674 15.0871 12.625 15.1337L12.5986 15.1601L8.08398 19.6786C7.79187 19.9707 7.38059 20.1415 6.96289 20.1415H5.375L2.39453 17.161C1.20121 15.9656 1.20249 14.0291 2.39453 12.8368V12.8358L5.37793 9.85147H6.95898ZM23.3945 9.871H24.6387L27.6035 12.8368C28.7961 14.0296 28.7962 15.9664 27.6035 17.1591L24.6406 20.122H23.3945C22.978 20.1219 22.5667 19.9505 22.2783 19.661L17.7764 15.1591L17.75 15.1337L17.6172 15.0136C17.6114 15.0086 17.6054 15.0039 17.5996 14.9989C17.6598 14.946 17.7197 14.8927 17.7764 14.8358L22.2783 10.3339C22.5685 10.0426 22.9807 9.87105 23.3945 9.871Z" stroke="white" stroke-width="3" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="payment-modal__option-info">
+          <div class="payment-modal__option-header">
+            <span class="payment-modal__option-name">Pix</span>
+            <span class="payment-modal__option-badge payment-modal__option-badge--green">{{ pix_discount }}% OFF</span>
+          </div>
+          <p class="payment-modal__option-value"><strong data-modal-pix-price>R$ 0,00</strong></p>
+          <p class="payment-modal__option-note">Aprovação na hora</p>
+        </div>
+      </div>
+
+      <!-- Dividir em Cartões (clicável → WhatsApp) -->
+      {%- if whatsapp_number != blank -%}
+        {%- liquid
+          assign product_full_url_cartoes = shop.url | append: product.url
+          assign whatsapp_cartoes_text = 'Olá, gostaria de comprar o ' | append: product.title | append: ' - ' | append: product_full_url_cartoes | append: ' , dividido em 2 - 3 cartões'
+          assign whatsapp_cartoes_encoded = whatsapp_cartoes_text | url_param_escape
+        -%}
+        <a href="https://wa.me/{{ whatsapp_number }}?text={{ whatsapp_cartoes_encoded }}" target="_blank" rel="noopener" class="payment-modal__option payment-modal__option--highlight payment-modal__option--link">
+      {%- else -%}
+        <div class="payment-modal__option payment-modal__option--highlight">
+      {%- endif -%}
+        <div class="payment-modal__option-icon payment-modal__option-icon--blue-light">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <path d="M6.5 6C5.67157 6 5 6.67157 5 7.5V25.5C5 26.3284 5.67157 27 6.5 27C7.32843 27 8 26.3284 8 25.5V9H28.5C29.3284 9 30 8.32843 30 7.5C30 6.67157 29.3284 6 28.5 6H6.5Z" fill="white"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 12.5C10 11.6716 10.6716 11 11.5 11H32.5C33.3284 11 34 11.6716 34 12.5V21.5C34 22.3284 33.3284 23 32.5 23C31.6716 23 31 22.3284 31 21.5V19H13V29H19.5C20.3284 29 21 29.6716 21 30.5C21 31.3284 20.3284 32 19.5 32H11.5C10.6716 32 10 31.3284 10 30.5V12.5ZM31 14V16H13V14H31Z" fill="white"/>
+            <path d="M25 30.5C25 29.6716 25.6716 29 26.5 29H29V26.5C29 25.6716 29.6716 25 30.5 25C31.3284 25 32 25.6716 32 26.5V29H34.5C35.3284 29 36 29.6716 36 30.5C36 31.3284 35.3284 32 34.5 32H32V34.5C32 35.3284 31.3284 36 30.5 36C29.6716 36 29 35.3284 29 34.5V32H26.5C25.6716 32 25 31.3284 25 30.5Z" fill="white"/>
+          </svg>
+        </div>
+        <div class="payment-modal__option-info">
+          <p class="payment-modal__option-title">Dividir em 2-3 cartões?</p>
+          <p class="payment-modal__option-description">
+            Sem problema! Dividimos o valor em<br>
+            até 3 cartões diferentes via atendimento.
+          </p>
+        </div>
+      {%- if whatsapp_number != blank -%}
+        </a>
+      {%- else -%}
+        </div>
+      {%- endif -%}
+
+      <!-- Boleto Parcelado -->
+      <div class="payment-modal__option payment-modal__option--with-button">
+        <div class="payment-modal__option-main">
+          <div class="payment-modal__option-icon payment-modal__option-icon--blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="30" viewBox="0 0 26 30" fill="none">
+              <path d="M3.5 0C1.567 0 0 1.567 0 3.5V24.5C0 26.433 1.567 28 3.5 28H12.5C13.3284 28 14 27.3284 14 26.5C14 25.6716 13.3284 25 12.5 25H3.5C3.22386 25 3 24.7761 3 24.5V3.5C3 3.22386 3.22386 3 3.5 3H19.5C19.7761 3 20 3.22386 20 3.5V9C20 9.82843 20.6716 10.5 21.5 10.5C22.3284 10.5 23 9.82843 23 9V3.5C23 1.567 21.433 0 19.5 0H3.5Z" fill="#F6F6F6"/>
+              <path d="M6 7.5C6 6.67157 6.67157 6 7.5 6H15.5C16.3284 6 17 6.67157 17 7.5C17 8.32843 16.3284 9 15.5 9H7.5C6.67157 9 6 8.32843 6 7.5Z" fill="#F6F6F6"/>
+              <path d="M23 14.5C23 13.6716 22.3284 13 21.5 13C20.6716 13 20 13.6716 20 14.5V15C17.7909 15 16 16.7909 16 19C16 21.2091 17.7909 23 20 23H22C22.5523 23 23 23.4477 23 24C23 24.5523 22.5523 25 22 25H17.5C16.6716 25 16 25.6716 16 26.5C16 27.3284 16.6716 28 17.5 28H19C19 28.8284 19.6716 29.5 20.5 29.5C21.3284 29.5 22 28.8284 22 28C24.2091 28 26 26.2091 26 24C26 21.7909 24.2091 20 22 20H20C19.4477 20 19 19.5523 19 19C19 18.4477 19.4477 18 20 18H24.5C25.3284 18 26 17.3284 26 16.5C26 15.6716 25.3284 15 24.5 15H23V14.5Z" fill="#F6F6F6"/>
+              <path d="M7.5 12C6.67157 12 6 12.6716 6 13.5C6 14.3284 6.67157 15 7.5 15H13C13.8284 15 14.5 14.3284 14.5 13.5C14.5 12.6716 13.8284 12 13 12H7.5Z" fill="#F6F6F6"/>
+              <path d="M6 19.5C6 18.6716 6.67157 18 7.5 18H12.5C13.3284 18 14 18.6716 14 19.5C14 20.3284 13.3284 21 12.5 21H7.5C6.67157 21 6 20.3284 6 19.5Z" fill="#F6F6F6"/>
+            </svg>
+          </div>
+          <div class="payment-modal__option-info">
+            <div class="payment-modal__option-header">
+              <span class="payment-modal__option-name">Boleto parcelado</span>
+              <span class="payment-modal__option-badge payment-modal__option-badge--blue">Até 12x no boleto</span>
+            </div>
+            <p class="payment-modal__option-value payment-modal__option-value--small">
+              <strong>A partir de =</strong> Preço original + 40%
+            </p>
+            <p class="payment-modal__option-note">Sujeito a análise</p>
+          </div>
+        </div>
+        {%- if whatsapp_number != blank -%}
+          {%- liquid
+            assign product_full_url = shop.url | append: product.url
+            assign whatsapp_text = 'Olá, Quero comprar ' | append: product.title | append: ' - ' | append: product_full_url | append: ' , parcelado no boleto'
+            assign whatsapp_text_encoded = whatsapp_text | url_param_escape
+          -%}
+          <a href="https://wa.me/{{ whatsapp_number }}?text={{ whatsapp_text_encoded }}" target="_blank" rel="noopener" class="payment-modal__whatsapp-btn" data-modal-whatsapp>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" fill="currentColor"/>
+            </svg>
+            <span>Consultar no WhatsApp</span>
+          </a>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Evita scroll/overflow do body quando o modal está aberto (incl. iOS) */
+  body.payment-modal-open {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+
+  .payment-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    max-width: 100vw;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .payment-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .payment-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+  }
+
+  .payment-modal__content {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    padding: 40px 60px;
+    max-width: 787px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  .payment-modal.is-open .payment-modal__content {
+    transform: translateY(0);
+  }
+
+  .payment-modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+
+  .payment-modal__close:hover {
+    background: #f6f6f6;
+  }
+
+  .payment-modal__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3d3d3d;
+    margin: 0 0 24px 0;
+  }
+
+  .payment-modal__options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .payment-modal__option {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: #f6f6f6;
+    border: 1px solid #d1d1d1;
+    border-radius: 8px;
+    padding: 16px 24px;
+  }
+
+  .payment-modal__option--highlight {
+    background: #dbf4ff;
+    border: 1px dashed #2abcff;
+  }
+
+  .payment-modal__option--link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .payment-modal__option--link:hover {
+    background: #c8eeff;
+    border-color: #1ba3e0;
+  }
+
+  .payment-modal__option--with-button {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .payment-modal__option-main {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .payment-modal__option-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .payment-modal__option-icon--orange { background: #fd5c00; }
+  .payment-modal__option-icon--green { background: #00c34d; }
+  .payment-modal__option-icon--blue { background: #1f6eff; }
+  .payment-modal__option-icon--blue-light { background: #2abcff; }
+
+  .payment-modal__option-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .payment-modal__option-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .payment-modal__option-name {
+    font-size: 14px;
+    color: #5d5d5d;
+  }
+
+  .payment-modal__option-badge {
+    font-size: 10px;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 40px;
+    white-space: nowrap;
+  }
+
+  .payment-modal__option-badge--orange { background: #fd5c00; }
+  .payment-modal__option-badge--green { background: #00c34d; }
+  .payment-modal__option-badge--blue { background: #1f6eff; }
+
+  .payment-modal__option-total {
+    font-size: 12px;
+    color: #4f4f4f;
+    margin: 0;
+  }
+
+  .payment-modal__option-total strong { font-weight: 700; }
+
+  .payment-modal__option-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4f4f4f;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .payment-modal__option-value--small { font-size: 18px; }
+  .payment-modal__option-value strong { font-weight: 700; }
+
+  .payment-modal__option-note {
+    font-size: 12px;
+    color: #6d6d6d;
+    margin: 0;
+  }
+
+  .payment-modal__option-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #4f4f4f;
+    margin: 0;
+  }
+
+  .payment-modal__option-description {
+    font-size: 12px;
+    color: #6d6d6d;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .payment-modal__whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(169deg, #05df72 0%, #00a63e 100%);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+
+  .payment-modal__whatsapp-btn:hover { opacity: 0.9; }
+
+  /* Mobile – evita estourar o body na viewport */
+  @media screen and (max-width: 749px) {
+    .payment-modal {
+      padding: 12px;
+      align-items: flex-start;
+      padding-top: max(12px, env(safe-area-inset-top));
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+      max-width: 100%;
+    }
+
+    .payment-modal__content {
+      padding: 24px 16px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      max-height: calc(100vh - 24px);
+      max-height: calc(100dvh - 24px);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .payment-modal__option,
+    .payment-modal__option-info {
+      min-width: 0;
+    }
+
+    .payment-modal__option-name,
+    .payment-modal__option-value,
+    .payment-modal__option-note,
+    .payment-modal__option-title,
+    .payment-modal__option-description {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    .payment-modal__title {
+      font-size: 24px;
+      padding-right: 32px;
+    }
+
+    .payment-modal__option {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .payment-modal__option--highlight { flex-direction: row; }
+
+    .payment-modal__option--with-button {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 24px;
+    }
+
+    .payment-modal__option-main {
+      width: 100%;
+      gap: 16px;
+    }
+
+    .payment-modal__option-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+    }
+
+    .payment-modal__option-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .payment-modal__option-name { font-weight: 700; }
+    .payment-modal__option-badge { font-weight: 700; }
+    .payment-modal__option-value { font-size: 22px; }
+
+    .payment-modal__option-value--small {
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .payment-modal__option-value--small strong { display: block; }
+    .payment-modal__option-note { font-weight: 700; }
+    .payment-modal__option-title { font-weight: 700; }
+    .payment-modal__option-description { font-weight: 700; }
+
+    .payment-modal__whatsapp-btn {
+      width: 100%;
+      justify-content: center;
+      font-weight: 700;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    // Coloca o modal como filho direto do body para position:fixed funcionar na viewport
+    // (evita que ancestrais com transform/overflow quebrem o posicionamento)
+    function moveModalToBody() {
+      const modal = document.getElementById('payment-modal');
+      if (modal && modal.parentNode !== document.body) {
+        document.body.appendChild(modal);
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', moveModalToBody);
+    } else {
+      moveModalToBody();
+    }
+
+    // Formatar preço em Real brasileiro
+    function formatMoney(cents) {
+      const value = cents / 100;
+      return value.toLocaleString('pt-BR', { 
+        style: 'currency', 
+        currency: 'BRL' 
+      });
+    }
+
+    // Atualizar valores do modal baseado no preço atual
+    function updateModalPrices() {
+      const modal = document.getElementById('payment-modal');
+      if (!modal) return;
+
+      // Obter preço atual da variante
+      let currentPrice = parseInt(modal.dataset.initialPrice) || 0;
+      
+      // Tentar obter o preço do elemento de preço atualizado pelo Shopify
+      const priceElement = document.querySelector('.price-item--sale.price-item--last, .price-item--regular');
+      if (priceElement) {
+        // Extrair o valor numérico do texto do preço
+        const priceText = priceElement.textContent.replace(/[^\d,]/g, '').replace(',', '.');
+        const parsedPrice = parseFloat(priceText);
+        if (!isNaN(parsedPrice) && parsedPrice > 0) {
+          currentPrice = Math.round(parsedPrice * 100);
+        }
+      }
+
+      // Também verificar no price-new se existir
+      const priceNewElement = document.querySelector('.price-new__installment-value');
+      if (priceNewElement) {
+        // O price-new mostra parcelamento, então precisamos buscar de outra forma
+        const pixElement = document.querySelector('.price-new__pix-text strong');
+        if (pixElement) {
+          const pixText = pixElement.textContent.replace(/[^\d,]/g, '').replace(',', '.');
+          const pixDiscount = parseInt(modal.dataset.pixDiscount) || 5;
+          const parsedPix = parseFloat(pixText);
+          if (!isNaN(parsedPix) && parsedPix > 0) {
+            // Reverter o desconto do PIX para obter o preço original
+            currentPrice = Math.round((parsedPix / (1 - pixDiscount / 100)) * 100);
+          }
+        }
+      }
+
+      // Obter configurações
+      const pixDiscount = parseInt(modal.dataset.pixDiscount) || 5;
+      const parcelas = parseInt(modal.dataset.parcelas) || 12;
+
+      // Calcular valores
+      const pixPrice = currentPrice * (1 - pixDiscount / 100);
+      const installmentPrice = currentPrice / parcelas;
+
+      // Atualizar elementos do modal
+      const totalPriceEl = modal.querySelector('[data-modal-total-price]');
+      const installmentPriceEl = modal.querySelector('[data-modal-installment-price]');
+      const pixPriceEl = modal.querySelector('[data-modal-pix-price]');
+      const parcelasBadgeEl = modal.querySelector('[data-modal-parcelas-badge]');
+
+      if (totalPriceEl) {
+        totalPriceEl.textContent = formatMoney(currentPrice);
+      }
+
+      if (installmentPriceEl) {
+        installmentPriceEl.textContent = `${parcelas}x de ${formatMoney(installmentPrice)}/mês`;
+      }
+
+      if (pixPriceEl) {
+        pixPriceEl.textContent = formatMoney(pixPrice);
+      }
+
+      if (parcelasBadgeEl) {
+        parcelasBadgeEl.textContent = `${parcelas}x sem juros`;
+      }
+    }
+
+    // Event delegation para abrir/fechar modal
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('payment-modal');
+      if (!modal) return;
+
+      // Open modal
+      const openBtn = e.target.closest('[data-open-payment-modal]');
+      if (openBtn) {
+        e.preventDefault();
+        updateModalPrices(); // Atualizar preços antes de abrir
+        modal.removeAttribute('style'); // Remove inline hide para .is-open funcionar
+        modal.classList.add('is-open');
+        document.body.classList.add('payment-modal-open');
+        document.body.style.overflow = 'hidden';
+        return;
+      }
+
+      // Close modal
+      const closeBtn = e.target.closest('[data-close-payment-modal]');
+      if (closeBtn) {
+        modal.classList.remove('is-open');
+        modal.style.cssText = 'visibility: hidden; opacity: 0; pointer-events: none;'; // Evita flash ao fechar
+        document.body.classList.remove('payment-modal-open');
+        document.body.style.overflow = '';
+        return;
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('payment-modal');
+        if (modal && modal.classList.contains('is-open')) {
+          modal.classList.remove('is-open');
+          modal.style.cssText = 'visibility: hidden; opacity: 0; pointer-events: none;';
+          document.body.classList.remove('payment-modal-open');
+          document.body.style.overflow = '';
+        }
+      }
+    });
+
+    // Escutar evento de mudança de variante do Shopify (pub/sub)
+    if (typeof subscribe !== 'undefined' && typeof PUB_SUB_EVENTS !== 'undefined') {
+      subscribe(PUB_SUB_EVENTS.variantChange, function(event) {
+        // Atualizar preço inicial com o novo preço da variante
+        const modal = document.getElementById('payment-modal');
+        if (modal && event.data && event.data.variant) {
+          modal.dataset.initialPrice = event.data.variant.price;
+        }
+      });
+    }
+
+    // Também observar mudanças no DOM do preço (fallback)
+    const priceObserver = new MutationObserver(function(mutations) {
+      // Se o modal estiver aberto, atualizar os preços
+      const modal = document.getElementById('payment-modal');
+      if (modal && modal.classList.contains('is-open')) {
+        updateModalPrices();
+      }
+    });
+
+    // Observar o container de preço para mudanças
+    document.addEventListener('DOMContentLoaded', function() {
+      const priceContainer = document.querySelector('.price-container-main-product, [id^="price-"]');
+      if (priceContainer) {
+        priceObserver.observe(priceContainer, { 
+          childList: true, 
+          subtree: true, 
+          characterData: true 
+        });
+      }
+    });
+
+    // Atualizar preços iniciais
+    updateModalPrices();
+  })();
+</script>

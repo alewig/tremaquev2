@@ -1,0 +1,368 @@
+{%- style -%}
+  .lista-favoritos-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  @media screen and (min-width: 750px) {
+    .lista-favoritos-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__title {
+    margin: 0 0 24px 0;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: {{ section.settings.color_title }};
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-base-background-1, #fff);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__card-link {
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__card-image {
+    aspect-ratio: 1;
+    object-fit: cover;
+    width: 100%;
+    display: block;
+    background: #f1f1f1;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__card-body {
+    padding: 12px;
+    flex: 1;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__card-title {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: {{ section.settings.color_title }};
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__card-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: {{ section.settings.color_price | default: '#0D0D0E' }};
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__card-remove {
+    margin-top: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    background: transparent;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 6px;
+    cursor: pointer;
+    color: #6d6d6d;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__card-remove:hover {
+    background: rgba(177, 3, 38, 0.08);
+    color: #B10326;
+    border-color: #B10326;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: #6d6d6d;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__empty-title {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #4f4f4f;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__empty-link {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 12px 24px;
+    background: #B10326;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: opacity 0.2s;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__empty-link:hover {
+    opacity: 0.9;
+    color: #fff;
+  }
+
+  .lista-favoritos-{{ section.id }} .lista-favoritos__loading {
+    text-align: center;
+    padding: 32px;
+    color: #6d6d6d;
+  }
+{%- endstyle -%}
+
+<div class="lista-favoritos-{{ section.id }}">
+  <div class="page-width">
+    {%- if section.settings.title != blank -%}
+      <h1 class="lista-favoritos__title">{{ section.settings.title | escape }}</h1>
+    {%- endif -%}
+
+    <div id="lista-favoritos-root-{{ section.id }}" class="lista-favoritos__root">
+      <p class="lista-favoritos__loading" data-favoritos-loading>Carregando favoritos...</p>
+      <div class="lista-favoritos__grid" data-favoritos-grid hidden></div>
+      <div class="lista-favoritos__empty" data-favoritos-empty hidden>
+        <p class="lista-favoritos__empty-title">{{ section.settings.empty_title | default: 'Você ainda não tem favoritos' }}</p>
+        <p>{{ section.settings.empty_text | default: 'Adicione produtos aos favoritos clicando no ícone de coração na página do produto.' }}</p>
+        <a href="{{ routes.all_products_collection_url }}" class="lista-favoritos__empty-link">{{ section.settings.empty_button | default: 'Ver produtos' }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var sectionId = {{ section.id | json }};
+    var root = document.getElementById('lista-favoritos-root-' + sectionId);
+    if (!root) return;
+
+    var grid = root.querySelector('[data-favoritos-grid]');
+    var empty = root.querySelector('[data-favoritos-empty]');
+    var loading = root.querySelector('[data-favoritos-loading]');
+
+    function getFavoritos() {
+      if (window.TremaqueFavoritos && typeof window.TremaqueFavoritos.get === 'function') {
+        return window.TremaqueFavoritos.get();
+      }
+      try {
+        var raw = localStorage.getItem('tremaque_favoritos');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function setFavoritos(arr) {
+      if (window.TremaqueFavoritos && typeof window.TremaqueFavoritos.set === 'function') {
+        window.TremaqueFavoritos.set(arr);
+        return;
+      }
+      try {
+        localStorage.setItem('tremaque_favoritos', JSON.stringify(arr));
+      } catch (e) {}
+    }
+
+    function formatMoney(cents) {
+      var v = (cents / 100).toFixed(2);
+      return 'R$ ' + v.replace('.', ',');
+    }
+
+    function renderCard(product, index) {
+      var handle = product.handle;
+      var img = product.featured_image;
+      var imgSrc = (img && (img.src || img.url)) ? (img.src || img.url) : '';
+      var title = product.title || '';
+      var price = product.variants && product.variants[0] ? product.variants[0].price : 0;
+      var url = product.url || '/products/' + handle;
+
+      var card = document.createElement('div');
+      card.className = 'lista-favoritos__card';
+      card.setAttribute('data-product-handle', handle);
+
+      var link = document.createElement('a');
+      link.href = url;
+      link.className = 'lista-favoritos__card-link';
+
+      var imgEl = document.createElement('img');
+      imgEl.className = 'lista-favoritos__card-image';
+      imgEl.src = imgSrc || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"%3E%3Crect fill="%23f1f1f1" width="400" height="400"/%3E%3C/svg%3E';
+      imgEl.alt = title;
+      imgEl.loading = 'lazy';
+      link.appendChild(imgEl);
+
+      var body = document.createElement('div');
+      body.className = 'lista-favoritos__card-body';
+      var titleEl = document.createElement('h3');
+      titleEl.className = 'lista-favoritos__card-title';
+      titleEl.textContent = title;
+      body.appendChild(titleEl);
+      var priceEl = document.createElement('p');
+      priceEl.className = 'lista-favoritos__card-price';
+      priceEl.textContent = formatMoney(parseInt(price, 10));
+      body.appendChild(priceEl);
+      link.appendChild(body);
+      card.appendChild(link);
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'lista-favoritos__card-remove';
+      btn.textContent = 'Remover dos favoritos';
+      btn.setAttribute('data-remove-handle', handle);
+      btn.addEventListener('click', function () {
+        var list = getFavoritos().filter(function (h) { return h !== handle; });
+        setFavoritos(list);
+        card.remove();
+        updateEmptyState();
+        window.dispatchEvent(new CustomEvent('tremaque-favoritos-changed', { detail: { list: list } }));
+      });
+      card.appendChild(btn);
+
+      return card;
+    }
+
+    function updateEmptyState() {
+      var cards = grid.querySelectorAll('.lista-favoritos__card');
+      if (cards.length === 0) {
+        grid.hidden = true;
+        empty.hidden = false;
+      } else {
+        grid.hidden = false;
+        empty.hidden = true;
+      }
+    }
+
+    function render() {
+      var handles = getFavoritos();
+      if (handles.length === 0) {
+        loading.hidden = true;
+        grid.hidden = true;
+        empty.hidden = false;
+        return;
+      }
+
+      loading.hidden = false;
+      grid.hidden = true;
+      empty.hidden = true;
+      grid.innerHTML = '';
+
+      var done = 0;
+      handles.forEach(function (handle) {
+        fetch('/products/' + handle + '.json')
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (data) {
+            if (data && data.product) {
+              grid.appendChild(renderCard(data.product));
+            }
+            done++;
+            if (done === handles.length) {
+              loading.hidden = true;
+              updateEmptyState();
+            }
+          })
+          .catch(function () {
+            done++;
+            if (done === handles.length) {
+              loading.hidden = true;
+              updateEmptyState();
+            }
+          });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', render);
+    window.addEventListener('tremaque-favoritos-changed', render);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Lista de Favoritos",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Meus Favoritos"
+    },
+    {
+      "type": "color",
+      "id": "color_title",
+      "label": "Cor do título",
+      "default": "#0D0D0E"
+    },
+    {
+      "type": "color",
+      "id": "color_price",
+      "label": "Cor do preço",
+      "default": "#0D0D0E"
+    },
+    {
+      "type": "text",
+      "id": "empty_title",
+      "label": "Título (lista vazia)",
+      "default": "Você ainda não tem favoritos"
+    },
+    {
+      "type": "textarea",
+      "id": "empty_text",
+      "label": "Texto (lista vazia)",
+      "default": "Adicione produtos aos favoritos clicando no ícone de coração na página do produto."
+    },
+    {
+      "type": "text",
+      "id": "empty_button",
+      "label": "Texto do botão (lista vazia)",
+      "default": "Ver produtos"
+    },
+    {
+      "type": "header",
+      "content": "Espaçamento"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding superior",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding inferior",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lista de Favoritos"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,212 @@
+{%- liquid
+  assign has_video = false
+  if section.settings.video_url != blank or section.settings.video != blank
+    assign has_video = true
+  endif
+
+  assign hide_section = false
+  if section.settings.hide_if_incomplete and has_video == false
+    assign hide_section = true
+  endif
+-%}
+
+{%- unless hide_section -%}
+{%- style -%}
+.section-container-{{ section.id }}{
+  background-color: {{ section.settings.color_background_section }};
+  padding: 80px 0px;
+  border-radius: 16px;
+}
+  .video-section-wrapper-{{ section.id }} {
+    /* Variáveis para controle via schema */
+    --video-border-radius: {{ section.settings.border_radius_video }}px;
+    --title-font-size: {{ section.settings.size_title }}px;
+
+    /* Espaçamento padrão da seção */
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  .video-section__title-{{ section.id }} {
+    font-size: var(--title-font-size);
+    text-align: center;
+    margin: 0 auto 2rem;
+    padding-bottom: 40px;
+  }
+
+  .video-section__video-container-{{ section.id }} {
+    position: relative;
+    width: 100%;
+    max-width: 900px; /* Largura máxima para o vídeo em telas grandes */
+    margin: 0 auto; /* Centraliza o container */
+    
+    /* A chave para o arredondamento funcionar no vídeo/iframe */
+    border-radius: var(--video-border-radius);
+    overflow: hidden;
+
+    /* Garante que o vídeo mantenha a proporção de 16:9 em qualquer tela */
+    aspect-ratio: 16 / 9;
+
+    /* Sombra sutil para destacar, como na imagem de referência */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  
+  .video-section__video-container-{{ section.id }} > .shopify-video-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* Ajustes para telas menores */
+  @media screen and (max-width: 768px) {
+    .section-container-{{ section.id }}{
+      padding: 40px 0px;
+    }
+    .video-section-wrapper-{{ section.id }} {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+    .video-section__title-{{ section.id }} {
+      padding-bottom: 24px;
+      font-size: calc(var(--title-font-size) * 0.8);
+    }
+  }
+{%- endstyle -%}
+
+<div class="section-{{ section.id }} video-section-wrapper-{{ section.id }}">
+  <div class="page-width section-container-{{ section.id }}">
+    {%- if section.settings.title != blank -%}
+      <h2 class="video-section__title-{{ section.id }}">
+        <strong>{{ section.settings.title }}</strong>
+      </h2>
+    {%- endif -%}
+
+    {%- if section.settings.video_url != blank -%}
+      <div class="video-section__video-container-{{ section.id }}">
+        {%- if section.settings.video_url contains 'youtube.com' or section.settings.video_url contains 'youtu.be' -%}
+          {%- assign video_id = section.settings.video_url | split: 'v=' | last | split: '&' | first -%}
+          {%- if section.settings.video_url contains 'youtu.be' -%}
+            {%- assign video_id = section.settings.video_url | split: '/' | last | split: '?' | first -%}
+          {%- endif -%}
+          <iframe
+            src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1"
+            class="shopify-video-player"
+            title="{{ section.settings.title | escape }}"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+            referrerpolicy="strict-origin-when-cross-origin"
+          ></iframe>
+        {%- elsif section.settings.video_url contains 'vimeo.com' -%}
+          {%- assign video_id = section.settings.video_url | split: '/' | last | split: '?' | first -%}
+          <iframe
+            src="https://player.vimeo.com/video/{{ video_id }}"
+            class="shopify-video-player"
+            title="{{ section.settings.title | escape }}"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+          ></iframe>
+        {%- endif -%}
+      </div>
+    {%- elsif section.settings.video != blank -%}
+      <div class="video-section__video-container-{{ section.id }}">
+        {{-
+          section.settings.video
+          | video_tag:
+            class: 'shopify-video-player',
+            image_size: '750x',
+            controls: true
+        -}}
+      </div>
+    {%- else -%}
+      {% comment %} Placeholder para quando nenhum vídeo for selecionado {% endcomment %}
+      <div class="video-section__video-container-{{ section.id }}" style="background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+{%- endunless -%}
+
+{% schema %}
+    {
+        "name": "Video Section",
+        "tag": "section",
+        "class": "section",
+        "settings": [
+          {
+            "type": "checkbox",
+            "id": "hide_if_incomplete",
+            "label": "Ocultar seção se o vídeo não estiver preenchido",
+            "default": true
+          },
+          {
+            "type": "header",
+            "content": "Conteúdo da Seção"
+          },
+          {
+              "type": "text",
+              "id": "title",
+              "label": "Título da seção",
+              "default": "Como profissionais utilizam"
+          },
+          {
+              "type": "header",
+              "content": "Vídeo Externo (YouTube/Vimeo)"
+          },
+          {
+              "type": "text",
+              "id": "video_url",
+              "label": "URL do Vídeo",
+              "info": "Cole a URL do vídeo (YouTube ou Vimeo) aqui. Ex: https://www.youtube.com/watch?v=..."
+          },
+          {
+              "type": "header",
+              "content": "Upload de Vídeo (Shopify)"
+          },
+          {
+              "type": "video",
+              "id": "video",
+              "label": "Arquivo de Vídeo"
+          },
+          {
+            "type": "header",
+            "content": "Estilização"
+          },
+          {
+            "type": "color",
+            "id": "color_background_section",
+            "label": "Cor de fundo da seção",
+            "default": "#FFDDE4"
+          },
+          {
+              "type": "range",
+              "id": "size_title",
+              "max": 60,
+              "min": 16,
+              "step": 1,
+              "unit": "px",
+              "label": "Tamanho do título",
+              "default": 32
+          },
+          {
+              "type": "range",
+              "id": "border_radius_video",
+              "max": 50,
+              "min": 0,
+              "step": 1,
+              "unit": "px",
+              "label": "Arredondamento do vídeo",
+              "default": 16
+          }
+        ],
+        "presets": [
+          {
+            "name": "Video Section"
+          }
+        ]
+    }
+{% endschema %}

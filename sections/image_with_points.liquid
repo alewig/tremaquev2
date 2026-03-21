@@ -1,0 +1,586 @@
+{%- style -%}
+  .benefits-points-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --section-padding-left: {{ section.settings.padding_left }}px;
+    --section-padding-right: {{ section.settings.padding_right }}px;
+    --section-margin-top: {{ section.settings.margin_top }}px;
+    --section-margin-bottom: {{ section.settings.margin_bottom }}px;
+
+    --color-background-section: {{ section.settings.color_background_section }};
+    --color-title-texts: {{ section.settings.color_title_texts | default: 'rgba(0,0,0,1)' }};
+    --color-desc-texts: {{ section.settings.color_desc_texts | default: 'rgba(0,0,0,0.8)' }};
+
+    --size-title-section: {{ section.settings.size_title_section }}px;
+    --size-desc-section: {{ section.settings.size_desc_section }}px;
+
+    --color-border-card: {{ section.settings.color_border_card | default: 'rgba(0,0,0,0.1)' }};
+    --border-card-radius: {{ section.settings.border_card_radius }}px;
+    --size-title-card: {{ section.settings.size_title_card }}px;
+    --size-desc-card: {{ section.settings.size_desc_card }}px;
+
+    --size-icons: {{ section.settings.size_icons }}px;
+    {%- if section.settings.background_icons -%}
+      --background-icons-color: {{ section.settings.background_icons_color | default: 'rgba(0,0,0,0.05)' }};
+      --border-radius-icons: {{ section.settings.border_radius_icons }}%;
+    {%- endif -%}
+
+    position: relative;
+    overflow: hidden;
+    padding: var(--section-padding-top) var(--section-padding-right) var(--section-padding-bottom) var(--section-padding-left);
+    margin: var(--section-margin-top) 0 var(--section-margin-bottom) 0;
+    {%- if section.settings.active_height_custom and section.settings.height_custom_section > 0 -%}
+      height: {{ section.settings.height_custom_section }}px;
+    {%- else -%}
+      height: {{ section.settings.height_default_section | default: '100%' }};
+    {%- endif -%}
+    background-color: var(--color-background-section);
+  }
+
+  .benefits-points__background-{{ section.id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+  }
+  {% if section.settings.active_effect_grifado %}
+      .benefits-points__item-title-{{ section.id }} {
+    display: inline;
+    background-image: linear-gradient(to top, {{ section.settings.color_effect_grifado }} 55%, transparent 0%);
+    background-position: 0 55%;
+    background-repeat: no-repeat;
+    background-size: 100% 50%;
+    }
+  {% endif %}
+
+
+  {%- if section.settings.img_background_section -%}
+    .benefits-points__background-{{ section.id }} {
+      background-image: url('{{ section.settings.img_background_section | image_url: width: 2200 }}');
+    }
+  {%- endif -%}
+
+  .benefits-points__container-{{ section.id }} {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-direction: {% if section.settings.side_card == 'left' %}row{% else %}row-reverse{% endif %};
+  }
+
+  .benefits-points__card-{{ section.id }} {
+    flex: 1 1 50%;
+    padding: 2.5rem;
+    border: 1px solid var(--color-border-card);
+    border-radius: var(--border-card-radius);
+    background-color: {{section.settings.color_background_card}};
+   
+  }
+
+  {% if section.settings.effect_blur == true %}
+    .benefits-points__card-{{ section.id }} {
+     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+     }
+  {% endif %}
+
+  .benefits-points__card-title-{{ section.id }} {
+    color: var(--color-title-texts);
+    font-size: var(--size-title-section);
+    margin: 0;
+  }
+  
+  .benefits-points__card-title-{{ section.id }} p {
+    margin: 0;
+  }
+
+  .benefits-points__card-description-{{ section.id }} {
+    color: var(--color-desc-texts);
+    font-size: var(--size-desc-section);
+  }
+  
+  .benefits-points__list-{{ section.id }} {
+    margin-top: 2rem;
+    display: grid;
+    gap: 1.5rem;
+  }
+  
+  .benefits-points__item-{{ section.id }} {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .benefits-points__icon-wrapper-{{ section.id }} {
+    flex-shrink: 0;
+  }
+
+  {%- if section.settings.background_icons -%}
+  .benefits-points__icon-wrapper-{{ section.id }} {
+    background-color: var(--background-icons-color);
+    width: calc(var(--size-icons) + 1rem);
+    height: calc(var(--size-icons) + 1rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-icons);
+  }
+  {%- endif -%}
+
+  .benefits-points__icon-{{ section.id }} {
+    width: var(--size-icons);
+    height: var(--size-icons);
+    object-fit: contain;
+  }
+  
+  .benefits-points__item-title-{{ section.id }} {
+    font-size: var(--size-title-card);
+    color: var(--color-title-texts);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .benefits-points__item-description-{{ section.id }} {
+    font-size: var(--size-desc-card);
+    color: var(--color-desc-texts);
+    margin: 0;
+  }
+  .benefits-points__item-description-{{ section.id }} p { 
+    margin: 0px ;
+  }
+  
+  .benefits-points__media-filler-{{ section.id }} {
+    flex: 1 1 50%;
+  }
+
+  /* --- Responsividade --- */
+  @media screen and (max-width: 990px) {
+    {% if section.settings.active_height_custom_mob == true %}
+      .benefits-points-{{ section.id }} { 
+         min-height: {{ section.settings.height_custom_section_mob }}px !important;
+      }
+      {% else %}
+         .benefits-points-{{ section.id }} { 
+             min-height: {{ section.settings.height_custom_section }}px;
+         }
+    {% endif %}
+    .benefits-points-{{ section.id }} {
+      height: auto;
+    
+    }
+    .benefits-points__card-{{ section.id }} {
+      flex-basis: 60%;
+    }
+    .benefits-points__media-filler-{{ section.id }} {
+      flex-basis: 40%;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .benefits-points-{{ section.id }} {
+      padding: var(--section-padding-top) 1.5rem var(--section-padding-bottom) 1.5rem;
+      min-height: unset;
+    }
+
+    {%- if section.settings.img_background_section_mob -%}
+      .benefits-points__background-{{ section.id }} {
+        background-image: url('{{ section.settings.img_background_section_mob  | image_url: width: 2200 }}');
+      }
+    {%- endif -%}
+
+    .benefits-points__container-{{ section.id }} {
+      flex-direction: column;
+    }
+    
+    .benefits-points__card-{{ section.id }} {
+      width: 100%;
+      flex-basis: auto;
+      padding: 0rem;
+      border: none;
+    }
+
+    .benefits-points__media-filler-{{ section.id }} {
+      display: none; /* Oculta a coluna vazia no mobile */
+    }
+  }
+{%- endstyle -%}
+
+<div class="section-{{ section.id }} benefits-points-{{ section.id }}">
+  <div class="benefits-points__background-{{ section.id }}">&nbsp;</div>
+  
+  <div class="page-width">
+    <div class="benefits-points__container-{{ section.id }}">
+      <div class="benefits-points__card-{{ section.id }}">
+        {%- if section.settings.title != blank -%}
+          <div class="benefits-points__card-title-{{ section.id }}">
+            {{ section.settings.title }}
+          </div>
+        {%- endif -%}
+        
+        {%- if section.settings.description != blank -%}
+          <div class="benefits-points__card-description-{{ section.id }}">
+            {{ section.settings.description }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.blocks.size > 0 -%}
+          <div class="benefits-points__list-{{ section.id }}">
+            {%- for block in section.blocks -%}
+              <div class="benefits-points__item-{{ section.id }}" {{ block.shopify_attributes }}>
+                {%- if block.settings.img_icon != blank -%}
+                  <div class="benefits-points__icon-wrapper-{{ section.id }}">
+                    {%- assign icon_width = section.settings.size_icons | times: 2 -%}
+                    <img
+                      src="{{ block.settings.img_icon | image_url: width: icon_width }}"
+                      alt="{{ block.settings.img_icon.alt | escape }}"
+                      class="benefits-points__icon-{{ section.id }}"
+                      width="{{ section.settings.size_icons }}"
+                      height="{{ section.settings.size_icons }}"
+                      loading="lazy"
+                    >
+                  </div>
+                {%- endif -%}
+                
+                <div class="benefits-points__text-content-{{ section.id }}">
+                  {%- if block.settings.title != blank -%}
+                    <h4 class="benefits-points__item-title-{{ section.id }}">{{ block.settings.title }}</h4>
+                  {%- endif -%}
+                  {%- if block.settings.description != blank -%}
+                    <div class="benefits-points__item-description-{{ section.id }}">{{ block.settings.description }}</div>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="benefits-points__media-filler-{{ section.id }}">
+        {% comment %}
+          Esta div serve para ocupar o espaço do lado da imagem,
+          garantindo que o card não se estique por toda a seção.
+        {% endcomment %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Pontos de benefício",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Conteúdo Geral da Seção"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "Título da Seção",
+      "default": "<p>Fale sobre os benefícios</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Descrição da Seção"
+    },
+    {
+      "type": "header",
+      "content": "Layout da Seção"
+    },
+    {
+      "type": "select",
+      "id": "side_card",
+      "label": "Posicionamento do Card de Benefícios",
+      "options": [
+        { "label": "Esquerda", "value": "left" },
+        { "label": "Direita", "value": "right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "height_default_section",
+      "label": "Altura da Seção",
+      "options": [
+        { "label": "Pequeno", "value": "400px" },
+        { "label": "Médio", "value": "600px" },
+        { "label": "Grande", "value": "800px" },
+        { "label": "Automático", "value": "100%" }
+      ],
+      "default": "100%",
+      "info": "A altura 'Automático' se ajusta ao conteúdo. A altura personalizada (abaixo) irá sobrescrever esta opção."
+    },
+    {
+        "type": "checkbox",
+        "id": "active_height_custom",
+        "label": "Ativar altura customizada",
+        "default": false
+    },
+    {
+        "type": "checkbox",
+        "id": "active_height_custom_mob",
+        "label": "Ativar altura customizada Mobile",
+        "default": false
+    },
+    {
+      "type": "range",
+      "id": "height_custom_section",
+      "min": 200,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "label": "Altura Personalizada",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "height_custom_section_mob",
+      "min": 200,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "label": "Altura Personalizada Mobile",
+      "default": 600
+    },
+    {
+      "type": "header",
+      "content": "Espaçamentos"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Espaçamento Interno (Topo)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Espaçamento Interno (Base)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Espaçamento Interno (Esquerda)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Espaçamento Interno (Direita)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Espaçamento Externo (Topo)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Espaçamento Externo (Base)",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Estilo da Seção e Textos"
+    },
+    {
+        "type": "checkbox",
+        "id": "active_effect_grifado",
+        "label": "Ativar efeito grifado titulo",
+        "default": false
+    },
+    {
+        "type": "color_background",
+         "id": "color_effect_grifado",
+         "label": "Cor do grifado"
+    },
+    {
+      "type": "color",
+      "id": "color_background_section",
+      "label": "Cor de fundo da seção",
+      "info": "Opcional. Se não for definida, usará a imagem"
+    },
+    {
+      "type": "image_picker",
+      "id": "img_background_section",
+      "label": "Imagem de fundo (Desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "img_background_section_mob",
+      "label": "Imagem de fundo (Mobile)",
+      "info": "Opcional. Se não for definida, usará a imagem de desktop."
+    },
+    {
+      "type": "color",
+      "id": "color_title_texts",
+      "label": "Cor dos títulos"
+    },
+    {
+      "type": "range",
+      "id": "size_title_section",
+      "min": 16,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Tamanho do Título da Seção",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "color_desc_texts",
+      "label": "Cor das descrições"
+    },
+    {
+      "type": "range",
+      "id": "size_desc_section",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Tamanho da Descrição da Seção",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Estilo do Card de Benefícios"
+    },
+    {
+      "type": "color",
+      "id": "color_border_card",
+      "label": "Cor da borda do card"
+    },
+    {
+      "type": "color_background",
+      "id": "color_background_card",
+      "label": "Cor de fundo do card"
+    },
+     {
+      "type": "checkbox",
+      "id": "effect_blur",
+      "label": "Ativar efeito Blur (espelho)",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "border_card_radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Arredondamento da borda do card",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "size_title_card",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Tamanho do Título (dentro do Card)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "size_desc_card",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Tamanho da Descrição (dentro do Card)",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Estilo dos Ícones"
+    },
+    {
+      "type": "range",
+      "id": "size_icons",
+      "min": 20,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Tamanho dos ícones",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "background_icons",
+      "label": "Usar fundo nos ícones",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "background_icons_color",
+      "label": "Cor de fundo dos ícones"
+    },
+    {
+      "type": "range",
+      "id": "border_radius_icons",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "label": "Arredondamento do fundo dos ícones (%)",
+      "unit": "%",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "icons",
+      "name": "Ponto de Benefício",
+      "settings": [
+        { "type": "image_picker", "id": "img_icon", "label": "Ícone" },
+        { "type": "text", "id": "title", "label": "Título", "default": "Título do benefício" },
+        { "type": "richtext", "id": "description", "label": "Descrição", "default": "<p>Descreva aqui a vantagem ou benefício para o seu cliente.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pontos de benefício",
+      "blocks": [
+        { "type": "icons" },
+        { "type": "icons" },
+        { "type": "icons" }
+      ]
+    }
+  ]
+}
+{% endschema %}

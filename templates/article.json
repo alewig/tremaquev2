@@ -1,0 +1,97 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-article",
+      "blocks": {
+        "featured_image": {
+          "type": "featured_image",
+          "settings": {
+            "image_height": "large"
+          }
+        },
+        "title": {
+          "type": "title",
+          "settings": {
+            "blog_show_date": true,
+            "blog_show_author": true
+          }
+        },
+        "share": {
+          "type": "share",
+          "settings": {
+            "share_label": "Compartilhe:"
+          }
+        },
+        "content": {
+          "type": "content",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "featured_image",
+        "title",
+        "share",
+        "content"
+      ],
+      "settings": {}
+    },
+    "collections_carrousel_v2_EMcwxw": {
+      "type": "collections-carrousel-v2",
+      "name": "Produtos - Carousel v3",
+      "settings": {
+        "title": "Produtos Relacionados",
+        "title_color": "#4f4f4f",
+        "title_size_desktop": 40,
+        "title_size_mobile": 24,
+        "background_color": "",
+        "view_all_text": "Ver todos",
+        "view_all_url": "",
+        "view_all_text_color": "#6d6d6d",
+        "view_all_arrow_color": "#6d6d6d",
+        "view_all_arrow_background_color": "",
+        "product_list": [],
+        "collection": "{{ article.metafields.custom.colecao_relacionada.value }}",
+        "products_limit": 12,
+        "padding_top": 40,
+        "padding_bottom": 40,
+        "slides_per_view_mobile": 1.2,
+        "slides_per_view_tablet": 2,
+        "slides_per_view_laptop": 3,
+        "slides_per_view_desktop": 4,
+        "space_between": 32
+      }
+    },
+    "featured_blog_V9HREi": {
+      "type": "featured-blog",
+      "name": "t:sections.featured-blog.presets.name",
+      "settings": {
+        "blog": "tutoriais-tremaque",
+        "post_limit": 3,
+        "heading": "Outros Tutoriais Tremaque",
+        "heading_size": "h1",
+        "columns_desktop": 3,
+        "show_view_all": true,
+        "show_image": true,
+        "show_date": true,
+        "show_author": false,
+        "color_scheme": "",
+        "padding_top": 20,
+        "padding_bottom": 32
+      }
+    }
+  },
+  "order": [
+    "main",
+    "collections_carrousel_v2_EMcwxw",
+    "featured_blog_V9HREi"
+  ]
+}

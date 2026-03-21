@@ -1,0 +1,350 @@
+<style>
+  .yeverOverlayer {
+    display: none;
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: #fff;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .spinnerYever {
+    display: inline-block !important;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #bfc1c3;
+    border-radius: 50%;
+    border-top: 4px solid #82858c;
+    animation: 2s linear infinite spin;
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  .yeverText {
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 150%;
+    color: #4c4b51;
+    margin-top: 10px;
+  }
+</style>
+<div class="yeverOverlayer">
+  <div class="spinnerYever"></div>
+  <span class="yeverText">CARREGANDO AMBIENTE SEGURO</span>
+</div>
+<script type="text/javascript" id="yeverScript">
+  var page = '{{ template.name }}';
+  var yeverApi = 'https://api.yever.com.br/checkout/V1/shopify';
+  var shopifyDomain = '{{ shop.permanent_domain }}';
+
+  if (page === 'cart') {
+    document.querySelector('.yeverOverlayer').style.display = 'flex';
+    yeverGetRequest('/cart.json', function (response) {
+      var payload = JSON.parse(response);
+      var dataCart = {
+        payload: payload,
+        shopifyDomain: shopifyDomain,
+      };
+
+      setUtmCookieYever('yeverCartProperties', yeverParseCartItems(payload));
+
+      yeverPostRequest(yeverApi, JSON.stringify(dataCart), function (response) {
+        var dataShop = JSON.parse(response);
+
+        if (dataShop.active === false) {
+          document.querySelector('.yeverOverlayer').style.display = 'none';
+          return;
+        }
+
+        var yeverUrl = dataShop.url;
+        var skipCart = dataShop.skip_cart;
+
+        if (skipCart && yeverUrl !== null) {
+          window.location.href = getUrlWithUtmsYever(yeverUrl);
+        } else {
+          yeverEvent();
+          document.querySelector('.yeverOverlayer').style.display = 'none';
+        }
+      });
+    });
+  } else {
+    document
+      .querySelectorAll(
+        'input[name="add"], button[name=\'add\'], #add-to-cart, .add-to-cart, #AddToCartText ,#AddToCart, .ProductForm__AddToCart'
+      )
+      .forEach(function (element) {
+        if (element.getAttribute('data-add-to-cart-only') === 'true') {
+          element.addEventListener('click', addProductCart);
+        } else {
+          element.addEventListener('click', buyProduct);
+        }
+      });
+    yeverEvent();
+  }
+
+  function addProductCart(event) {
+    event.preventDefault();
+    var form = this.form;
+
+    yeverPostFormRequest('/cart/add.js', form, function () {
+      window.location.href = '/cart';
+    });
+  }
+
+  function buyProduct(event) {
+    event.preventDefault();
+    var form = this.form;
+
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    xhr.open('POST', '/cart/add.js', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        // 200 = added successfully, 409 = already in cart — proceed to checkout in both cases
+        if (xhr.status === 200 || xhr.status === 409) {
+          endShopping();
+        }
+      }
+    };
+    var data = new URLSearchParams(new FormData(form)).toString();
+    xhr.send(data);
+  }
+
+  function endShopping(event = null) {
+    if (event !== null) {
+      event.preventDefault();
+    }
+
+    yeverGetRequest('/cart.json', function (response) {
+      var payload = JSON.parse(response);
+      var dataCart = {
+        payload: payload,
+        shopifyDomain: shopifyDomain,
+      };
+
+      setUtmCookieYever('yeverCartProperties', yeverParseCartItems(payload));
+
+      yeverPostRequest(yeverApi, JSON.stringify(dataCart), function (response) {
+        var dataShop = JSON.parse(response);
+        var yeverUrl = dataShop.url;
+
+        if (dataShop.active !== false && yeverUrl !== null) {
+          window.location.href = getUrlWithUtmsYever(yeverUrl);
+        }
+      });
+    });
+    return false;
+  }
+
+  function yeverGetRequest(url, success) {
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    xhr.open('GET', url);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === (XMLHttpRequest.DONE || 4) && xhr.status === 200) {
+        success(xhr.responseText);
+      }
+    };
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.send();
+  }
+
+  function yeverPostRequest(url, data, success) {
+    var params =
+      typeof data === 'string'
+        ? data
+        : Object.keys(data)
+            .map(function (k) {
+              return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]);
+            })
+            .join('&');
+
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+
+    xhr.open('POST', url);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === (XMLHttpRequest.DONE || 4) && xhr.status === 200) {
+        success(xhr.responseText);
+      }
+    };
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(params);
+  }
+
+  function yeverPostFormRequest(url, form, success) {
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    xhr.open('POST', '/cart/add.js', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === (XMLHttpRequest.DONE || 4) && xhr.status === 200) {
+        success(xhr.responseText);
+      }
+    };
+    var data = new URLSearchParams(new FormData(form)).toString();
+    xhr.send(data);
+  }
+
+  var hasUrlSupport = 'undefined' !== typeof URL && 'undefined' !== typeof URLSearchParams;
+  if (hasUrlSupport) {
+    var utmTermsYever = [
+      'utm_source',
+      'utm_campaign',
+      'utm_term',
+      'utm_medium',
+      'utm_content',
+      'utm_pixel',
+      'utm_yever',
+      'gclid',
+      'fbclid',
+    ];
+    var currentUrlYever = new URL(window.location.href);
+    var urlParamsYever = currentUrlYever.searchParams;
+
+    utmTermsYever.forEach(function (utmTerm) {
+      if (urlParamsYever.has(utmTerm)) {
+        setUtmUrlYever(utmTerm, urlParamsYever.get(utmTerm));
+      }
+    });
+  }
+
+  function getUrlWithUtmsYever(url) {
+    if (!hasUrlSupport || !url) {
+      return url;
+    }
+
+    var currentUrl = new URL(url);
+    var cookiesUtms = getUtmsUrlYever();
+
+    cookiesUtms.forEach(function (value, key) {
+      currentUrl.searchParams.set(key, value);
+    });
+
+    var cookiesTrackingYever = ['_ga', '_fbp', '_fbc'];
+
+    cookiesTrackingYever.forEach(function (cookieTracking) {
+      var getCookieTracking = getUtmCookieYever(cookieTracking);
+      if (getCookieTracking) {
+        currentUrl.searchParams.set(cookieTracking, getCookieTracking);
+      }
+    });
+
+    return currentUrl.href;
+  }
+
+  function setUtmUrlYever(term, value) {
+    var params = getUtmsUrlYever();
+
+    params.set(term, value);
+    setUtmCookieYever('yeverUtmsTrack', params.toString());
+  }
+
+  function getUtmsUrlYever() {
+    var currentUtms = getUtmCookieYever('yeverUtmsTrack');
+
+    if (currentUtms) {
+      return new URLSearchParams(currentUtms);
+    }
+
+    return new URLSearchParams();
+  }
+
+  function setUtmCookieYever(name, value) {
+    var date = new Date();
+    date.setTime(date.getTime() + 2592000000);
+    var domain = window.location.host.replace('www.', '');
+    document.cookie =
+      name + '=' + (value || '') + ';expires=' + date.toUTCString() + ';path=/;SameSite=Lax;domain=' + domain + ';';
+  }
+
+  function getUtmCookieYever(name) {
+    var nameEQ = name + '=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  function yampiClick() {
+    return endShopping();
+  }
+
+  async function yeverEvent() {
+    for (let i = 0; i <= 11; ++i) {
+      setTimeout(
+        () => {
+          document
+            .querySelectorAll(
+              'button[name="checkout"],a[name="checkout"],a[href="/checkout"],[data-href="/checkout"],#cart-checkout'
+            )
+            .forEach(function (element) {
+              if (element.getAttribute('onclick') !== 'endShopping(event)') {
+                var cloneElement = element.cloneNode(true);
+                element.parentNode.replaceChild(cloneElement, element);
+                cloneElement.setAttribute('onclick', 'endShopping(event)');
+              }
+            });
+          document.querySelectorAll('button[class*="payment"]').forEach(function (element) {
+            if (!element.className.includes('payment-button-yever')) {
+              var cloneElement = element.cloneNode(true);
+              element.parentNode.replaceChild(cloneElement, element);
+              cloneElement.addEventListener('click', buyProduct);
+              cloneElement.classList.add('payment-button-yever');
+            }
+          });
+        },
+        i <= 10 ? 500 * i : 10000
+      );
+    }
+  }
+
+  function yeverParseCartItems(payload) {
+    const jsonObject = JSON.stringify({
+      token: payload.token,
+      note: payload.note,
+      attributes: payload.attributes,
+      items: payload.items.map((item) => {
+        return {
+          id: item.id,
+          properties: item.properties,
+          variant_id: item.variant_id,
+          key: item.key,
+          sku: item.sku,
+          product_id: item.product_id,
+        };
+      }),
+    });
+    return btoa(encodeURIComponent(jsonObject).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1)));
+  }
+
+  const { fetch: originalFetch } = window;
+  window.fetch = async (...args) => {
+    const [resource, config] = args;
+
+    const response = await originalFetch(resource, config);
+    if (resource == '/cart/change') {
+      yeverEvent();
+    }
+
+    return response;
+  };
+
+  document.querySelectorAll('.btn-checkout').forEach(function (element) {
+    if (element.getAttribute('onclick') == "window.location='/checkout'") {
+      element.setAttribute('onclick', "window.location='/cart'");
+    }
+  });
+</script>

@@ -1,0 +1,266 @@
+{% comment %}
+  Renders a list of product's price (regular, sale)
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - placeholder: {Boolean} Renders a placeholder price (optional)
+  - use_variant: {Boolean} Renders selected or first variant price instead of overall product pricing (optional)
+  - show_badges: {Boolean} Renders 'Sale' and 'Sold Out' tags if the product matches the condition (optional)
+  - price_class: {String} Adds a price class to the price element (optional)
+  - show_compare_at_price: {Boolean} Renders the compare at price if the product matches the condition (optional)
+
+  Usage:
+  {% render 'price', product: product %}
+{% endcomment %}
+{%- liquid
+  if use_variant
+    assign target = product.selected_or_first_available_variant
+  elsif placeholder
+    assign target = null
+  else
+    assign target = product
+  endif
+
+  assign compare_at_price = target.compare_at_price
+  assign price = target.price | default: 1999
+  assign price_min = product.price_min
+  assign price_max = product.price_max
+  assign available = target.available | default: false
+  assign money_price = price | money
+  assign money_price_min = price_min | money
+  assign money_price_max = price_max | money
+  if settings.currency_code_enabled
+    assign money_price = price | money_with_currency
+    assign money_price_min = price_min | money_with_currency
+    assign money_price_max = price_max | money_with_currency
+  endif
+
+  if target == product and product.price_varies
+    assign money_price = 'products.product.price.from_price_html' | t: price: money_price
+  endif
+
+  assign pix_enabled = settings.pix_enabled
+  assign pix_discount = settings.pix_discount | default: 0
+  assign pix_color = settings.pix_text_color
+
+  if pix_enabled and pix_discount > 0
+    assign discount_multiplier = pix_discount | times: 0.01
+    assign pix_discount_amount = price | times: discount_multiplier
+    assign pix_price = price | minus: pix_discount_amount
+    assign money_pix_price = pix_price | money
+    if settings.currency_code_enabled
+      assign money_pix_price = pix_price | money_with_currency
+    endif
+  endif
+
+  # Calculate installment price based on schema settings
+  assign parcelas = settings.parcelas_sem_juros
+  assign installment_price = price | divided_by: parcelas
+  assign money_installment_price = installment_price | money
+  if settings.currency_code_enabled
+    assign money_installment_price = installment_price | money
+  endif
+
+  # Calculate coupon discount
+  assign cupom_name = settings.cupom_name
+  assign cupom_discount_type = settings.cupom_discount_type | default: 'percentage'
+  assign cupom_discount_value = settings.cupom_discount_value | default: 0
+  assign cupom_discount_fixed = settings.cupom_discount_fixed | default: 0
+  assign cupom_price = price
+
+  if cupom_name != blank
+    if cupom_discount_type == 'percentage' and cupom_discount_value > 0
+      assign discount_multiplier = cupom_discount_value | times: 0.01
+      assign cupom_discount_amount = price | times: discount_multiplier
+      assign cupom_price = price | minus: cupom_discount_amount
+    elsif cupom_discount_type == 'fixed' and cupom_discount_fixed > 0
+      assign cupom_price = price | minus: cupom_discount_fixed
+      if cupom_price < 0
+        assign cupom_price = 0
+      endif
+    endif
+    assign money_cupom_price = cupom_price | money
+    if settings.currency_code_enabled
+      assign money_cupom_price = cupom_price | money_with_currency
+    endif
+  endif
+-%}
+
+{%- unless target == null and placeholder == null -%}
+  <div
+    class="
+      price
+      {%- if price_class %} {{ price_class }}{% endif -%}
+      {%- if available == false %} price--sold-out{% endif -%}
+      {%- if compare_at_price > price and product.quantity_price_breaks_configured? != true %} price--on-sale{% endif -%}
+      {%- if compare_at_price > price and product.quantity_price_breaks_configured? %} volume-pricing--sale-badge{% endif -%}
+      {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
+      {%- if show_badges %} price--show-badge{% endif -%}
+    "
+  >
+    <div class="price__container {{ price_class }}">
+      {%- comment -%}
+        Explanation of description list:
+          - div.price__regular: Displayed when there are no variants on sale
+          - div.price__sale: Displayed when a variant is a sale
+      {%- endcomment -%}
+      <div class="price__regular {{ price_class }}">
+        {%- if product.quantity_price_breaks_configured? -%}
+          {%- if show_compare_at_price and compare_at_price -%}
+            {%- unless product.price_varies == false and product.compare_at_price_varies %}
+              <span class="visually-hidden visually-hidden--inline">
+                {{- 'products.product.price.regular_price' | t -}}
+              </span>
+              <span>
+                <s class="price-item price-item--regular variant-item__old-price">
+                  {% if settings.currency_code_enabled %}
+                    {{ compare_at_price | money_with_currency }}
+                  {% else %}
+                    {{ compare_at_price | money }}
+                  {% endif %}
+                </s>
+              </span>
+            {%- endunless -%}
+          {%- endif -%}
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+          <span class="price-item price-item--regular">
+            {{-
+              'products.product.volume_pricing.price_range'
+              | t: minimum: money_price_min, maximum: money_price_max
+            -}}
+          </span>
+        {%- else -%}
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+          <span class="price-item price-item--regular">
+            {{ money_price }}
+          </span>
+        {%- endif -%}
+      </div>
+      {%- if compare_at_price > price -%}
+        <div class="price__sale">
+          {%- unless product.price_varies == false and product.compare_at_price_varies %}
+            <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+            <span>
+              <s class="price-item price-item--regular">
+                {% if settings.currency_code_enabled %}
+                  {{ compare_at_price | money_with_currency }}
+                {% else %}
+                  {{ compare_at_price | money }}
+                {% endif %}
+              </s>
+            </span>
+          {%- endunless -%}
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
+          <span class="price-item price-item--sale price-item--last">{{ money_price }} </span>
+        </div>
+      {%- endif -%}
+      <small class="unit-price caption{% if product.selected_or_first_available_variant.unit_price_measurement == nil %} hidden{% endif %}">
+        <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+        <span class="price-item price-item--last">
+          <span>{{- product.selected_or_first_available_variant.unit_price | money -}}</span>
+          <span aria-hidden="true">/</span>
+          <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+          <span>
+            {%- if product.selected_or_first_available_variant.unit_price_measurement.reference_value != 1 -%}
+              {{- product.selected_or_first_available_variant.unit_price_measurement.reference_value -}}
+            {%- endif -%}
+            {{ product.selected_or_first_available_variant.unit_price_measurement.reference_unit }}
+          </span>
+        </span>
+      </small>
+      {%- if pix_enabled and pix_discount > 0 -%}
+        <div class="price__pix {{ price_class }}">{{- money_pix_price }} no Pix</div>
+      {%- endif -%}
+      {% if cupom_name != blank %}	
+        <div class="cupom-content">
+          <strong>{{ money_cupom_price }}</strong> com cupom <strong>{{ cupom_name }}</strong>
+        </div>
+      {% endif %}
+      {%- if parcelas > 0 -%}
+        <small
+          class="installment-price caption"
+          style="color: {{ settings.parcelamento_text_color }}; font-size: {{ settings.parcelamento_font_size }};"
+        >
+          <span class="visually-hidden"></span>
+          <span class="price-item price-item--installment {{ price_hidden }}">
+            {%- if settings.parcelamento_svg != blank and template.name == "product" -%}
+              {{ settings.parcelamento_svg }}
+            {%- endif -%}
+            {{ parcelas }}x de
+            <strong style="color:{{ settings.parcelamento_number_color }};">{{ money_installment_price }}</strong>
+            sem juros
+          </span>
+        </small>
+      {%- endif -%}
+    </div>
+    {%- if show_badges -%}
+      <span class="badge price__badge-sale color-{{ settings.sale_badge_color_scheme }}">
+        {%- assign discount = product.compare_at_price
+          | minus: product.price
+          | times: 100.0
+          | divided_by: product.compare_at_price
+          | round
+        -%}
+        {{- discount }}% OFF
+      </span>
+
+      <span class="badge price__badge-sold-out color-{{ settings.sold_out_badge_color_scheme }}">
+        {{ 'products.product.sold_out' | t }}
+      </span>
+    {%- endif -%}
+  </div>
+{% endunless %}
+
+{% if template == 'product' %}
+  <style>
+    
+    .installment-hidden{
+     display:none !important;
+    }
+    .price__container{
+          display: grid !important;
+    }
+    .price-item--regular{
+      margin: 0px !important;
+    }
+    .price-item--last{
+          font-weight: 700;
+    }
+  </style>
+{% else %}
+  <style>
+      .price__container{
+      display: grid;
+    }
+    .price--large .price__container{
+      display:grid;
+    }
+  </style>
+{% endif %}
+<style>
+  .price-item--installment svg{
+      width: 16px;
+      height: 16px;
+    }
+  .price-item--last{
+    color: {{settings.color_price_final}};
+    font-weight: 900;
+  }
+  .price-item--regular{
+    color: {{settings.color_price_base}} !important;
+  }
+  
+  /* Quando não há desconto, o preço regular tem estilo de preço final */
+  .price:not(.price--on-sale) .price__regular .price-item--regular{
+    color: {{settings.color_price_final}} !important;
+    font-weight: 900;
+  }
+</style>
+
+{% if template.name == 'product' %}
+  <style>
+    .price__badge-sale{
+      display:none !important;
+    }
+  </style>
+{% endif %}

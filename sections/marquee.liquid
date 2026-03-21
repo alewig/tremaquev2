@@ -1,0 +1,328 @@
+<section class="marquee-section-{{ section.id }}">
+    <div class="marquee-container-{{ section.id }}">
+      {% if section.settings.title or section.settings.subtitle %}
+        <div class="marquee-header-{{ section.id }}">
+          {% if section.settings.title %}
+            <h2 class="marquee-title-{{ section.id }}">{{ section.settings.title }}</h2>
+          {% endif %}
+          {% if section.settings.subtitle %}
+            <p class="marquee-subtitle-{{ section.id }}">{{ section.settings.subtitle }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+      <div class="marquee-viewport-{{ section.id }}" data-speed="{{ section.settings.speed_marquee }}" data-direction="{{ section.settings.direction }}">
+        <div class="marquee-track-{{ section.id }}">
+          {% for block in section.blocks %}
+            <span class="marquee-item-{{ section.id }}">{{ block.settings.text }}</span>
+            <span class="marquee-separator-{{ section.id }}" aria-hidden="true">{{ section.settings.separator }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <style>
+    .marquee-subtitle-{{ section.id }} {
+        margin: 0px;
+    }
+    {% if section.settings.background_color %}
+      .marquee-section-{{ section.id }} {
+        background: {{ section.settings.background_color }};
+      }
+    {% endif %}
+    .marquee-section-{{ section.id }}{
+           overflow: hidden;
+       }
+    .marquee-container-{{ section.id }}{
+        display: inline-flex;
+           justify-content: center;
+           align-items: center;
+        gap: 40px;
+  
+    }
+    .marquee-header-{{ section.id }}{
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .marquee-title-{{ section.id }}{
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        text-transform: {{ section.settings.text_decoration }};
+    }
+    .marquee-subtitle-{{ section.id }}{
+        margin: 0;
+        font-size: 16px;
+        font-weight: 400;
+    }
+    .marquee-viewport-{{ section.id }}{
+        overflow: hidden;
+        white-space: nowrap;
+        width: 100%;
+    }
+    .marquee-track-{{ section.id }}{
+        display: inline-flex;
+        align-items: center;
+        gap: 32px;
+        will-change: transform;
+    }
+    .marquee-item-{{ section.id }}{
+           margin: 0px;
+           font-size: {{ section.settings.font_size_text }}px;
+           color: {{ section.settings.color_text }};
+        display: inline-block;
+        text-transform: {{ section.settings.text_decoration }};
+    }
+    .marquee-separator-{{ section.id }}{
+           font-size: {{ section.settings.font_size_text }}px;
+           color: {{ section.settings.color_text }};
+        display: inline-block;
+        margin: 0 16px;
+        opacity: .6;
+    }
+    @media (max-width: 749px){
+           .marquee-container-{{ section.id }}{
+               gap: 17.419px;
+           }
+          .marquee-item-{{ section.id }}, .marquee-separator-{{ section.id }}{
+              font-size: {{ section.settings.font_size_text_mobile | default: 13.935 }}px;
+          }
+        .marquee-title-{{ section.id }}{ font-size: 20px; }
+        .marquee-subtitle-{{ section.id }}{ font-size: 14px; }
+    }
+  </style>
+  
+  <script>
+    (() => {
+      function debounce(fn, wait) {
+        let t;
+        return function () {
+          clearTimeout(t);
+          t = setTimeout(fn, wait);
+        };
+      }
+  
+      function initMarquee(root) {
+        const viewport = root;
+        const track = viewport.querySelector('.marquee-track-{{ section.id }}');
+        if (!track) return;
+  
+        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let paused = false;
+        let offset = 0;
+        let frameId = null;
+        let contentWidth = 0; // largura de UMA sequência original
+        const speedAttr = parseFloat(viewport.getAttribute('data-speed'));
+        const speed = Number.isFinite(speedAttr) ? speedAttr : 0.2;
+        const direction = viewport.getAttribute('data-direction') || 'right';
+        const directionMultiplier = direction === 'left' ? -1 : 1;
+  
+        const original = track.innerHTML; // manter o markup original de uma volta
+  
+        function measure() {
+          // volta para o conteúdo original para medir sua largura
+          track.innerHTML = original;
+          track.style.transform = 'translateX(0px)';
+          offset = 0;
+          // largura de uma sequência
+          contentWidth = track.scrollWidth;
+          if (!contentWidth) {
+            return;
+          }
+          // calcular quantas repetições precisamos para cobrir a viewport com sobra
+          const viewportWidth = viewport.clientWidth || viewport.offsetWidth;
+          // Aumentar para garantir que sempre tenha conteúdo suficiente
+          const repeats = Math.max(3, Math.ceil(viewportWidth / contentWidth) + 3);
+          // construir trilha repetida
+          let buff = '';
+          for (let r = 0; r < repeats; r++) {
+            buff += original;
+          }
+          track.innerHTML = buff;
+          // Inicializar offset baseado na direção
+          if (direction === 'left') {
+            offset = -contentWidth;
+          } else {
+            offset = 0;
+          }
+        }
+  
+        function step() {
+          if (paused) {
+            frameId = requestAnimationFrame(step);
+            return;
+          }
+          offset += speed * directionMultiplier;
+          if (contentWidth) {
+            if (direction === 'left') {
+              // Para direção 'left' (esquerda para direita)
+              // Quando o offset fica positivo demais, volta para trás
+              if (offset >= 0) {
+                offset = offset - contentWidth;
+              }
+              // Quando o offset fica negativo demais, avança
+              if (offset < -contentWidth) {
+                offset = offset + contentWidth;
+              }
+            } else {
+              // Para direção 'right' (direita para esquerda)
+              // Usar módulo negativo para loop suave
+              if (offset <= -contentWidth) {
+                offset = offset + contentWidth;
+              }
+              if (offset > 0) {
+                offset = offset - contentWidth;
+              }
+            }
+          }
+          track.style.transform = `translateX(${offset}px)`;
+          frameId = requestAnimationFrame(step);
+        }
+  
+        measure();
+        window.addEventListener('resize', debounce(measure, 150));
+        viewport.addEventListener('mouseenter', () => {
+          paused = true;
+        });
+        viewport.addEventListener('mouseleave', () => {
+          paused = false;
+        });
+  
+        if (!prefersReduced) {
+          step();
+        }
+  
+        // Retornar função de cleanup se necessário no editor
+        return () => {
+          if (frameId) {
+            cancelAnimationFrame(frameId);
+          }
+        };
+      }
+  
+      function boot() {
+        const root = document.querySelector('.marquee-viewport-{{ section.id }}');
+        if (root) {
+          initMarquee(root);
+        }
+      }
+  
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+      } else {
+        boot();
+      }
+  
+      document.addEventListener('shopify:section:load', (e) => {
+        if (e && e.detail && e.detail.sectionId === '{{ section.id }}') {
+          const root = document.querySelector('.marquee-viewport-{{ section.id }}');
+          if (root) {
+            initMarquee(root);
+          }
+        }
+      });
+    })();
+  </script>
+  {% schema %}
+  {
+    "name": "Marquee",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Title"
+      },
+      {
+        "type": "text",
+        "id": "subtitle",
+        "label": "Subtitle"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Color Text",
+        "default": "#000000"
+      },
+      {
+        "type": "color_background",
+        "id": "background_color",
+        "label": "Background Color"
+      },
+      {
+        "type": "text",
+        "id": "speed_marquee",
+        "label": "Speed Marquee",
+        "default": "0.2"
+      },
+      {
+        "type": "select",
+        "id": "direction",
+        "label": "Direção do Texto",
+        "options": [
+          {
+            "value": "right",
+            "label": "Direita para Esquerda"
+          },
+          {
+            "value": "left",
+            "label": "Esquerda para Direita"
+          }
+        ],
+        "default": "right"
+      },
+      {
+        "type": "number",
+        "id": "font_size_text",
+        "label": "Font Size Text"
+      },
+      {
+        "type": "number",
+        "id": "font_size_text_mobile",
+        "label": "Font Size Text Mobile",
+        "default": 13
+      },
+      {
+        "type": "text",
+        "id": "separator",
+        "label": "Separator",
+        "default": "•"
+      },
+      {
+        "type": "select",
+        "id": "text_decoration",
+        "label": "Text Decoration",
+        "options": [
+          {
+            "value": "uppercase",
+            "label": "Uppercase"
+          },
+          {
+            "value": "lowercase",
+            "label": "Lowercase"
+          }
+        ],
+        "default": "uppercase"
+      }
+    ],
+    "blocks": [
+      {
+        "name": "text",
+        "type": "text",
+        "settings": [
+          {
+            "type": "richtext",
+            "id": "text",
+            "label": "Text"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Marquee"
+      }
+    ]
+  }
+  {% endschema %}
+  

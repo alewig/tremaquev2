@@ -1,0 +1,363 @@
+{{ 'section-blog-post.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign image_height = 'adapt'
+  assign show_date = true
+  assign show_author = false
+  assign share_label = 'Compartilhe'
+
+  for block in section.blocks
+    case block.type
+      when 'featured_image'
+        assign image_height = block.settings.image_height
+      when 'title'
+        assign show_date = block.settings.blog_show_date
+        assign show_author = block.settings.blog_show_author
+      when 'share'
+        if block.settings.share_label != blank
+          assign share_label = block.settings.share_label
+        endif
+    endcase
+  endfor
+
+  assign article_summary = article.excerpt | strip_html
+  if article_summary == blank
+    assign article_summary = article.content | strip_html | truncatewords: 42
+  endif
+
+  assign article_editor_name = blank
+  if article.metafields.custom.escritor != blank
+    assign article_editor = article.metafields.custom.escritor.value
+    if article_editor != blank
+      if article_editor.nome.value != blank
+        assign article_editor_name = article_editor.nome.value
+      elsif article_editor.name.value != blank
+        assign article_editor_name = article_editor.name.value
+      elsif article_editor.titulo.value != blank
+        assign article_editor_name = article_editor.titulo.value
+      elsif article_editor.title.value != blank
+        assign article_editor_name = article_editor.title.value
+      elsif article_editor.editor.value != blank
+        assign article_editor_name = article_editor.editor.value
+      elsif article_editor.nome_completo.value != blank
+        assign article_editor_name = article_editor.nome_completo.value
+      elsif article_editor.display_name != blank
+        assign article_editor_name = article_editor.display_name
+      endif
+    endif
+
+    if article_editor_name == blank
+      assign article_editor_name = article.metafields.custom.escritor | metafield_text | strip
+    endif
+  endif
+
+  assign article_video_embed = blank
+  if article.metafields.custom.video_embed != blank
+    if article.metafields.custom.video_embed.value != blank
+      assign article_video_embed = article.metafields.custom.video_embed.value | strip
+    else
+      assign article_video_embed = article.metafields.custom.video_embed | metafield_text | strip
+    endif
+  endif
+
+  assign share_url = request.origin | append: article.url
+  assign share_url_encoded = share_url | url_encode
+  assign share_title = article.title | url_encode
+  assign facebook_share_url = 'https://www.facebook.com/sharer/sharer.php?u=' | append: share_url_encoded
+  assign pinterest_share_url = 'https://pinterest.com/pin/create/button/?url=' | append: share_url_encoded | append: '&description=' | append: share_title
+  assign whatsapp_share_url = 'https://wa.me/?text=' | append: share_title | append: '%20' | append: share_url_encoded
+
+  assign video_embed_url = blank
+  assign normalized_video_embed = article_video_embed
+  if normalized_video_embed contains '&quot;'
+    assign normalized_video_embed = normalized_video_embed | replace: '&quot;', '"'
+  endif
+  if normalized_video_embed contains '&#39;'
+    assign normalized_video_embed = normalized_video_embed | replace: '&#39;', "'"
+  endif
+  if normalized_video_embed contains '&apos;'
+    assign normalized_video_embed = normalized_video_embed | replace: '&apos;', "'"
+  endif
+  if normalized_video_embed contains '&amp;'
+    assign normalized_video_embed = normalized_video_embed | replace: '&amp;', '&'
+  endif
+
+  if normalized_video_embed != blank and normalized_video_embed contains 'src='
+    assign iframe_src_chunk = normalized_video_embed | split: 'src=' | last
+    assign iframe_src_first_char = iframe_src_chunk | slice: 0, 1
+    if iframe_src_first_char == '"'
+      assign video_embed_url = iframe_src_chunk | split: '"' | slice: 1, 1 | first
+    elsif iframe_src_first_char == "'"
+      assign video_embed_url = iframe_src_chunk | split: "'" | slice: 1, 1 | first
+    endif
+  endif
+-%}
+
+<article class="trm-article-template">
+  <div class="trm-article-template__shell">
+    {%- if article.image -%}
+      <div class="trm-article-template__hero trm-article-template__hero--{{ image_height }}">
+        <img
+          srcset="
+            {% if article.image.width >= 750 %}{{ article.image | image_url: width: 750 }} 750w,{% endif %}
+            {% if article.image.width >= 1100 %}{{ article.image | image_url: width: 1100 }} 1100w,{% endif %}
+            {% if article.image.width >= 1500 %}{{ article.image | image_url: width: 1500 }} 1500w,{% endif %}
+            {{ article.image | image_url }} {{ article.image.width }}w
+          "
+          sizes="(min-width: 1248px) 1216px, calc(100vw - 32px)"
+          src="{{ article.image | image_url: width: 1500 }}"
+          alt="{{ article.image.alt | default: article.title | escape }}"
+          loading="eager"
+          fetchpriority="high"
+          width="{{ article.image.width }}"
+          height="{{ article.image.height }}"
+        >
+      </div>
+    {%- endif -%}
+
+    <div class="trm-article-template__content-wrap">
+      {%- for block in section.blocks -%}
+        {%- if block.type == '@app' -%}
+          <div class="page-width page-width--narrow" {{ block.shopify_attributes }}>
+            {% render block %}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      <div class="trm-article-template__meta-row">
+        <div class="trm-article-template__meta">
+          {%- if show_author -%}
+            <span class="trm-article-template__meta-item">
+              <span class="trm-article-template__meta-dot"></span>
+              {{ article_editor_name | default: article.author | escape }}
+            </span>
+          {%- endif -%}
+          {%- if article.tags.size > 0 -%}
+            <span class="trm-article-template__tag">{{ article.tags.first }}</span>
+          {%- endif -%}
+          {%- if show_date -%}
+            <span class="trm-article-template__meta-item">
+              {{ article.published_at | date: '%d/%m/%Y' }}
+            </span>
+          {%- endif -%}
+        </div>
+
+        <div class="trm-article-template__share">
+          <span class="trm-article-template__share-label">{{ share_label }}</span>
+          <a
+            href="{{ facebook_share_url }}"
+            class="trm-article-template__share-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Compartilhar no Facebook"
+          >
+            {{ 'icon-facebook.svg' | inline_asset_content }}
+          </a>
+          <a
+            href="{{ pinterest_share_url }}"
+            class="trm-article-template__share-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Compartilhar no Pinterest"
+          >
+            {{ 'icon-pinterest.svg' | inline_asset_content }}
+          </a>
+          {%- if settings.social_instagram_link != blank -%}
+            <a
+              href="{{ settings.social_instagram_link }}"
+              class="trm-article-template__share-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram da Tremaque"
+            >
+              {{ 'icon-instagram.svg' | inline_asset_content }}
+            </a>
+          {%- endif -%}
+          <a
+            href="{{ whatsapp_share_url }}"
+            class="trm-article-template__share-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Compartilhar no WhatsApp"
+          >
+            <svg viewBox="0 0 25 25" fill="none" aria-hidden="true">
+              <path d="M0 25L1.76568 18.5802C0.676128 16.701 0.103617 14.5708 0.104664 12.3865C0.107804 5.55729 5.69162 0 12.5523 0C15.8817 0.00104167 19.0069 1.29167 21.3577 3.63333C23.7074 5.975 25.001 9.0875 25 12.3979C24.9969 19.2281 19.413 24.7854 12.5523 24.7854C10.4695 24.7844 8.41706 24.2646 6.59905 23.2771L0 25Z" fill="currentColor"/>
+              <path d="M6.90467 21.0344C8.65884 22.0708 10.3335 22.6917 12.5481 22.6927C18.2502 22.6927 22.8952 18.074 22.8983 12.3958C22.9004 6.70625 18.2774 2.09375 12.5565 2.09167C6.85025 2.09167 2.20841 6.71042 2.20631 12.3875C2.20527 14.7052 2.88767 16.4406 4.03374 18.2562L2.98815 22.0562L6.90467 21.0344Z" fill="white"/>
+              <path d="M18.8227 15.3427C18.7453 15.2135 18.5381 15.1365 18.2262 14.9812C17.9153 14.826 16.3862 14.0771 16.1004 13.974C15.8157 13.8708 15.6085 13.8188 15.4002 14.1292C15.193 14.4385 14.5964 15.1365 14.4153 15.3427C14.2343 15.549 14.0522 15.575 13.7413 15.4198C13.4305 15.2646 12.4278 14.9385 11.2398 13.8833C10.3157 13.0625 9.69082 12.049 9.50975 11.7385C9.32868 11.4292 9.49091 11.2615 9.64582 11.1073C9.78607 10.9688 9.95667 10.7458 10.1126 10.5646C10.2707 10.3854 10.3219 10.2563 10.4266 10.049C10.5302 9.84271 10.4789 9.66146 10.4004 9.50625C10.3219 9.35208 9.70024 7.82812 9.44172 7.20833C9.18844 6.60521 8.93201 6.68646 8.74152 6.67708L8.14494 6.66667C7.9377 6.66667 7.60069 6.74375 7.316 7.05417C7.03131 7.36458 6.2275 8.1125 6.2275 9.63646C6.2275 11.1604 7.34217 12.6323 7.49707 12.8385C7.65302 13.0448 9.68978 16.1719 12.8098 17.5125C13.5519 17.8312 14.1317 18.0219 14.5828 18.1646C15.328 18.4 16.0062 18.3667 16.5421 18.2875C17.1397 18.199 18.3821 17.5385 18.6417 16.8156C18.9012 16.0917 18.9012 15.4719 18.8227 15.3427Z" fill="currentColor"/>
+            </svg>
+          </a>
+          <button
+            type="button"
+            class="trm-article-template__share-link trm-article-template__share-link--copy"
+            data-trm-copy-link
+            data-copy-url="{{ share_url }}"
+            aria-label="Copiar link do artigo"
+          >
+            {{ 'icon-share.svg' | inline_asset_content }}
+          </button>
+        </div>
+      </div>
+
+      <h1 class="trm-article-template__title">{{ article.title | escape }}</h1>
+
+      <div class="trm-article-template__body-grid">
+        <div class="trm-article-template__main-column">
+          {%- if article_summary != blank -%}
+            <div class="trm-article-template__summary">
+              {{ article_summary }}
+            </div>
+          {%- endif -%}
+
+          <div class="trm-article-template__video-card trm-article-template__video-card--mobile">
+            {%- if video_embed_url != blank -%}
+              <div class="trm-article-template__video-embed">
+                <iframe
+                  src="{{ video_embed_url }}"
+                  title="{{ article.title | escape }}"
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            {%- else -%}
+              <div class="trm-article-template__video-placeholder trm-article-template__video-placeholder--empty">
+                <span class="trm-article-template__video-play" aria-hidden="true"></span>
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="trm-article-template__rte rte">
+            {{ article.content }}
+          </div>
+        </div>
+
+        <aside class="trm-article-template__aside">
+          <div class="trm-article-template__video-card trm-article-template__video-card--desktop">
+            {%- if video_embed_url != blank -%}
+              <div class="trm-article-template__video-embed">
+                <iframe
+                  src="{{ video_embed_url }}"
+                  title="{{ article.title | escape }}"
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            {%- else -%}
+              <div class="trm-article-template__video-placeholder trm-article-template__video-placeholder--empty">
+                <span class="trm-article-template__video-play" aria-hidden="true"></span>
+              </div>
+            {%- endif -%}
+          </div>
+        </aside>
+      </div>
+
+    </div>
+  </div>
+</article>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('[data-trm-copy-link]');
+    if (!buttons.length || !navigator.clipboard) return;
+
+    buttons.forEach(function (button) {
+      if (button.dataset.copyBound === 'true') return;
+      button.dataset.copyBound = 'true';
+      button.addEventListener('click', function () {
+        navigator.clipboard.writeText(button.getAttribute('data-copy-url') || window.location.href);
+        button.classList.add('is-copied');
+        window.setTimeout(function () {
+          button.classList.remove('is-copied');
+        }, 1600);
+      });
+    });
+  })();
+</script>
+
+<script type="application/ld+json">
+  {{ article | structured_data }}
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.main-article.name",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "featured_image",
+      "name": "t:sections.main-article.blocks.featured_image.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "image_height",
+          "options": [
+            {
+              "value": "adapt",
+              "label": "t:sections.main-article.blocks.featured_image.settings.image_height.options__1.label"
+            },
+            {
+              "value": "small",
+              "label": "t:sections.main-article.blocks.featured_image.settings.image_height.options__2.label"
+            },
+            {
+              "value": "medium",
+              "label": "t:sections.main-article.blocks.featured_image.settings.image_height.options__3.label"
+            },
+            {
+              "value": "large",
+              "label": "t:sections.main-article.blocks.featured_image.settings.image_height.options__4.label"
+            }
+          ],
+          "default": "adapt",
+          "label": "t:sections.main-article.blocks.featured_image.settings.image_height.label"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "name": "t:sections.main-article.blocks.title.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "blog_show_date",
+          "default": true,
+          "label": "t:sections.main-article.blocks.title.settings.blog_show_date.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_show_author",
+          "default": false,
+          "label": "t:sections.main-article.blocks.title.settings.blog_show_author.label"
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "t:sections.main-article.blocks.content.name",
+      "limit": 1
+    },
+    {
+      "type": "share",
+      "name": "t:sections.main-article.blocks.share.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "share_label",
+          "label": "t:sections.main-article.blocks.share.settings.text.label",
+          "default": "Compartilhe:"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,531 @@
+{% comment %}
+  CHANGELOG:
+  - Adicionado suporte para vídeo com preview e botão de play.
+  - Novas configurações no schema para estilizar o botão de play.
+  - Adicionado HTML, CSS e JavaScript para a funcionalidade de vídeo.
+  - A lógica agora verifica se 'block.settings.video_block' existe. Se sim, renderiza o player de vídeo.
+    Se não, renderiza a imagem como antes.
+  - O link que envolvia o bloco inteiro (`title_link`) agora é ignorado para blocos de vídeo para evitar conflito com o botão de play.
+{% endcomment %}
+
+{% schema %}
+{
+  "name": "Galeria",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title_section",
+      "label": "Titulo da seção",
+    },
+    {
+      "type": "color",
+       "id": "color_title_section",
+       "label": "Cor do titulo",
+       "default": "#000"
+    },
+    {
+      "type": "number",
+      "id": "size_title_section",
+      "label": "Tamanho do titulo",
+       "default":38
+    },
+    {
+      "type": "number",
+      "id": "weight_title_section",
+      "label": "Peso do titulo",
+       "default":700
+    },
+    {
+      "type": "checkbox",
+      "id": "use_page_width",
+      "label": "Usar classe page-width",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_animation",
+      "label": "Habilitar animação de hover (apenas imagens)",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Estilos dos Blocos"
+    },
+    {
+      "type": "range",
+      "id": "image_gap",
+      "label": "Espaçamento entre blocos (px)",
+      "default": 0,
+      "min": 0,
+      "max": 50,
+      "step": 1
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "label": "Arredondamento das bordas (px)",
+      "default": 0,
+      "min": 0,
+      "max": 100,
+      "step": 1
+    },
+    {
+      "type": "text",
+      "id": "image_height",
+      "label": "Altura dos blocos (px)",
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "object_fit",
+      "label": "Ajuste da mídia (imagem/vídeo)",
+      "default": "cover",
+      "options": [
+        { "value": "fill", "label": "Preencher (fill)" },
+        { "value": "contain", "label": "Conter (contain)" },
+        { "value": "cover", "label": "Cobrir (cover)" },
+        { "value": "scale-down", "label": "Reduzir escala (scale-down)" },
+        { "value": "none", "label": "Nenhum (none)" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "image_height_mobile",
+      "label": "Altura dos blocos no mobile (px)",
+      "default": "250"
+    },
+    {
+      "type": "header",
+      "content": "Estilos do Botão de Play (Vídeo)"
+    },
+    {
+      "type": "color",
+      "id": "play_button_bg_color",
+      "label": "Cor de fundo do botão",
+      "default": "rgba(0,0,0,0.5)"
+    },
+    {
+      "type": "color",
+      "id": "play_button_icon_color",
+      "label": "Cor do ícone de play",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "play_button_size",
+      "label": "Tamanho do botão de play (px)",
+      "min": 40,
+      "max": 120,
+      "step": 5,
+      "default": 70
+    },
+    {
+      "type": "header",
+      "content": "Espaçamento da Seção"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Superior",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Inferior",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "block",
+      "name": "Block",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Imagem (Desktop)",
+          "info": "Usada como fallback se o vídeo não for definido."
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Imagem (Mobile)"
+        },
+        {
+          "type": "video",
+          "id": "video_block",
+          "label": "Vídeo",
+          "info": "Se selecionado, substitui a imagem. A pré-visualização do vídeo será usada como poster."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título",
+          "default": "Título Padrão"
+        },
+        {
+          "type": "url",
+          "id": "title_link",
+          "label": "Link do Bloco",
+          "info": "Ignorado se um vídeo for selecionado no bloco."
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtítulo",
+          "default": "Subtítulo Padrão"
+        },
+        {
+          "type": "url",
+          "id": "subtitle_link",
+          "label": "Link do Subtítulo"
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Posição do Texto",
+          "default": "center-center",
+          "options": [
+            { "value": "top-left", "label": "Topo Esquerda" },
+            { "value": "top-center", "label": "Topo Centro" },
+            { "value": "top-right", "label": "Topo Direita" },
+            { "value": "center-left", "label": "Centro Esquerda" },
+            { "value": "center-center", "label": "Centro" },
+            { "value": "center-right", "label": "Centro Direita" },
+            { "value": "bottom-left", "label": "Base Esquerda" },
+            { "value": "bottom-center", "label": "Base Centro" },
+            { "value": "bottom-right", "label": "Base Direita" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Galeria"
+    }
+  ],
+  "max_blocks": 3
+}
+{% endschema %}
+
+{% style %}
+  /* Padding personalizado para a seção */
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="two-blocks-section-{{ section.id }} {% if section.settings.use_page_width %}page-width{% endif %} section-{{ section.id }}-padding">
+   {% if section.settings.title_section != blank %}
+    <h1 class="two-blocks-title-{{ section.id }}">
+    {{ section.settings.title_section }}
+    </h1>
+  {% endif %} 
+  
+  <div class="blocks-container-{{ section.id }}">
+    {% for block in section.blocks %}
+      <div class="block-{{ section.id }}" {{ block.shopify_attributes }}>
+        
+        {%- assign has_video = false -%}
+        {%- if block.settings.video_block != blank -%}
+          {%- assign has_video = true -%}
+        {%- endif -%}
+
+        {%- assign has_link = false -%}
+        {%- if block.settings.title_link != blank and has_video == false -%}
+          {%- assign has_link = true -%}
+        {%- endif -%}
+
+        {% if has_link %}
+          <a href="{{ block.settings.title_link }}" style="display: block; color: inherit; text-decoration: none;">
+        {% endif %}
+
+        <div
+          class="block-media-container-{{ section.id }}{% if section.settings.enable_hover_animation and has_video == false %} hover-animation-{{ section.id }}{% endif %}"
+          style="position: relative;"
+        >
+          {% if has_video %}
+            <div class="video-wrapper-{{ section.id }}">
+             {{ block.settings.video_block | video_tag:
+                      image_size: '400x',
+                      autoplay: false,
+                      loop: false,
+                      controls: false,
+                      muted: false,
+                      playsinline: true
+                      
+                  }}
+              <button class="video-play-button-{{ section.id }}" aria-label="Play video">
+                <svg height="100%" width="100%" viewBox="0 0 36 36">
+                  <path d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z"></path>
+                </svg>
+              </button>
+            </div>
+          {% else %}
+            {% if block.settings.image or block.settings.image_mobile %}
+              <picture>
+                {% if block.settings.image_mobile %}
+                  <source srcset="{{ block.settings.image_mobile | img_url: 'master' }}" media="(max-width: 768px)">
+                {% endif %}
+                {% if block.settings.image %}
+                  <img
+                    width="auto"
+                    height="auto"
+                    src="{{ block.settings.image | img_url: 'master' }}"
+                    alt="{{ block.settings.title | escape }}"
+                    style="width: 100%; height: 100%;"
+                  >
+                {% else %}
+                   {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                {% endif %}
+              </picture>
+            {% else %}
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
+          {% endif %}
+          
+          <div class="block-content-{{ section.id }} {{ block.settings.text_position }}">
+            {% if block.settings.title != blank %}
+              <h2>{{ block.settings.title }}</h2>
+            {% endif %}
+            {% if block.settings.subtitle != blank %}
+              <p>
+                {% if block.settings.subtitle_link != blank %}
+                  <a href="{{ block.settings.subtitle_link }}" style="color: inherit;">
+                    {{ block.settings.subtitle }}
+                  </a>
+                {% else %}
+                  {{ block.settings.subtitle }}
+                {% endif %}
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if has_link %}
+          </a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .two-blocks-title-{{ section.id }} {
+    color: {{ section.settings.color_title_section }};
+    font-size: {{ section.settings.size_title_section }}px;
+    font-weight: {{ section.settings.weight_title_section }};
+  }
+  .two-blocks-section-{{ section.id }} .blocks-container-{{ section.id }} {
+    display: flex;
+    width: 100%;
+    gap: {{ section.settings.image_gap }}px;
+  }
+
+  .two-blocks-section-{{ section.id }} .block-{{ section.id }} {
+    flex: 1;
+    position: relative;
+  }
+
+  .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }} {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: {{ section.settings.image_height }}px;
+    border-radius: {{ section.settings.image_radius }}px;
+    background-color: #f0f0f0; /* Cor de fundo para placeholders */
+  }
+
+  .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }} picture,
+  .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }} img,
+  .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }} .placeholder-svg {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: {{ section.settings.object_fit }};
+    border-radius: {{ section.settings.image_radius }}px;
+  }
+
+  /* Animação de hover apenas para imagens */
+  {% if section.settings.enable_hover_animation %}
+    .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }}.hover-animation-{{ section.id }} img {
+      transition: transform 0.6s ease, filter 0.3s ease;
+    }
+    .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }}.hover-animation-{{ section.id }}:hover {
+      cursor: pointer;
+    }
+    .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }}.hover-animation-{{ section.id }}:hover img {
+       transform: scale(1.05);
+       filter: brightness(0.8);
+    }
+  {% endif %}
+
+  /* Estilos do Vídeo */
+  .video-wrapper-{{ section.id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .video-wrapper-{{ section.id }} video {
+     width: 100%;
+    height: 100%;
+  }
+
+  .block-video-{{ section.id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: {{ section.settings.object_fit }};
+    border-radius: {{ section.settings.image_radius }}px;
+    z-index: 1;
+  }
+
+  .video-play-button-{{ section.id }} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: {{ section.settings.play_button_size }}px;
+    height: {{ section.settings.play_button_size }}px;
+    background-color: {{ section.settings.play_button_bg_color }};
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    transition: transform 0.2s ease, opacity 0.3s ease;
+  }
+
+  .video-play-button-{{ section.id }}:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .video-play-button-{{ section.id }} svg {
+    fill: {{ section.settings.play_button_icon_color }};
+    width: 50%;
+    height: 50%;
+    /* Ajuste para o ícone de play ficar mais centralizado visualmente */
+    transform: translateX(2px); 
+  }
+
+  /* Esconde o botão de play quando o vídeo está tocando */
+  .video-wrapper-{{ section.id }}.is-playing .video-play-button-{{ section.id }} {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  /* Conteúdo de texto sobreposto */
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    z-index: 3; /* Garante que o texto fique acima do vídeo/imagem */
+    pointer-events: none; /* Permite cliques através do texto */
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  /* Permite clicar nos links do texto */
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }} a {
+    pointer-events: auto;
+  }
+  
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }} h2,
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }} p {
+    margin: 0;
+    padding: 5px 10px;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  }
+
+  /* Posições do texto */
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }}.top-left { justify-content: flex-start; align-items: flex-start; text-align: left; }
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }}.top-center { justify-content: flex-start; align-items: center; }
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }}.top-right { justify-content: flex-start; align-items: flex-end; text-align: right; }
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }}.center-left { justify-content: center; align-items: flex-start; text-align: left; }
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }}.center-right { justify-content: center; align-items: flex-end; text-align: right; }
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }}.bottom-left { justify-content: flex-end; align-items: flex-start; text-align: left; }
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }}.bottom-center { justify-content: flex-end; align-items: center; }
+  .two-blocks-section-{{ section.id }} .block-content-{{ section.id }}.bottom-right { justify-content: flex-end; align-items: flex-end; text-align: right; }
+
+  @media (max-width: 768px) {
+    .two-blocks-section-{{ section.id }} .blocks-container-{{ section.id }} {
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }} {
+      height: {{ section.settings.image_height_mobile }}px !important;
+    }
+
+    .two-blocks-section-{{ section.id }} .block-content-{{ section.id }} h2 {
+      font-size: 16px;
+    }
+
+    .two-blocks-section-{{ section.id }} .block-content-{{ section.id }} p {
+      font-size: 12px;
+    }
+
+    {% if section.settings.enable_hover_animation %}
+      .two-blocks-section-{{ section.id }} .block-media-container-{{ section.id }}.hover-animation-{{ section.id }}:hover img {
+        transform: none;
+        filter: none;
+      }
+    {% endif %}
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const playButtons = document.querySelectorAll('.video-play-button-{{ section.id }}');
+    
+    if (playButtons.length > 0) {
+      playButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const wrapper = button.closest('.video-wrapper-{{ section.id }}');
+          if (wrapper) {
+            const video = wrapper.querySelector('video');
+            if (video) {
+              wrapper.classList.add('is-playing');
+              video.controls = true; // Mostra os controles nativos do navegador
+              video.play();
+            }
+          }
+        });
+      });
+    }
+  });
+</script>

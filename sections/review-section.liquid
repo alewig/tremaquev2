@@ -1,0 +1,440 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+
+{%- style -%}
+  .section-reviews-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-reviews-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .reviews-section-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .reviews-section__title-{{ section.id }} {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    color: #4f4f4f;
+    margin: 0;
+  }
+
+  .reviews-carousel-{{ section.id }} {
+    width: 100%;
+    position: relative;
+  }
+
+  .reviews-carousel-{{ section.id }} .swiper-wrapper {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .reviews-carousel-{{ section.id }} .swiper-slide {
+    height: auto;
+    display: flex;
+  }
+
+  .review-card-{{ section.id }} {
+    border-radius: 8px;
+    border: 1px solid var(--gray-100, #E7E7E7);
+    background: var(--White, #FFF);
+    padding: 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .review-card__header-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .review-card__name-{{ section.id }} {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.12;
+    color: #100c33;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+
+  .review-card__stars-{{ section.id }} {
+    display: flex;
+    gap: 3.333px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .review-card__star-{{ section.id }} {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .review-card__star-{{ section.id }} svg {
+    width: 100%;
+    height: 100%;
+    fill: #FFB74A;
+  }
+
+  .review-card__text-{{ section.id }} {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+    color: #100c33;
+    opacity: 0.44;
+    margin: 0;
+  }
+
+  .reviews-carousel__nav-{{ section.id }} {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: {{ section.settings.color_arrow_background }};
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    border-radius: 50%;
+  }
+
+  .reviews-carousel__nav--prev-{{ section.id }} {
+    left: -2%;
+  }
+
+  .reviews-carousel__nav--next-{{ section.id }} {
+    right: -2%;
+  }
+
+  .reviews-carousel__nav-{{ section.id }} svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+
+  @media screen and (max-width: 749px) {
+    .reviews-section__title-{{ section.id }} {
+      font-size: 28px;
+    }
+    
+    .review-card-{{ section.id }} {
+      padding: 20px;
+    }
+  }
+{%- endstyle -%}
+
+<section class="section-reviews-{{ section.id }} color-{{ section.settings.color_scheme }} gradient">
+  <div class="page-width">
+    <div class="reviews-section-{{ section.id }}">
+      {%- if section.settings.title != blank -%}
+        <h2 class="reviews-section__title-{{ section.id }}">
+          {{ section.settings.title }}
+        </h2>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="reviews-carousel-{{ section.id }}">
+          <div class="reviews-carousel__swiper-{{ section.id }} swiper">
+            <div class="swiper-wrapper">
+              {%- for block in section.blocks -%}
+                <div class="swiper-slide" {{ block.shopify_attributes }}>
+                  <div class="review-card-{{ section.id }}">
+                    <div class="review-card__header-{{ section.id }}">
+                      {%- if block.settings.customer_name != blank -%}
+                        <h3 class="review-card__name-{{ section.id }}">
+                          {{ block.settings.customer_name }}
+                        </h3>
+                      {%- endif -%}
+                      {%- if block.settings.rating > 0 -%}
+                        <div class="review-card__stars-{{ section.id }}">
+                          {%- for i in (1..5) -%}
+                            <div class="review-card__star-{{ section.id }}">
+                              {%- if i <= block.settings.rating -%}
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M10 0L12.2451 6.90983H19.5106L13.6327 11.1803L15.8779 18.0902L10 13.8197L4.12215 18.0902L6.36729 11.1803L0.489435 6.90983H7.75486L10 0Z" fill="#FFB74A"/>
+                                </svg>
+                              {%- else -%}
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M10 0L12.2451 6.90983H19.5106L13.6327 11.1803L15.8779 18.0902L10 13.8197L4.12215 18.0902L6.36729 11.1803L0.489435 6.90983H7.75486L10 0Z" fill="#E0E0E0" opacity="0.3"/>
+                                </svg>
+                              {%- endif -%}
+                            </div>
+                          {%- endfor -%}
+                        </div>
+                      {%- endif -%}
+                    </div>
+                    {%- if block.settings.review_text != blank -%}
+                      <p class="review-card__text-{{ section.id }}">
+                        {{ block.settings.review_text }}
+                      </p>
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
+          
+          <button 
+            type="button" 
+            class="reviews-carousel__nav-{{ section.id }} reviews-carousel__nav--prev-{{ section.id }}"
+            aria-label="{{ 'general.slider.previous_slide' | t }}"
+          >
+            {% render 'generic-arrow' , color_arrow: section.settings.color_arrow , rotate_arrow: 0 %}
+          </button>
+          
+          <button 
+            type="button" 
+            class="reviews-carousel__nav-{{ section.id }} reviews-carousel__nav--next-{{ section.id }}"
+            aria-label="{{ 'general.slider.next_slide' | t }}"
+          >
+            {% render 'generic-arrow' , color_arrow: section.settings.color_arrow , rotate_arrow: 180 %}
+          </button>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.reviews-carousel__swiper-{{ section.id }}');
+    if (!container || container.dataset.swiperInitialized === 'true') return;
+
+    function initReviewsSwiper() {
+      if (typeof Swiper === 'undefined') {
+        setTimeout(initReviewsSwiper, 100);
+        return;
+      }
+
+      try {
+        const swiper = new Swiper(container, {
+          slidesPerView: 1,
+          spaceBetween: 16,
+          loop: false,
+          navigation: {
+            nextEl: '.reviews-carousel__nav--next-{{ section.id }}',
+            prevEl: '.reviews-carousel__nav--prev-{{ section.id }}',
+          },
+          breakpoints: {
+            640: {
+              slidesPerView: 1.5,
+              spaceBetween: 16,
+            },
+            768: {
+              slidesPerView: 2,
+              spaceBetween: 16,
+            },
+            1024: {
+              slidesPerView: 3,
+              spaceBetween: 16,
+            },
+          },
+          on: {
+            init: function() {
+              container.dataset.swiperInitialized = 'true';
+            }
+          }
+        });
+
+        container.swiperInstance = swiper;
+      } catch (error) {
+        console.warn('Erro ao inicializar Swiper para seção {{ section.id }}:', error);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initReviewsSwiper);
+    } else {
+      initReviewsSwiper();
+    }
+  });
+
+  {% if request.design_mode %}
+    document.addEventListener('shopify:section:load', function(event) {
+      if (event.detail.sectionId === '{{ section.id }}') {
+        const container = document.querySelector('.reviews-carousel__swiper-{{ section.id }}');
+        if (container && container.swiperInstance) {
+          container.swiperInstance.destroy(true, true);
+          delete container.dataset.swiperInitialized;
+          setTimeout(function() {
+            if (typeof Swiper !== 'undefined') {
+              const swiper = new Swiper(container, {
+                slidesPerView: 1,
+                spaceBetween: 16,
+                loop: false,
+                navigation: {
+                  nextEl: '.reviews-carousel__nav--next-{{ section.id }}',
+                  prevEl: '.reviews-carousel__nav--prev-{{ section.id }}',
+                },
+                breakpoints: {
+                  640: {
+                    slidesPerView: 1.5,
+                    spaceBetween: 16,
+                  },
+                  768: {
+                    slidesPerView: 2,
+                    spaceBetween: 16,
+                  },
+                  1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 16,
+                  },
+                },
+              });
+              container.swiperInstance = swiper;
+            }
+          }, 100);
+        }
+      }
+    });
+  {% endif %}
+</script>
+
+
+
+
+{% schema %}
+{
+  "name": "Reviews",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Título",
+      "default": "Quem prova, sente a diferença"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    },
+    {
+      "type": "color",
+      "id": "color_arrow_background",
+      "label": "Cor do background da seta",
+      "default": "#0F0F0F"
+    },
+    {
+      "type": "color",
+      "id": "color_arrow",
+      "label": "Cor da seta",
+      "default": "#FFF"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "text",
+          "id": "customer_name",
+          "label": "Nome do cliente",
+          "default": "Marina R."
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "label": "Avaliação",
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "review_text",
+          "label": "Texto do review",
+          "default": "\"A Harmony virou parte da minha rotina. Os mixes têm uma qualidade absurda, dá pra sentir no sabor e até no aroma quando abre a embalagem. É o tipo de produto que a gente sente confiança de oferecer pra família\""
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Reviews",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "customer_name": "Marina R.",
+            "rating": 5,
+            "review_text": "\"A Harmony virou parte da minha rotina. Os mixes têm uma qualidade absurda, dá pra sentir no sabor e até no aroma quando abre a embalagem. É o tipo de produto que a gente sente confiança de oferecer pra família\""
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "customer_name": "Ricardo L",
+            "rating": 5,
+            "review_text": "\"Sou muito criterioso com alimentação, e os produtos da Harmony realmente entregam o que prometem. Ingredientes frescos, combinações equilibradas e uma experiência que vai muito além de 'comprar saudável'. É sofisticado e natural ao mesmo tempo.\""
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "customer_name": "Patrícia M.",
+            "rating": 5,
+            "review_text": "\"Descobri a Harmony por acaso e nunca mais fiquei sem. As opções à granel são incríveis, e o atendimento transmite muito cuidado. Dá pra ver que tudo foi pensado com propósito, desde a embalagem até o sabor.\""
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

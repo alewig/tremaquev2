@@ -1,0 +1,237 @@
+<section class="main-section-block-{{ section.id }}">
+    <div class="benefits-block-main-{{ section.id }}">
+    {%- if section.settings.title_section != blank -%}
+        <div class="section-title-{{ section.id }}">
+        {{ section.settings.title_section }}
+        </div>
+    {%- endif -%}
+    
+    <div class="grid-blocks-{{ section.id }} page-width">
+        {%- for block in section.blocks -%}
+        <div class="content-block-{{ section.id }}">
+            {%- if block.settings.icon_block != blank -%}
+            <img 
+                src="{{ block.settings.icon_block | image_url: width: 200 }}" 
+                alt="{{ block.settings.icon_block.alt | escape }}"
+                loading="lazy"
+                width="{{ section.settings.icon_size }}"
+                height="{{ section.settings.icon_size }}"
+                style="max-width: {{ section.settings.icon_size }}px;"
+            >
+            {%- endif -%}
+            {%- if block.settings.title_block != blank -%}
+            <h1>{{ block.settings.title_block }}</h1>
+            {%- endif -%}
+            {%- if block.settings.description_block != blank -%}
+            <p>{{ block.settings.description_block }}</p>
+            {%- endif -%}
+        </div>
+        {%- endfor -%}
+    </div>
+    </div>
+</section>
+
+
+<style>
+    .main-section-block-{{ section.id }} {
+      padding-top:{{ section.settings.padding_aside_top_section }}px;
+      padding-bottom:{{ section.settings.padding_aside_bottom_section }}px;
+    }
+  .benefits-block-main-{{ section.id }} {
+    background-color: {{ section.settings.background_section_color }};
+    padding-top:{{ section.settings.padding_inside_top_section }}px;
+    padding-bottom:{{ section.settings.padding_inside_bottom_section }}px;
+    text-align: center;
+  }
+
+  .section-title-{{ section.id }} {
+    color: {{ section.settings.title_color_section }};
+    font-size: {{ section.settings.font_size_title_section }}px;
+    margin-bottom: 40px;
+  }
+  .section-title-{{ section.id }} p{
+    margin: 0px;
+  }
+
+  /* Estilo base para mobile (um bloco abaixo do outro) */
+  .grid-blocks-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* Espaçamento entre os blocos */
+  }
+
+  .content-block-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza o conteúdo (icone, texto) horizontalmente */
+    text-align: center;
+  }
+
+  .content-block-{{ section.id }} img {
+    height: auto; /* Mantém a proporção da imagem */
+    margin-bottom: 15px;
+  }
+
+  .content-block-{{ section.id }} h1 {
+    color: {{ section.settings.color_title_block }};
+    font-size: {{ section.settings.font_title_size }}px;
+    font-weight: {{ section.settings.font_title_weight }};
+    margin: 0 0 10px 0;
+  }
+
+  .content-block-{{ section.id }} p {
+    color: {{ section.settings.color_subtitle_block }};
+    font-size: {{ section.settings.font_subtitle_size }}px;
+    font-weight: {{ section.settings.font_subtitle_weight }};
+    margin: 0;
+  }
+
+  /* Estilos para Desktop (a partir de 768px de largura de tela) */
+  @media (min-width: 768px) {
+    .grid-blocks-{{ section.id }} {
+      display: grid;
+      /* Cria colunas responsivas: o navegador tentará criar colunas com no mínimo 250px, 
+         e distribuirá o espaço igualmente (1fr) entre elas. */
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px; /* Espaçamento entre os blocos no desktop */
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Benefícios em Blocos",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "title_section",
+      "label": "Título da seção"
+    },
+    {
+      "type": "color",
+      "id": "title_color_section",
+      "label": "Cor título seção"
+    },
+    {
+      "type": "number",
+      "id": "font_size_title_section",
+      "label": "Tamanho do título da seção",
+      "default": 40
+    },
+    {
+      "type": "color",
+      "id": "background_section_color",
+      "label": "Cor de fundo da seção",
+      "default": "#FEE5EF"
+    },
+    {
+      "type": "header",
+      "content": "Espaçamentos"
+    },
+    {
+        "type": "number",
+         "id": "padding_inside_top_section",
+         "label": "Padding Top (Dentro)",
+         "default":20
+    },
+    {
+        "type": "number",
+         "id": "padding_inside_bottom_section",
+         "label": "Padding Bottom (Dentro)",
+         "default":20
+    },
+    {
+        "type": "number",
+         "id": "padding_aside_top_section",
+         "label": "Padding Top (Fora)",
+         "default":80
+    },
+    {
+        "type": "number",
+         "id": "padding_aside_bottom_section",
+         "label": "Padding Bottom (fora)",
+         "default":80
+    },
+    {
+      "type": "header",
+      "content": "Estilo dos Blocos"
+    },
+    {
+      "type": "color",
+      "id": "color_title_block",
+      "label": "Cor do título (blocos)",
+      "default": "#0D0D0E"
+    },
+    {
+      "type": "color",
+      "id": "color_subtitle_block",
+      "label": "Cor da descrição (blocos)",
+      "default": "#4B4B53"
+    },
+    {
+      "type": "number",
+      "id": "font_title_weight",
+      "label": "Peso da fonte título (blocos)",
+      "default": 700,
+      "info": "sugestões: 100 leve, 400 normal, 700 bold"
+    },
+    {
+      "type": "number",
+      "id": "font_subtitle_weight",
+      "label": "Peso da fonte descrição (blocos)",
+      "default": 400,
+      "info": "sugestões: 100 leve, 400 normal, 700 bold"
+    },
+    {
+      "type": "number",
+      "id": "font_title_size",
+      "label": "Tamanho do título (blocos)",
+      "default": 24
+    },
+    {
+      "type": "number",
+      "id": "font_subtitle_size",
+      "label": "Tamanho da descrição (blocos)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Tamanho do ícone (blocos)",
+      "min": 20,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Bloco",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon_block",
+          "label": "Ícone"
+        },
+        {
+          "type": "text",
+          "id": "title_block",
+          "label": "Título Bloco"
+        },
+        {
+          "type": "text",
+          "id": "description_block",
+          "label": "Descrição Bloco"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Benefícios em Blocos"
+    }
+  ]
+}
+{% endschema %}

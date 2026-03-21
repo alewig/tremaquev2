@@ -1,0 +1,562 @@
+{% comment %}
+  Product Collection Carousel Section v3
+  
+  Renders a carousel of products from a selected collection using card-product-new snippet
+{% endcomment %}
+
+{%- liquid
+    assign section_title = section.settings.title | default: ''
+    assign section_title_color = section.settings.title_color | default: '#4f4f4f'
+    assign title_size_desktop = section.settings.title_size_desktop | default: 40
+    assign title_size_mobile = section.settings.title_size_mobile | default: 32
+    assign section_background_color = section.settings.background_color | default: ''
+    assign view_all_text = section.settings.view_all_text | default: 'Ver todos'
+    assign view_all_url = section.settings.view_all_url | default: '#'
+    assign view_all_text_color = section.settings.view_all_text_color | default: '#6d6d6d'
+    assign view_all_arrow_color = section.settings.view_all_arrow_color | default: '#6d6d6d'
+    assign view_all_arrow_background_color = section.settings.view_all_arrow_background_color | default: ''
+    assign padding_top = section.settings.padding_top | default: 40
+    assign padding_bottom = section.settings.padding_bottom | default: 40
+    assign slides_per_view_mobile = section.settings.slides_per_view_mobile | default: 1.2
+    assign slides_per_view_tablet = section.settings.slides_per_view_tablet | default: 2
+    assign slides_per_view_laptop = section.settings.slides_per_view_laptop | default: 3
+    assign slides_per_view_desktop = section.settings.slides_per_view_desktop | default: 4
+    assign space_between = section.settings.space_between | default: 32
+    assign collection_handle = section.settings.collection
+    assign products_limit = section.settings.products_limit | default: 12
+  -%}
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  
+  <section class="collection-carousel-v3-{{ section.id }}" style="padding-top: {{ padding_top }}px; padding-bottom: {{ padding_bottom }}px;{% if section_background_color != blank %} background-color: {{ section_background_color }};{% endif %}">
+    <div class="page-width">
+      <div class="collection-carousel-v3__header-{{ section.id }}">
+        {%- if section_title != blank -%}
+          <h2 class="collection-carousel-v3__title-{{ section.id }}" style="color: {{ section_title_color }};">
+            {{ section_title }}
+          </h2>
+        {%- endif -%}
+        
+        
+        {%- if view_all_url != blank and view_all_url != '#' -%}
+          <a href="{{ view_all_url }}" class="collection-carousel-v3__view-all-{{ section.id }}">
+            <span class="collection-carousel-v3__view-all-text-{{ section.id }}">{{ view_all_text }}</span>
+            <div class="collection-carousel-v3__view-all-icon-wrapper-{{ section.id }}">
+              <svg class="collection-carousel-v3__view-all-icon-{{ section.id }}" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </a>
+        {%- endif -%}
+      </div>
+  
+      {%- liquid
+        assign manual_products = section.settings.product_list
+        assign has_manual_products = false
+        if manual_products.count > 0
+          assign has_manual_products = true
+        endif
+      -%}
+  
+      {%- if has_manual_products -%}
+        {%- comment %} Modo: Produtos Selecionados Manualmente {% endcomment -%}
+        {%- assign skip_card_styles = false -%}
+        <div class="collection-carousel-v3__slider-{{ section.id }} swiper">
+          <div class="swiper-wrapper">
+            {%- for product in manual_products -%}
+              {%- if product != blank -%}
+                <div class="swiper-slide">
+                  {%- render 'cards-new',
+                    card_product: product,
+                    section_id: section.id,
+                    show_secondary_image: true,
+                    show_rating: true,
+                    show_variants: true,
+                    skip_styles: skip_card_styles
+                  -%}
+                </div>
+                {%- assign skip_card_styles = true -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- elsif collection_handle != blank -%}
+        {%- comment %} Modo: Coleção {% endcomment -%}
+        {%- assign collection_obj = collections[collection_handle] -%}
+        {%- if collection_obj != blank and collection_obj.products.size > 0 -%}
+          {%- assign skip_card_styles = false -%}
+          <div class="collection-carousel-v3__slider-{{ section.id }} swiper">
+            <div class="swiper-wrapper">
+              {%- for product in collection_obj.products limit: products_limit -%}
+                <div class="swiper-slide">
+                  {%- render 'cards-new',
+                    card_product: product,
+                    section_id: section.id,
+                    show_secondary_image: true,
+                    show_rating: true,
+                    show_variants: true,
+                    skip_styles: skip_card_styles
+                  -%}
+                </div>
+                {%- assign skip_card_styles = true -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- else -%}
+          <div class="collection-carousel-v3__empty-{{ section.id }}">
+            <p>{{ 'sections.collection_template.empty' | t | default: 'Nenhum produto encontrado nesta coleção.' }}</p>
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        <div class="collection-carousel-v3__empty-{{ section.id }}">
+          <p>Selecione uma coleção ou adicione produtos manualmente.</p>
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+  
+  <style>
+    .collection-carousel-v3-{{ section.id }} {
+      width: 100%;
+    }
+  
+    .collection-carousel-v3__header-{{ section.id }} {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      width: 100%;
+    }
+  
+    .collection-carousel-v3__title-{{ section.id }} {
+      font-size: {{ title_size_desktop }}px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0;
+      text-align: start;
+    }
+  
+    .collection-carousel-v3__view-all-{{ section.id }} {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+  
+    .collection-carousel-v3__view-all-{{ section.id }}:hover {
+      opacity: 0.7;
+    }
+  
+    .collection-carousel-v3__view-all-text-{{ section.id }} {
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.4;
+      white-space: nowrap;
+      color: {{ view_all_text_color }};
+    }
+  
+    .collection-carousel-v3__view-all-icon-wrapper-{{ section.id }} {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+      {% if view_all_arrow_background_color != blank %}
+      background-color: {{ view_all_arrow_background_color }};
+      {% endif %}
+    }
+  
+    .collection-carousel-v3__view-all-icon-{{ section.id }} {
+      width: 21px;
+      height: 21px;
+      flex-shrink: 0;
+      color: {{ view_all_arrow_color }};
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} {
+      width: 100%;
+      overflow: hidden;
+      /* Improves horizontal swipe/drag on Safari/iOS + trackpads */
+      touch-action: pan-y;
+
+      /* Better desktop drag UX */
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .collection-carousel-v3__slider-{{ section.id }} img {
+      -webkit-user-drag: none;
+      user-drag: none;
+    }
+
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-wrapper {
+      display: flex;
+      align-items: stretch;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} {
+      --space-between: {{ space_between }}px;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-slide {
+      height: auto;
+      display: flex;
+      align-items: stretch;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      overflow: visible;
+      width: 280px !important;
+      max-width: 280px !important;
+      padding-bottom: 16px;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-slide > * {
+      width: 100%;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-slide .product-card-new {
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-slide .product-card-new__image-wrapper {
+      width: 100%;
+      height: 280px;
+      position: relative;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-slide .product-card-new__image-link {
+      width: 100%;
+      height: 100%;
+      display: block;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-slide .product-card-new__image-container {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      overflow: hidden;
+      position: relative;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-slide .product-card-new__image {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  
+    .collection-carousel-v3__slider-{{ section.id }} .swiper-slide .product-card-new__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+  
+    .collection-carousel-v3__empty-{{ section.id }} {
+      text-align: center;
+      padding: 40px 20px;
+      color: #4F4F4F;
+    }
+  
+    @media (max-width: 749px) {
+      .collection-carousel-v3__title-{{ section.id }} {
+        font-size: {{ title_size_mobile }}px;
+      }
+  
+      .collection-carousel-v3__header-{{ section.id }} {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+    }
+  </style>
+  
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+  <script>
+    (function() {
+      function initCollectionCarousel() {
+        const slider = document.querySelector('.collection-carousel-v3__slider-{{ section.id }}');
+        if (!slider || slider.swiper) return;
+  
+        if (typeof Swiper === 'undefined') {
+          setTimeout(initCollectionCarousel, 100);
+          return;
+        }
+  
+        const swiperInstance = new Swiper(slider, {
+          slidesPerView: 'auto',
+          spaceBetween: {{ space_between }},
+          grabCursor: true,
+          watchOverflow: true,
+          freeMode: false,
+          centeredSlides: false,
+
+          // Desktop + trackpad (including iPadOS pointer devices):
+          // - enable click+drag (simulateTouch)
+          // - enable trackpad horizontal scroll (mousewheel)
+          // - attach touch/pointer listeners on container so gaps between cards are draggable
+          touchEventsTarget: 'container',
+          simulateTouch: true,
+
+          // Avoid the "click locks" feeling on desktop when slides contain links/images
+          preventClicks: true,
+          preventClicksPropagation: true,
+
+          // Let us prevent native image dragging without breaking swipe
+          touchStartPreventDefault: false,
+          passiveListeners: false,
+
+          mousewheel: {
+            forceToAxis: true,
+            sensitivity: 1
+          }
+        });
+
+        // Prevent native drag behavior (images/links) from stealing the gesture
+        slider.addEventListener('dragstart', function(e) { e.preventDefault(); });
+  
+        slider.swiper = swiperInstance;
+      }
+  
+      function waitForSwiper() {
+        if (typeof Swiper !== 'undefined') {
+          initCollectionCarousel();
+        } else {
+          setTimeout(waitForSwiper, 50);
+        }
+      }
+  
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitForSwiper);
+      } else {
+        waitForSwiper();
+      }
+  
+      if (Shopify && Shopify.designMode) {
+        document.addEventListener('shopify:section:load', waitForSwiper);
+        document.addEventListener('shopify:section:reorder', waitForSwiper);
+        document.addEventListener('shopify:section:select', waitForSwiper);
+        document.addEventListener('shopify:section:deselect', waitForSwiper);
+        document.addEventListener('shopify:section:unload', function() {
+          const slider = document.querySelector('.collection-carousel-v3__slider-{{ section.id }}');
+          if (slider && slider.swiper) {
+            slider.swiper.destroy(true, true);
+            slider.swiper = null;
+          }
+        });
+      }
+    })();
+  </script>
+  
+  {% schema %}
+  {
+    "name": "Produtos - Carousel v3",
+    "tag": "section",
+    "class": "section",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Título da seção",
+        "default": "Best Sellers"
+      },
+      {
+        "type": "color",
+        "id": "title_color",
+        "label": "Cor do título",
+        "default": "#4f4f4f"
+      },
+      {
+        "type": "range",
+        "id": "title_size_desktop",
+        "min": 20,
+        "max": 80,
+        "step": 2,
+        "unit": "px",
+        "label": "Tamanho do título (Desktop)",
+        "default": 40
+      },
+      {
+        "type": "range",
+        "id": "title_size_mobile",
+        "min": 16,
+        "max": 60,
+        "step": 2,
+        "unit": "px",
+        "label": "Tamanho do título (Mobile)",
+        "default": 24
+      },
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "Cor de fundo da seção",
+        "info": "Deixe em branco para usar o fundo padrão"
+      },
+      {
+        "type": "header",
+        "content": "Botão Ver Todos"
+      },
+      {
+        "type": "text",
+        "id": "view_all_text",
+        "label": "Texto do botão",
+        "default": "Ver todos"
+      },
+      {
+        "type": "url",
+        "id": "view_all_url",
+        "label": "Link do botão",
+        "info": "Deixe em branco para ocultar o botão"
+      },
+      {
+        "type": "color",
+        "id": "view_all_text_color",
+        "label": "Cor do texto do botão",
+        "default": "#6d6d6d"
+      },
+      {
+        "type": "color",
+        "id": "view_all_arrow_color",
+        "label": "Cor da seta",
+        "default": "#6d6d6d"
+      },
+      {
+        "type": "color",
+        "id": "view_all_arrow_background_color",
+        "label": "Cor de fundo do círculo da seta",
+        "info": "Deixe em branco para não exibir o círculo de fundo"
+      },
+      {
+        "type": "header",
+        "content": "Produtos"
+      },
+      {
+        "type": "paragraph",
+        "content": "Escolha entre: (1) Selecionar produtos manualmente OU (2) Selecionar uma coleção. Se houver produtos selecionados, eles terão prioridade sobre a coleção."
+      },
+      {
+        "type": "product_list",
+        "id": "product_list",
+        "label": "Produtos",
+        "limit": 24,
+        "info": "Selecione produtos específicos para exibir no carousel"
+      },
+      {
+        "type": "header",
+        "content": "Coleção (Alternativa)"
+      },
+      {
+        "type": "collection",
+        "id": "collection",
+        "label": "Coleção de produtos",
+        "info": "Será usada apenas se não houver produtos selecionados acima"
+      },
+      {
+        "type": "range",
+        "id": "products_limit",
+        "min": 4,
+        "max": 24,
+        "step": 2,
+        "label": "Quantidade máxima de produtos (da coleção)",
+        "default": 12,
+        "info": "Aplicável apenas quando usando coleção"
+      },
+      {
+        "type": "header",
+        "content": "Espaçamento"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "px",
+        "label": "Padding superior",
+        "default": 40
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "px",
+        "label": "Padding inferior",
+        "default": 40
+      },
+      {
+        "type": "header",
+        "content": "Configurações do Carousel"
+      },
+      {
+        "type": "range",
+        "id": "slides_per_view_mobile",
+        "min": 1,
+        "max": 2,
+        "step": 0.1,
+        "label": "Slides por visualização (Mobile)",
+        "default": 1.2
+      },
+      {
+        "type": "range",
+        "id": "slides_per_view_tablet",
+        "min": 1,
+        "max": 3,
+        "step": 0.1,
+        "label": "Slides por visualização (Tablet)",
+        "default": 2
+      },
+      {
+        "type": "range",
+        "id": "slides_per_view_laptop",
+        "min": 1,
+        "max": 5,
+        "step": 0.1,
+        "label": "Slides por visualização (Laptop - 1024px a 1365px)",
+        "default": 3
+      },
+      {
+        "type": "range",
+        "id": "slides_per_view_desktop",
+        "min": 1,
+        "max": 6,
+        "step": 0.1,
+        "label": "Slides por visualização (Desktop - 1366px+)",
+        "default": 4
+      },
+      {
+        "type": "range",
+        "id": "space_between",
+        "min": 0,
+        "max": 50,
+        "step": 2,
+        "unit": "px",
+        "label": "Espaçamento entre cards",
+        "default": 32
+      }
+    ],
+    "presets": [
+      {
+        "name": "Produtos - Carousel v3"
+      }
+    ]
+  }
+  {% endschema %}
+  

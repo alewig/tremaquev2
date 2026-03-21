@@ -1,0 +1,231 @@
+{%- liquid
+  # Get settings
+  assign shipping_enabled = settings.ativar_barra_frete
+  assign shipping_free_value_text = settings.shipping_free_value | default: '299,99'
+  
+  # Colors
+  assign bar_bg_color = settings.shipping_bar_background_color | default: '#ffffff'
+  assign bar_text_color = settings.shipping_bar_text_color | default: '#706F71'
+  
+  # Icons
+  assign icon_start_svg = settings.shipping_bar_icon_start
+  assign icon_end_svg = settings.shipping_bar_icon_end
+  
+  # Messages (richtext fields)
+  assign message_pending_raw = settings.shipping_bar_message_pending
+  assign message_success_raw = settings.shipping_bar_message_success
+  
+  # Default messages if not set
+  if message_pending_raw == blank
+    assign message_pending_raw = '<p>Adicione mais {remaining} e ganhe Frete Grátis!</p>'
+  endif
+  if message_success_raw == blank
+    assign message_success_raw = '<p>Parabéns! Você ganhou Frete Grátis!</p>'
+  endif
+  
+  # Convert shipping value from text to number (remove comma and convert to cents)
+  assign shipping_free_value_clean = shipping_free_value_text | replace: ',', '.' | times: 100
+  
+  # Get cart total in cents
+  assign cart_total = cart.total_price
+  
+  # Calculate remaining amount for free shipping
+  assign remaining = shipping_free_value_clean | minus: cart_total
+  
+  # Calculate progress percentage
+  assign progress_percent = cart_total | times: 100 | divided_by: shipping_free_value_clean
+  if progress_percent > 100
+    assign progress_percent = 100
+  endif
+  
+  # Format values for display
+  assign remaining_money = remaining | money
+  assign target_money = shipping_free_value_clean | money
+  
+  # Process messages with placeholder - replace {remaining} in the HTML and wrap with underline
+  assign remaining_with_underline = '<span class="shipping-bar__remaining-value">' | append: remaining_money | append: '</span>'
+  assign message_pending_processed = message_pending_raw | replace: '{remaining}', remaining_with_underline
+  assign message_success_processed = message_success_raw
+-%}
+
+{%- if shipping_enabled -%}
+  <div class="shipping-bar-wrapper" style="background-color: {{ bar_bg_color }};">
+    <div class="shipping-bar">
+      {%- if remaining > 0 -%}
+        <div class="shipping-bar__message" style="color: {{ bar_text_color }};">
+          {{ message_pending_processed }}
+        </div>
+      {%- else -%}
+        <div class="shipping-bar__message shipping-bar__message--success" style="color: {{ bar_text_color }};">
+          <span class="shipping-bar__icon">✓</span>
+          {{ message_success_processed }}
+        </div>
+      {%- endif -%}
+      
+      <div class="shipping-bar__progress">
+        <div class="shipping-bar__track">
+          <div class="shipping-bar__fill" style="width: {{ progress_percent }}%">&nbsp;</div>
+        </div>
+        <div class="shipping-bar__labels">
+          <span class="shipping-bar__start">
+            {%- if icon_start_svg != blank -%}
+              <span class="shipping-bar__icon-wrapper">
+                {{ icon_start_svg }}
+              </span>
+            {%- endif -%}
+            R$0
+          </span>
+          <span class="shipping-bar__end">
+            {{ target_money }}
+            {%- if icon_end_svg != blank -%}
+              <span class="shipping-bar__icon-wrapper shipping-bar__icon-wrapper--truck">
+                {{ icon_end_svg }}
+              </span>
+            {%- endif -%}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+
+    .shipping-bar-wrapper {
+      padding: 16px 24px;
+    }
+
+    .shipping-bar__message {
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1.4;
+      text-align: start;
+      margin: 0;
+      padding-bottom: 5px;
+    }
+
+    .shipping-bar__remaining-value {
+      text-decoration-line: underline;
+    }
+
+    .shipping-bar__message p {
+      margin: 0;
+    }
+
+    .shipping-bar__message p:not(:last-child) {
+      margin-bottom: 4px;
+    }
+
+    .shipping-bar__icon-wrapper {
+      display: inline-flex;
+      align-items: center;
+      width: 20px;
+      height: 20px;
+    }
+
+    .shipping-bar__icon-wrapper svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .shipping-bar__icon-wrapper--truck {
+      width: 21px;
+      height: 15px;
+    }
+
+    .shipping-bar__message strong {
+      font-weight: 700;
+    }
+
+    .shipping-bar__message--success strong {
+      color: #34C759;
+    }
+
+    .shipping-bar__icon {
+      font-size: 16px;
+      margin-right: 4px;
+    }
+
+    .shipping-bar__progress {
+      position: relative;
+    }
+
+    .shipping-bar__track {
+      width: 100%;
+      height: 8px;
+      background: #E5E5E5;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .shipping-bar__fill {
+      height: 100%;
+      background: linear-gradient(90deg, #08744E 0%,rgb(21, 180, 117) 100%);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .shipping-bar__labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .shipping-bar__start{
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .shipping-bar__start {
+      font-weight: 600;
+    }
+
+    .shipping-bar__end {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .shipping-bar__truck {
+      width: 20px;
+      height: 20px;
+      color: #FF6B00;
+    }
+
+    /* Mobile adjustments */
+    @media screen and (max-width: 749px) {
+      .shipping-bar-wrapper {
+        padding: 12px 16px;
+      }
+
+      .shipping-bar__message {
+        font-size: 13px;
+      }
+
+      .shipping-bar__labels {
+        font-size: 11px;
+      }
+
+      .shipping-bar__truck {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  </style>
+
+  <script>
+    // Update shipping bar when cart changes
+    document.addEventListener('cart:updated', function() {
+      // Reload the page to update the shipping bar
+      // Or you could fetch and update via AJAX
+      location.reload();
+    });
+  </script>
+{%- endif -%}

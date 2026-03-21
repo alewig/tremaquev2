@@ -1,0 +1,458 @@
+{% comment %}
+  Renders a new product card design
+  
+  Accepts:
+  - card_product: {Object} Product Liquid object (required)
+  - section_id: {String} The ID of the section that contains this card (optional)
+  - show_secondary_image: {Boolean} Show secondary image on hover. Default: true (optional)
+  - show_badge: {Boolean} Show product badge. Default: true (optional)
+  - badge_text: {String} Custom badge text. Default: "MAIS VENDIDO" (optional)
+  - skip_styles: {Boolean} Don't include component styles. Default: false (optional)
+  
+  Usage:
+  {% render 'cards-new', card_product: product, section_id: section.id %}
+{% endcomment %}
+
+{%- liquid
+  assign show_secondary = show_secondary_image | default: true
+  assign show_badge_value = show_badge | default: true
+  
+  if card_product and card_product != empty
+    assign product_price = card_product.price
+    assign product_compare_at_price = card_product.compare_at_price
+    assign product_title = card_product.title
+    assign product_url = card_product.url
+    assign product_featured_image = card_product.featured_image
+    assign product_second_image = card_product.images[1]
+    
+    comment
+      Calcular porcentagem de desconto
+    endcomment
+    if product_compare_at_price > product_price
+      assign discount_amount = product_compare_at_price | minus: product_price
+      assign discount_percentage = discount_amount | times: 100.0 | divided_by: product_compare_at_price | round
+    else
+      assign discount_percentage = 0
+    endif
+    
+    comment
+      Usar metafield custom.tag_produto se existir, caso contrário usar badge_text ou "MAIS VENDIDO"
+    endcomment
+    if card_product.metafields.custom.tag_produto != blank
+      assign badge_text_value = card_product.metafields.custom.tag_produto
+    endif
+    
+    assign installment_count = settings.parcelas_sem_juros | default: 12
+    assign installment_price = product_price | divided_by: installment_count
+    
+    comment
+      Calcular desconto PIX (porcentagem vinda de settings.pix_discount)
+    endcomment
+    assign pix_discount_pct = settings.pix_discount | default: 0
+    if pix_discount_pct > 0
+      assign discount_multiplier = pix_discount_pct | times: 0.01
+      assign pix_discount_amount = product_price | times: discount_multiplier
+      assign pix_price = product_price | minus: pix_discount_amount
+    else
+      assign pix_price = product_price
+    endif
+  endif
+-%}
+
+{%- if card_product and card_product != empty -%}
+  <div class="product-card-new">
+    <a href="{{ product_url }}" class="product-card-new__image-link">
+      <div class="product-card-new__image-wrapper">
+        <div class="product-card-new__image-container">
+          {%- if product_featured_image -%}
+            <div class="product-card-new__image product-card-new__image--primary">
+              <img
+                srcset="
+                  {%- if product_featured_image.width >= 286 -%}{{ product_featured_image | image_url: width: 286 }} 286w,{%- endif -%}
+                  {%- if product_featured_image.width >= 572 -%}{{ product_featured_image | image_url: width: 572 }} 572w,{%- endif -%}
+                  {{ product_featured_image | image_url }} {{ product_featured_image.width }}w
+                "
+                src="{{ product_featured_image | image_url: width: 286 }}"
+                sizes="286px"
+                alt="{{ product_featured_image.alt | escape }}"
+                loading="lazy"
+                width="{{ product_featured_image.width }}"
+                height="{{ product_featured_image.height }}"
+                class="product-card-new__img"
+              >
+            </div>
+            {%- if product_second_image and show_secondary -%}
+              <div class="product-card-new__image product-card-new__image--secondary">
+                <img
+                  srcset="
+                    {%- if product_second_image.width >= 286 -%}{{ product_second_image | image_url: width: 286 }} 286w,{%- endif -%}
+                    {%- if product_second_image.width >= 572 -%}{{ product_second_image | image_url: width: 572 }} 572w,{%- endif -%}
+                    {{ product_second_image | image_url }} {{ product_second_image.width }}w
+                  "
+                  src="{{ product_second_image | image_url: width: 286 }}"
+                  sizes="286px"
+                  alt="{{ product_second_image.alt | escape }}"
+                  loading="lazy"
+                  width="{{ product_second_image.width }}"
+                  height="{{ product_second_image.height }}"
+                  class="product-card-new__img"
+                >
+              </div>
+            {%- endif -%}
+          {%- else -%}
+            <div class="product-card-new__image product-card-new__image--primary">
+              {{ 'product-1' | placeholder_svg_tag: 'product-card-new__placeholder' }}
+            </div>
+          {%- endif -%}
+        </div>
+        
+        <div class="product-card-new__badges">
+          {%- if discount_percentage > 0 -%}
+            <div class="product-card-new__badge product-card-new__badge--discount">
+              <span class="product-card-new__badge-text">-{{ discount_percentage }}% OFF</span>
+            </div>
+          {%- endif -%}
+          
+          {%- if show_badge_value and badge_text_value != blank -%}
+            <div class="product-card-new__badge product-card-new__badge--tag">
+              <span class="product-card-new__badge-text">{{ badge_text_value }}</span>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </a>
+
+    <div class="product-card-new__content">
+      <h3 class="product-card-new__title">
+        <a href="{{ product_url }}" class="product-card-new__title-link">{{ product_title | escape }}</a>
+      </h3>
+      
+      <div class="product-card-new__pricing">
+        <div class="product-card-new__installment-wrapper">
+          <span class="product-card-new__installment-price">
+            {{ installment_count }}x de {{ installment_price | money }}
+          </span>
+          <span class="product-card-new__installment-badge">
+            Sem Juros
+          </span>
+        </div>
+        <div class="product-card-new__total-wrapper">
+          <span class="product-card-new__total-price">{{ product_price | money }}</span>
+        </div>
+        
+        <div class="product-card-new__pix-wrapper">
+          <span class="product-card-new__pix-text">
+            ou <strong>{{ pix_price | money }}</strong> via PIX
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none">
+            <path d="M4.55518 5.39453L5.87061 6.70898C6.02109 6.86004 6.19997 6.97995 6.39697 7.06152C6.44083 7.07968 6.48563 7.09519 6.53076 7.10938L5.25342 8.3877C4.83699 8.80397 4.161 8.80407 3.74463 8.3877L2.49365 7.13672C2.56681 7.11791 2.63937 7.09639 2.70947 7.06738C2.8573 7.00618 2.99559 6.9236 3.11865 6.82227L3.23584 6.71484L4.55518 5.39453ZM4.49951 0.299805C4.74707 0.299853 4.98543 0.386485 5.17529 0.541992L5.25342 0.612305L6.53076 1.88965C6.48567 1.90383 6.44079 1.91934 6.39697 1.9375C6.20042 2.01895 6.02177 2.13838 5.87158 2.28906L4.55615 3.60449L3.23584 2.28418C3.0279 2.07627 2.77197 1.93362 2.49365 1.8623L3.74463 0.612305C3.94478 0.412293 4.21656 0.299805 4.49951 0.299805Z" stroke="#00C34D" stroke-width="0.6"/>
+            <path d="M2.08789 2.80542C2.21269 2.80575 2.33415 2.8427 2.43652 2.91089L2.53125 2.98901L3.88574 4.34351V4.34448C3.94735 4.40639 4.01791 4.45813 4.09375 4.50073C4.0206 4.54069 3.95198 4.59075 3.89062 4.64917L3.88574 4.65405L2.53125 6.00952C2.4154 6.12537 2.25384 6.19214 2.08887 6.19214H1.5498L0.612305 5.25464C0.195649 4.83748 0.195965 4.16122 0.612305 3.74487L1.55078 2.80542H2.08789ZM7.01855 2.81128H7.45312L8.38672 3.74487C8.80314 4.16129 8.80314 4.83725 8.38672 5.25366L7.4541 6.18628H7.01855C6.85409 6.18628 6.69203 6.11986 6.57715 6.00464V6.00366L5.22656 4.65405L5.22168 4.64917L5.15137 4.58862C5.10924 4.55558 5.0642 4.52714 5.01758 4.50171C5.09415 4.45892 5.16444 4.40594 5.22656 4.34351L6.57715 2.99487V2.9939C6.6924 2.8783 6.85463 2.81128 7.01855 2.81128Z" stroke="#00C34D" stroke-width="0.6"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="product-card-new__actions">
+        <a href="{{ product_url }}" class="product-card-new__btn-primary">
+          <span class="product-card-new__btn-text">Ver Produto</span>
+        </a>
+        {%- liquid
+          assign whatsapp_message = 'Gostaria de saber mais informações sobre o ' | append: product_title
+          assign whatsapp_number = settings.number_contato | remove: ' ' | remove: '-' | remove: '(' | remove: ')'
+        -%}
+        <a 
+          href="https://wa.me/{{ whatsapp_number }}?text={{ whatsapp_message | url_encode }}" 
+          class="product-card-new__btn-secondary" 
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chamar no WhatsApp sobre {{ product_title | escape }}"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+            <path d="M0 25L1.76568 18.5802C0.676128 16.701 0.103617 14.5708 0.104664 12.3865C0.107804 5.55729 5.69162 0 12.5523 0C15.8817 0.00104167 19.0069 1.29167 21.3577 3.63333C23.7074 5.975 25.001 9.0875 25 12.3979C24.9969 19.2281 19.413 24.7854 12.5523 24.7854C10.4695 24.7844 8.41706 24.2646 6.59905 23.2771L0 25ZM6.90467 21.0344C8.65884 22.0708 10.3335 22.6917 12.5481 22.6927C18.2502 22.6927 22.8952 18.074 22.8983 12.3958C22.9004 6.70625 18.2774 2.09375 12.5565 2.09167C6.85025 2.09167 2.20841 6.71042 2.20631 12.3875C2.20527 14.7052 2.88767 16.4406 4.03374 18.2562L2.98815 22.0562L6.90467 21.0344ZM18.8227 15.3427C18.7453 15.2135 18.5381 15.1365 18.2262 14.9812C17.9153 14.826 16.3862 14.0771 16.1004 13.974C15.8157 13.8708 15.6085 13.8188 15.4002 14.1292C15.193 14.4385 14.5964 15.1365 14.4153 15.3427C14.2343 15.549 14.0522 15.575 13.7413 15.4198C13.4305 15.2646 12.4278 14.9385 11.2398 13.8833C10.3157 13.0625 9.69082 12.049 9.50975 11.7385C9.32868 11.4292 9.49091 11.2615 9.64582 11.1073C9.78607 10.9688 9.95667 10.7458 10.1126 10.5646C10.2707 10.3854 10.3219 10.2563 10.4266 10.049C10.5302 9.84271 10.4789 9.66146 10.4004 9.50625C10.3219 9.35208 9.70024 7.82812 9.44172 7.20833C9.18844 6.60521 8.93201 6.68646 8.74152 6.67708L8.14494 6.66667C7.9377 6.66667 7.60069 6.74375 7.316 7.05417C7.03131 7.36458 6.2275 8.1125 6.2275 9.63646C6.2275 11.1604 7.34217 12.6323 7.49707 12.8385C7.65302 13.0448 9.68978 16.1719 12.8098 17.5125C13.5519 17.8312 14.1317 18.0219 14.5828 18.1646C15.328 18.4 16.0062 18.3667 16.5421 18.2875C17.1397 18.199 18.3821 17.5385 18.6417 16.8156C18.9012 16.0917 18.9012 15.4719 18.8227 15.3427Z" fill="url(#paint0_linear_14515_966)"/>
+            <defs>
+              <linearGradient id="paint0_linear_14515_966" x1="0" y1="0" x2="25" y2="25" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#05DF72"/>
+                <stop offset="1" stop-color="#00A63E"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+  .product-card-new {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+
+  .product-card-new__image-link {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+  }
+
+  .product-card-new__image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 286px;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    background-color: #D1D1D1;
+  }
+
+  .product-card-new__image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .product-card-new__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .product-card-new__image--primary {
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+  }
+
+  .product-card-new__image--secondary {
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .product-card-new__image-link:hover .product-card-new__image--primary {
+    opacity: 0;
+  }
+
+  .product-card-new__image-link:hover .product-card-new__image--secondary {
+    opacity: 1;
+  }
+
+  .product-card-new__img,
+  .product-card-new__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .product-card-new__badges {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    z-index: 3;
+  }
+
+  .product-card-new__badge {
+    display: flex;
+    padding: 6px 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    border-radius: 4px;
+  }
+
+  .product-card-new__badge--discount {
+    background-color: #D2F9E3;
+  }
+
+  .product-card-new__badge--tag {
+    background: linear-gradient(168.58deg, #F0B100 0%, #FF6900 100%);
+  }
+
+  .product-card-new__badge-text {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .product-card-new__badge--discount .product-card-new__badge-text {
+    color: #0A915F;
+  }
+
+  .product-card-new__badge--tag .product-card-new__badge-text {
+    color: #FFFFFF;
+  }
+
+  .product-card-new__content {
+    background-color: #F6F6F6;
+    border-radius: 0 0 8px 8px;
+    padding: 10px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    width: 100%;
+  }
+
+  .product-card-new__title {
+    margin: 0;
+  }
+
+  .product-card-new__title-link {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #3D3D3D;
+    text-decoration: none;
+    display: block;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  .product-card-new__title-link:hover {
+    text-decoration: underline;
+  }
+
+  .product-card-new__pricing {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .product-card-new__installment-wrapper {
+    display: flex;
+    gap: 4px;
+    align-items: baseline;
+  }
+
+  .product-card-new__installment-price {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 140%;
+    color: #4F4F4F;
+  }
+
+  .product-card-new__installment-badge {
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 0.81;
+    color: #6D6D6D;
+  }
+
+  .product-card-new__total-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .product-card-new__total-price {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #4F4F4F;
+  }
+
+  .product-card-new__pix-wrapper {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .product-card-new__pix-text {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #888888;
+  }
+
+  .product-card-new__pix-text strong {
+    font-weight: 700;
+  }
+
+  .product-card-new__pix-icon {
+    width: 9px;
+    height: 9px;
+    flex-shrink: 0;
+  }
+
+  .product-card-new__actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
+  }
+
+  .product-card-new__btn-primary {
+    background: linear-gradient(90deg, #00C34D 0%, #00C34D 100%);
+    border-radius: 8px;
+    padding: 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    height: 44px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .product-card-new__btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .product-card-new__btn-text {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: normal;
+    color: #FFFFFF;
+  }
+
+  .product-card-new__btn-secondary {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(0deg, #CEFFE1 0%, #CEFFE1 100%), #5D5D5D;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .product-card-new__btn-secondary svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  @media screen and (max-width: 768px) {
+    .product-card-new__image-wrapper {
+      height: 200px;
+    }
+
+    .product-card-new__content {
+      height: auto;
+      min-height: 210px;
+    }
+
+    .product-card-new__installment-price {
+      font-size: 12px;
+    }
+
+    .product-card-new__total-price {
+      font-size: 12px;
+    }
+
+    .product-card-new__btn-primary {
+      flex: 1;
+      width: auto;
+    }
+  }
+</style>

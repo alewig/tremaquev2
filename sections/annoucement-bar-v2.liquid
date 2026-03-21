@@ -1,0 +1,149 @@
+{%- style -%}
+  .announcement-bar-v2-{{ section.id }} {
+    background: {{ section.settings.color_background }};
+    color: {{ section.settings.color_text }};
+    padding-top: {{ section.settings.padding_top_aside }}px;
+    padding-bottom: {{ section.settings.padding_bottom_aside }}px;
+  }
+
+  .announcement-bar-v2-{{ section.id }} .announcement-bar-v2__content {
+    padding-top: {{ section.settings.padding_top_inside }}px;
+    padding-bottom: {{ section.settings.padding_bottom_inside }}px;
+    text-align: center;
+  }
+
+  .announcement-bar-v2-{{ section.id }} .announcement-bar-v2__text {
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.2;
+    margin: 0;
+  }
+  .announcement-bar-v2-{{ section.id }} .announcement-bar-v2__text p {
+    margin: 0px !important;
+  }
+
+  .announcement-bar-v2-{{ section.id }} .announcement-bar-v2__slider {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .announcement-bar-v2-{{ section.id }} .announcement-bar-v2__slides {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .announcement-bar-v2-{{ section.id }} .announcement-bar-v2__slide {
+    min-width: 100%;
+    flex-shrink: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .announcement-bar-v2-{{ section.id }} .announcement-bar-v2__text {
+      font-size: 1.2rem;
+    }
+  }
+{%- endstyle -%}
+
+<div class="announcement-bar-v2-{{ section.id }}">
+  <div class="announcement-bar-v2__content page-width">
+    {%- if section.blocks.size > 1 -%}
+      <div class="announcement-bar-v2__slider">
+        <div class="announcement-bar-v2__slides" id="announcement-slides-{{ section.id }}">
+          {%- for block in section.blocks -%}
+            <div class="announcement-bar-v2__slide" {{ block.shopify_attributes }}>
+              <div class="announcement-bar-v2__text">
+                {{ block.settings.text }}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- else -%}
+      {%- for block in section.blocks -%}
+        <div class="announcement-bar-v2__text" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{%- if section.blocks.size > 1 -%}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const slides = document.getElementById('announcement-slides-{{ section.id }}');
+    if (!slides) return;
+    
+    const slideElements = slides.children;
+    let currentSlide = 0;
+    const totalSlides = slideElements.length;
+    
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % totalSlides;
+      slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+    
+    // Auto-advance slides every 5 seconds
+    setInterval(nextSlide, 5000);
+  });
+</script>
+{%- endif -%}
+
+{% schema %}
+    {
+        "name": "Anúncio Bar V2",
+        "settings": [
+           {
+             "type": "color_background",
+             "id": "color_background",
+             "label": "Cor de Fundo",
+             "default": "#000000"
+           },
+           {
+             "type": "color",
+             "id": "color_text",
+             "label": "Cor do Texto",
+             "default": "#000000"
+           },
+           {
+             "type": "number",
+             "id": "padding_top_inside",
+             "label": "Padding Top (Dentro)",
+             "default": 0
+           },
+           {
+             "type": "number",
+             "id": "padding_bottom_inside",
+             "label": "Padding Bottom (Dentro)",
+             "default": 0
+           },
+           {
+            "type": "number",
+            "id": "padding_top_aside",
+            "label": "Padding Top (Fora)",
+            "default": 0
+          },
+          {
+            "type": "number",
+            "id": "padding_bottom_aside",
+            "label": "Padding Bottom (Fora)",
+            "default": 0
+          }
+        ],"blocks": [
+            {
+                "type": "announcement",
+                "name": "Anúncio",
+                "settings": [
+                    {
+                        "type": "richtext",
+                        "id": "text",
+                        "label": "Texto",
+                        "default": "<p>Anúncio</p>"
+                    }
+                ]
+            }
+        ],"presets": [
+            {
+                "name": "Anúncio Bar V2"
+            }
+        ]
+    }
+{% endschema %}

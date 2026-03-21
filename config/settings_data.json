@@ -1,0 +1,444 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "current": {
+    "ativar_barra_frete": false,
+    "ativar_badge_frete": false,
+    "shipping_free": "147,99",
+    "optionName": "Kit",
+    "swatchType": "variantImage",
+    "swatchStyle": "square-round-corners",
+    "color_background_swatch": "#ffc0cc",
+    "color_background_swatch_suave": "#ffdde4",
+    "color_background_swatch_border": "#d6002a",
+    "color_text_main": "#000000",
+    "number_contato": "+5543984172561",
+    "tamanho_icone": "90",
+    "codigo_svg": "<svg width=\"60\" height=\"60\" viewbox=\"0 0 60 60\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g filter=\"url(#filter0_dd_14160_2229)\">\n<path d=\"M8.88721 22.2178C8.88721 10.7653 18.1713 1.4812 29.6238 1.4812C41.0764 1.4812 50.3605 10.7653 50.3605 22.2178C50.3605 33.6704 41.0764 42.9545 29.6238 42.9545C18.1713 42.9545 8.88721 33.6704 8.88721 22.2178Z\" fill=\"url(#paint0_linear_14160_2229)\" shape-rendering=\"crispEdges\"></path>\n<path d=\"M18.8853 32.9564L20.4021 27.4412C19.4661 25.8269 18.9743 23.9968 18.9752 22.1203C18.9779 16.2534 23.7749 11.4792 29.6688 11.4792C32.529 11.4801 35.2139 12.5888 37.2334 14.6005C39.252 16.6122 40.3634 19.2862 40.3625 22.1301C40.3598 27.9979 35.5628 32.7721 29.6688 32.7721C27.8795 32.7712 26.1163 32.3246 24.5544 31.4763L18.8853 32.9564ZM24.817 29.5496C26.324 30.44 27.7626 30.9734 29.6652 30.9743C34.5638 30.9743 38.5543 27.0063 38.557 22.1283C38.5588 17.2405 34.5872 13.2779 29.6724 13.2761C24.7702 13.2761 20.7825 17.244 20.7807 22.1212C20.7798 24.1123 21.366 25.6032 22.3506 27.1629L21.4523 30.4275L24.817 29.5496ZM35.0557 24.6599C34.9891 24.549 34.8111 24.4828 34.5432 24.3494C34.2761 24.2161 32.9624 23.5727 32.717 23.4841C32.4724 23.3955 32.2944 23.3507 32.1154 23.6174C31.9374 23.8832 31.4249 24.4828 31.2693 24.6599C31.1138 24.8371 30.9573 24.8595 30.6903 24.7262C30.4232 24.5928 29.5618 24.3127 28.5413 23.4062C27.7473 22.701 27.2105 21.8303 27.055 21.5636C26.8994 21.2979 27.0388 21.1538 27.1719 21.0213C27.2924 20.9023 27.4389 20.7108 27.5729 20.5551C27.7087 20.4012 27.7527 20.2902 27.8426 20.1121C27.9317 19.935 27.8876 19.7792 27.8202 19.6459C27.7527 19.5135 27.2186 18.2042 26.9965 17.6718C26.7789 17.1537 26.5586 17.2235 26.395 17.2154L25.8825 17.2064C25.7045 17.2064 25.4149 17.2727 25.1704 17.5393C24.9258 17.806 24.2352 18.4486 24.2352 19.7578C24.2352 21.067 25.1928 22.3315 25.3259 22.5086C25.4599 22.6858 27.2096 25.3723 29.89 26.524C30.5275 26.7978 31.0257 26.9616 31.4132 27.0842C32.0534 27.2864 32.636 27.2578 33.0964 27.1898C33.6098 27.1137 34.6771 26.5464 34.9001 25.9253C35.1231 25.3034 35.1231 24.7709 35.0557 24.6599Z\" fill=\"white\"></path>\n</g>\n<defs>\n<filter id=\"filter0_dd_14160_2229\" x=\"7.4625e-05\" y=\"1.21593e-05\" width=\"59.2474\" height=\"59.2475\" filterunits=\"userSpaceOnUse\" color-interpolation-filters=\"sRGB\">\n<feflood flood-opacity=\"0\" result=\"BackgroundImageFix\"></feflood>\n<fecolormatrix in=\"SourceAlpha\" type=\"matrix\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0\" result=\"hardAlpha\"></fecolormatrix>\n<femorphology radius=\"2.96238\" operator=\"erode\" in=\"SourceAlpha\" result=\"effect1_dropShadow_14160_2229\"></femorphology>\n<feoffset dy=\"2.96238\"></feoffset>\n<fegaussianblur stddeviation=\"2.22178\"></fegaussianblur>\n<fecomposite in2=\"hardAlpha\" operator=\"out\"></fecomposite>\n<fecolormatrix type=\"matrix\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0\"></fecolormatrix>\n<feblend mode=\"normal\" in2=\"BackgroundImageFix\" result=\"effect1_dropShadow_14160_2229\"></feblend>\n<fecolormatrix in=\"SourceAlpha\" type=\"matrix\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0\" result=\"hardAlpha\"></fecolormatrix>\n<femorphology radius=\"2.22178\" operator=\"erode\" in=\"SourceAlpha\" result=\"effect2_dropShadow_14160_2229\"></femorphology>\n<feoffset dy=\"7.40594\"></feoffset>\n<fegaussianblur stddeviation=\"5.55446\"></fegaussianblur>\n<fecomposite in2=\"hardAlpha\" operator=\"out\"></fecomposite>\n<fecolormatrix type=\"matrix\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0\"></fecolormatrix>\n<feblend mode=\"normal\" in2=\"effect1_dropShadow_14160_2229\" result=\"effect2_dropShadow_14160_2229\"></feblend>\n<feblend mode=\"normal\" in=\"SourceGraphic\" in2=\"effect2_dropShadow_14160_2229\" result=\"shape\"></feblend>\n</filter>\n<lineargradient id=\"paint0_linear_14160_2229\" x1=\"8.88721\" y1=\"1.4812\" x2=\"50.3605\" y2=\"42.9545\" gradientunits=\"userSpaceOnUse\">\n<stop stop-color=\"#05DF72\"></stop>\n<stop offset=\"1\" stop-color=\"#00A63E\"></stop>\n</lineargradient>\n</defs>\n</svg>",
+    "color_back_qk_buy": "#00c34d",
+    "color_text_qk_buy": "#ffffff",
+    "color_price_final": "#08744e",
+    "color_price_base": "#b0b0b0",
+    "pix_enabled": true,
+    "pix_discount": 12,
+    "parcelas_sem_juros": 12,
+    "parcelamento_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewbox=\"0 0 16 16\" fill=\"none\">\n  <path d=\"M14.6666 6.66671H1.33325M7.33325 9.33337H3.99992M1.33325 5.46671L1.33325 10.5334C1.33325 11.2801 1.33325 11.6535 1.47858 11.9387C1.60641 12.1896 1.81038 12.3936 2.06126 12.5214C2.34648 12.6667 2.71985 12.6667 3.46659 12.6667L12.5333 12.6667C13.28 12.6667 13.6534 12.6667 13.9386 12.5214C14.1895 12.3936 14.3934 12.1896 14.5213 11.9387C14.6666 11.6535 14.6666 11.2801 14.6666 10.5334V5.46671C14.6666 4.71997 14.6666 4.3466 14.5213 4.06139C14.3934 3.8105 14.1895 3.60653 13.9386 3.4787C13.6534 3.33337 13.28 3.33337 12.5333 3.33337L3.46659 3.33337C2.71985 3.33337 2.34648 3.33337 2.06126 3.4787C1.81038 3.60653 1.60641 3.8105 1.47858 4.06139C1.33325 4.3466 1.33325 4.71997 1.33325 5.46671Z\" stroke=\"#4B4B53\" stroke-width=\"0.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n</svg>",
+    "parcelamento_text_color": "#4b4b53",
+    "parcelamento_number_color": "#4b4b53",
+    "logo": "shopify://shop_images/TEXT_SEARCH_2.png",
+    "logo_width": 160,
+    "favicon": "shopify://shop_images/Tremaque_Logo_Original_PSD_1_512x512_335a4510-49b3-4aed-8491-88ea0a71c2f8.png",
+    "type_header_font": "dm_sans_n5",
+    "heading_scale": 120,
+    "type_body_font": "dm_sans_n4",
+    "body_scale": 100,
+    "google_font_name": "",
+    "google_font_weights": "",
+    "page_width": 1600,
+    "spacing_sections": 36,
+    "spacing_grid_horizontal": 20,
+    "spacing_grid_vertical": 20,
+    "animations_reveal_on_scroll": true,
+    "animations_hover_elements": "none",
+    "buttons_border_thickness": 1,
+    "buttons_border_opacity": 55,
+    "buttons_radius": 8,
+    "buttons_shadow_opacity": 0,
+    "buttons_shadow_horizontal_offset": 0,
+    "buttons_shadow_vertical_offset": 4,
+    "buttons_shadow_blur": 5,
+    "variant_pills_border_thickness": 1,
+    "variant_pills_border_opacity": 10,
+    "variant_pills_radius": 10,
+    "variant_pills_shadow_opacity": 0,
+    "variant_pills_shadow_horizontal_offset": 0,
+    "variant_pills_shadow_vertical_offset": 4,
+    "variant_pills_shadow_blur": 5,
+    "inputs_border_thickness": 1,
+    "inputs_border_opacity": 55,
+    "inputs_radius": 8,
+    "inputs_shadow_opacity": 0,
+    "inputs_shadow_horizontal_offset": 0,
+    "inputs_shadow_vertical_offset": 4,
+    "inputs_shadow_blur": 5,
+    "card_style": "card",
+    "card_image_padding": 0,
+    "card_text_alignment": "left",
+    "card_color_scheme": "scheme-1",
+    "card_border_thickness": 0,
+    "card_border_opacity": 10,
+    "card_corner_radius": 12,
+    "card_shadow_opacity": 5,
+    "card_shadow_horizontal_offset": 10,
+    "card_shadow_vertical_offset": 10,
+    "card_shadow_blur": 35,
+    "collection_card_style": "card",
+    "collection_card_image_padding": 0,
+    "collection_card_text_alignment": "center",
+    "collection_card_color_scheme": "scheme-1",
+    "collection_card_border_thickness": 0,
+    "collection_card_border_opacity": 10,
+    "collection_card_corner_radius": 12,
+    "collection_card_shadow_opacity": 5,
+    "collection_card_shadow_horizontal_offset": 10,
+    "collection_card_shadow_vertical_offset": 10,
+    "collection_card_shadow_blur": 35,
+    "blog_card_style": "card",
+    "blog_card_image_padding": 0,
+    "blog_card_text_alignment": "center",
+    "blog_card_color_scheme": "scheme-1",
+    "blog_card_border_thickness": 0,
+    "blog_card_border_opacity": 10,
+    "blog_card_corner_radius": 12,
+    "blog_card_shadow_opacity": 5,
+    "blog_card_shadow_horizontal_offset": 10,
+    "blog_card_shadow_vertical_offset": 10,
+    "blog_card_shadow_blur": 35,
+    "text_boxes_border_thickness": 0,
+    "text_boxes_border_opacity": 10,
+    "text_boxes_radius": 24,
+    "text_boxes_shadow_opacity": 0,
+    "text_boxes_shadow_horizontal_offset": 10,
+    "text_boxes_shadow_vertical_offset": 12,
+    "text_boxes_shadow_blur": 20,
+    "media_border_thickness": 0,
+    "media_border_opacity": 10,
+    "media_radius": 12,
+    "media_shadow_opacity": 10,
+    "media_shadow_horizontal_offset": 10,
+    "media_shadow_vertical_offset": -34,
+    "media_shadow_blur": 20,
+    "popup_border_thickness": 1,
+    "popup_border_opacity": 10,
+    "popup_corner_radius": 22,
+    "popup_shadow_opacity": 10,
+    "popup_shadow_horizontal_offset": 10,
+    "popup_shadow_vertical_offset": 12,
+    "popup_shadow_blur": 20,
+    "drawer_border_thickness": 1,
+    "drawer_border_opacity": 10,
+    "drawer_shadow_opacity": 0,
+    "drawer_shadow_horizontal_offset": 0,
+    "drawer_shadow_vertical_offset": 4,
+    "drawer_shadow_blur": 5,
+    "badge_position": "top left",
+    "badge_corner_radius": 40,
+    "sale_badge_color_scheme": "scheme-5",
+    "sold_out_badge_color_scheme": "scheme-1",
+    "color_badge_custom": "#f6f6f6",
+    "brand_headline": "",
+    "brand_description": "",
+    "brand_image": "shopify://shop_images/Branco.png",
+    "brand_image_width": 100,
+    "social_facebook_link": "https://www.facebook.com/tremaque",
+    "social_instagram_link": "https://www.instagram.com/tremaque/",
+    "social_youtube_link": "https://www.youtube.com/@Tremaque",
+    "social_tiktok_link": "https://www.tiktok.com/@tremaque",
+    "social_twitter_link": "https://x.com/tremaque",
+    "social_snapchat_link": "",
+    "social_pinterest_link": "",
+    "social_tumblr_link": "",
+    "social_vimeo_link": "",
+    "predictive_search_enabled": true,
+    "predictive_search_show_vendor": false,
+    "predictive_search_show_price": true,
+    "currency_code_enabled": false,
+    "cart_type": "page",
+    "show_vendor": false,
+    "show_cart_note": false,
+    "cart_drawer_collection": "",
+    "cart_color_scheme": "scheme-1",
+    "sections": {
+      "main-password-header": {
+        "type": "main-password-header",
+        "settings": {
+          "color_scheme": "scheme-1"
+        }
+      },
+      "main-password-footer": {
+        "type": "main-password-footer",
+        "settings": {
+          "color_scheme": "scheme-1"
+        }
+      }
+    },
+    "content_for_index": [],
+    "blocks": {
+      "14060646107696862457": {
+        "type": "shopify://apps/judge-me-reviews/blocks/judgeme_core/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+        "disabled": false,
+        "settings": {}
+      }
+    },
+    "color_schemes": {
+      "scheme-1": {
+        "settings": {
+          "background": "#fafcfb",
+          "background_gradient": "",
+          "text": "#000000",
+          "button": "#00c34d",
+          "button_label": "#ffffff",
+          "secondary_button_label": "#00862d",
+          "shadow": "#000000"
+        }
+      },
+      "scheme-2": {
+        "settings": {
+          "background": "#f6f6f6",
+          "background_gradient": "",
+          "text": "#000000",
+          "button": "#d6002a",
+          "button_label": "#ffffff",
+          "secondary_button_label": "#2e2a39",
+          "shadow": "#2e2a39"
+        }
+      },
+      "scheme-3": {
+        "settings": {
+          "background": "#bbb4dd",
+          "background_gradient": "",
+          "text": "#fdfbf7",
+          "button": "#fdfbf7",
+          "button_label": "#2e2a39",
+          "secondary_button_label": "#fdfbf7",
+          "shadow": "#2e2a39"
+        }
+      },
+      "scheme-4": {
+        "settings": {
+          "background": "#f62d13",
+          "background_gradient": "",
+          "text": "#f6f6f6",
+          "button": "#f6f6f6",
+          "button_label": "#9b046f",
+          "secondary_button_label": "#f6f6f6",
+          "shadow": "#f6f6f6"
+        }
+      },
+      "scheme-5": {
+        "settings": {
+          "background": "#d2f9e3",
+          "background_gradient": "",
+          "text": "#0a915f",
+          "button": "#fdfbf7",
+          "button_label": "#000000",
+          "secondary_button_label": "#fdfbf7",
+          "shadow": "#000000"
+        }
+      },
+      "scheme-20716b2c-4f13-4e10-a042-1e8fd15df53a": {
+        "settings": {
+          "background": "#ffffff",
+          "background_gradient": "linear-gradient(95deg, rgba(102, 166, 158, 1), rgba(202, 239, 228, 1) 100%)",
+          "text": "#ffffff",
+          "button": "#ef8261",
+          "button_label": "#ffffff",
+          "secondary_button_label": "#2e2a39",
+          "shadow": "#2e2a39"
+        }
+      }
+    }
+  },
+  "presets": {
+    "Default": {
+      "logo_width": 70,
+      "color_schemes": {
+        "scheme-1": {
+          "settings": {
+            "background": "#FDFBF7",
+            "background_gradient": "linear-gradient(180deg, rgba(240, 244, 236, 1), rgba(241, 235, 226, 1) 100%)",
+            "text": "#2E2A39",
+            "button": "#9B046F",
+            "button_label": "#FDFBF7",
+            "secondary_button_label": "#2E2A39",
+            "shadow": "#2E2A39"
+          }
+        },
+        "scheme-2": {
+          "settings": {
+            "background": "#EDFFA7",
+            "background_gradient": "radial-gradient(rgba(255, 229, 229, 1), rgba(255, 224, 218, 1) 25%, rgba(215, 255, 137, 1) 100%)",
+            "text": "#2E2A39",
+            "button": "#2E2A39",
+            "button_label": "#EDFFA7",
+            "secondary_button_label": "#2E2A39",
+            "shadow": "#2E2A39"
+          }
+        },
+        "scheme-3": {
+          "settings": {
+            "background": "#2E2A39",
+            "background_gradient": "",
+            "text": "#FDFBF7",
+            "button": "#FDFBF7",
+            "button_label": "#2E2A39",
+            "secondary_button_label": "#FDFBF7",
+            "shadow": "#2E2A39"
+          }
+        },
+        "scheme-4": {
+          "settings": {
+            "background": "#9B046F",
+            "background_gradient": "",
+            "text": "#FDFBF7",
+            "button": "#FDFBF7",
+            "button_label": "#9B046F",
+            "secondary_button_label": "#FDFBF7",
+            "shadow": "#2E2A39"
+          }
+        },
+        "scheme-5": {
+          "settings": {
+            "background": "#5E3653",
+            "background_gradient": "linear-gradient(320deg, rgba(134, 16, 106, 1), rgba(94, 54, 83, 1) 100%)",
+            "text": "#FDFBF7",
+            "button": "#FDFBF7",
+            "button_label": "#5E3653",
+            "secondary_button_label": "#FDFBF7",
+            "shadow": "#2E2A39"
+          }
+        }
+      },
+      "type_header_font": "poppins_n5",
+      "heading_scale": 120,
+      "type_body_font": "poppins_n4",
+      "body_scale": 100,
+      "page_width": 1200,
+      "spacing_sections": 36,
+      "spacing_grid_horizontal": 40,
+      "spacing_grid_vertical": 40,
+      "animations_reveal_on_scroll": true,
+      "animations_hover_elements": "none",
+      "buttons_border_thickness": 1,
+      "buttons_border_opacity": 55,
+      "buttons_radius": 10,
+      "buttons_shadow_opacity": 0,
+      "buttons_shadow_horizontal_offset": 0,
+      "buttons_shadow_vertical_offset": 4,
+      "buttons_shadow_blur": 5,
+      "variant_pills_border_thickness": 0,
+      "variant_pills_border_opacity": 10,
+      "variant_pills_radius": 10,
+      "variant_pills_shadow_opacity": 0,
+      "variant_pills_shadow_horizontal_offset": 0,
+      "variant_pills_shadow_vertical_offset": 4,
+      "variant_pills_shadow_blur": 5,
+      "inputs_border_thickness": 1,
+      "inputs_border_opacity": 55,
+      "inputs_radius": 10,
+      "inputs_shadow_opacity": 0,
+      "inputs_shadow_horizontal_offset": 0,
+      "inputs_shadow_vertical_offset": 4,
+      "inputs_shadow_blur": 5,
+      "card_style": "card",
+      "card_image_padding": 0,
+      "card_text_alignment": "center",
+      "card_color_scheme": "scheme-1",
+      "card_border_thickness": 0,
+      "card_border_opacity": 10,
+      "card_corner_radius": 12,
+      "card_shadow_opacity": 5,
+      "card_shadow_horizontal_offset": 10,
+      "card_shadow_vertical_offset": 10,
+      "card_shadow_blur": 35,
+      "collection_card_style": "card",
+      "collection_card_image_padding": 0,
+      "collection_card_text_alignment": "center",
+      "collection_card_color_scheme": "scheme-1",
+      "collection_card_border_thickness": 0,
+      "collection_card_border_opacity": 10,
+      "collection_card_corner_radius": 12,
+      "collection_card_shadow_opacity": 5,
+      "collection_card_shadow_horizontal_offset": 10,
+      "collection_card_shadow_vertical_offset": 10,
+      "collection_card_shadow_blur": 35,
+      "blog_card_style": "card",
+      "blog_card_image_padding": 0,
+      "blog_card_text_alignment": "center",
+      "blog_card_color_scheme": "scheme-1",
+      "blog_card_border_thickness": 0,
+      "blog_card_border_opacity": 10,
+      "blog_card_corner_radius": 12,
+      "blog_card_shadow_opacity": 5,
+      "blog_card_shadow_horizontal_offset": 10,
+      "blog_card_shadow_vertical_offset": 10,
+      "blog_card_shadow_blur": 35,
+      "text_boxes_border_thickness": 0,
+      "text_boxes_border_opacity": 10,
+      "text_boxes_radius": 24,
+      "text_boxes_shadow_opacity": 0,
+      "text_boxes_shadow_horizontal_offset": 10,
+      "text_boxes_shadow_vertical_offset": 12,
+      "text_boxes_shadow_blur": 20,
+      "media_border_thickness": 0,
+      "media_border_opacity": 10,
+      "media_radius": 12,
+      "media_shadow_opacity": 10,
+      "media_shadow_horizontal_offset": 10,
+      "media_shadow_vertical_offset": 12,
+      "media_shadow_blur": 20,
+      "popup_border_thickness": 1,
+      "popup_border_opacity": 10,
+      "popup_corner_radius": 22,
+      "popup_shadow_opacity": 10,
+      "popup_shadow_horizontal_offset": 10,
+      "popup_shadow_vertical_offset": 12,
+      "popup_shadow_blur": 20,
+      "drawer_border_thickness": 1,
+      "drawer_border_opacity": 10,
+      "drawer_shadow_opacity": 0,
+      "drawer_shadow_horizontal_offset": 0,
+      "drawer_shadow_vertical_offset": 4,
+      "drawer_shadow_blur": 5,
+      "badge_position": "bottom left",
+      "badge_corner_radius": 20,
+      "sale_badge_color_scheme": "scheme-5",
+      "sold_out_badge_color_scheme": "scheme-3",
+      "brand_headline": "",
+      "brand_description": "<p></p>",
+      "brand_image_width": "100",
+      "social_twitter_link": "",
+      "social_facebook_link": "",
+      "social_pinterest_link": "",
+      "social_instagram_link": "",
+      "social_tiktok_link": "",
+      "social_tumblr_link": "",
+      "social_snapchat_link": "",
+      "social_youtube_link": "",
+      "social_vimeo_link": "",
+      "predictive_search_enabled": true,
+      "predictive_search_show_vendor": false,
+      "predictive_search_show_price": true,
+      "currency_code_enabled": true,
+      "cart_type": "notification",
+      "show_vendor": false,
+      "show_cart_note": true,
+      "cart_drawer_collection": "",
+      "cart_color_scheme": "scheme-1",
+      "sections": {
+        "main-password-header": {
+          "type": "main-password-header",
+          "settings": {
+            "color_scheme": "scheme-1"
+          }
+        },
+        "main-password-footer": {
+          "type": "main-password-footer",
+          "settings": {
+            "color_scheme": "scheme-1"
+          }
+        }
+      }
+    }
+  },
+  "platform_customizations": {
+    "custom_css": []
+  }
+}

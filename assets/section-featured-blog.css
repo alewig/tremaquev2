@@ -1,0 +1,220 @@
+.trm-featured-blog {
+  background: #fafcfb;
+}
+
+.trm-featured-blog__inner {
+  max-width: 1248px;
+}
+
+.trm-featured-blog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.trm-featured-blog__title {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+  font-size: 2.8rem;
+  line-height: 1.1;
+  color: #565557;
+}
+
+.trm-featured-blog__view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 16px;
+  border-radius: 8px;
+  background: #b10326;
+  text-decoration: none;
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #fff;
+}
+
+.trm-featured-blog__view-all-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  transform: rotate(180deg);
+}
+
+.trm-featured-blog__view-all-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.trm-featured-blog__scroller {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.trm-featured-blog__scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.trm-featured-blog__grid {
+  display: grid;
+  gap: 16px;
+  min-width: 100%;
+}
+
+.trm-featured-blog__grid--1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.trm-featured-blog__grid--2 {
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+}
+
+.trm-featured-blog__grid--3 {
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+}
+
+.trm-featured-blog__grid--4 {
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
+}
+
+.trm-featured-blog-card {
+  background: transparent;
+}
+
+.trm-featured-blog-card__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.trm-featured-blog-card__media {
+  position: relative;
+  overflow: hidden;
+  height: 180px;
+  margin-bottom: -16px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #ddd;
+  z-index: 1;
+}
+
+.trm-featured-blog-card__media img,
+.trm-featured-blog-card__placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.trm-featured-blog-card__tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: #ffdde4;
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  color: #ff244f;
+}
+
+.trm-featured-blog-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 152px;
+  padding: 32px 16px 16px;
+  border-radius: 0 0 8px 8px;
+  background: #f6f6f6;
+}
+
+.trm-featured-blog-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #8d8d8d;
+}
+
+.trm-featured-blog-card__title {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #4f4f4f;
+}
+
+.trm-featured-blog-card__excerpt {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #888;
+}
+
+@media screen and (max-width: 989px) {
+  .trm-featured-blog__grid {
+    display: flex;
+    min-width: max-content;
+  }
+
+  .trm-featured-blog-card {
+    width: 240px;
+    flex: 0 0 240px;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .trm-featured-blog__header {
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .trm-featured-blog__title {
+    max-width: 210px;
+    font-size: 2.4rem;
+  }
+
+  .trm-featured-blog__view-all {
+    padding: 6px 8px 6px 12px;
+    font-size: 11px;
+  }
+
+  .trm-featured-blog__view-all-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .trm-featured-blog-card {
+    width: 184px;
+    flex-basis: 184px;
+  }
+
+  .trm-featured-blog-card__media {
+    height: 120px;
+  }
+
+  .trm-featured-blog-card__content {
+    min-height: 118px;
+    padding: 26px 12px 12px;
+  }
+
+  .trm-featured-blog-card__title {
+    font-size: 14px;
+  }
+
+  .trm-featured-blog-card__excerpt {
+    font-size: 11px;
+  }
+}

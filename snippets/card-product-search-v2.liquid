@@ -1,0 +1,64 @@
+<div class="card-product-{{ product.id }}">
+ <a href="${product.url}" class="predictive-search-item-{{ product.id }}">
+    <img src="${product.image}" alt="${product.title}" class="predictive-search-item__image-{{ product.id }}" width="50" height="50">
+        <div class="predictive-search-item__info-{{ product.id }}">
+            <p class="predictive-search-item__title-{{ product.id }}">{{product.title}}</p>
+            <span class="predictive-search-item__price-{{ product.id }}">{{product.price}}</span>
+        </div>
+  </a>
+</div>
+
+<style>
+.predictive-search-results-v2 {
+  position: absolute;
+  top: calc(100% - 20px); /* Posiciona logo abaixo da barra, com uma sobreposição */
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 8px;
+  background: var(--PRODUCT-CARD, #F1F1F1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 16px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+/* Estilo para cada item da lista de resultados */
+.predictive-search-item-{{ product.id }} {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.predictive-search-item-{{ product.id }}:hover {
+  background-color: #f5f5f5;
+}
+
+.predictive-search-item__image-{{ product.id }} {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin-right: 12px;
+  border-radius: 4px;
+}
+
+.predictive-search-item__info-{{ product.id }} {
+  display: flex;
+  flex-direction: column;
+}
+
+.predictive-search-item__title-{{ product.id }} {
+  font-weight: 600;
+  margin: 0;
+  font-size: 14px;
+}
+
+.predictive-search-item__price-{{ product.id }} {
+  font-size: 13px;
+  color: #666;
+}
+</style>

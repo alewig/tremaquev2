@@ -1,0 +1,536 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .carrousel-videos-swiper-{{ section.id }} .swiper-slide {
+  touch-action: pan-y pan-x;
+}
+
+.carrousel-videos-swiper-{{ section.id }} a,
+.carrousel-videos-swiper-{{ section.id }} img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+  .carrousel-videos-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 100%;
+  }
+
+  .carrousel-videos-header-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .carrousel-videos-title-{{ section.id }} {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: {{ section.settings.color_title }};
+    margin: 0;
+  }
+
+  .carrousel-videos-button-{{ section.id }} {
+    background-color: {{ section.settings.color_button_bg }};
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .carrousel-videos-button-{{ section.id }}:hover {
+    opacity: 0.9;
+  }
+
+  .carrousel-videos-button-text-{{ section.id }} {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: {{ section.settings.color_button_text }};
+    white-space: nowrap;
+  }
+
+  .carrousel-videos-button-icon-{{ section.id }} {
+    width: 22.857px;
+    height: 22.857px;
+    flex-shrink: 0;
+  }
+
+  .carrousel-videos-swiper-container-{{ section.id }} {
+    position: relative;
+    width: 100%;
+  }
+
+  .carrousel-videos-swiper-{{ section.id }} {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .carrousel-videos-swiper-{{ section.id }} .swiper-wrapper {
+    display: flex;
+  }
+
+  .carrousel-videos-swiper-{{ section.id }} .swiper-slide {
+    width: 383px;
+    height: auto;
+  }
+
+  .video-card-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+  }
+
+
+  .video-card-thumbnail-{{ section.id }} {
+    position: relative;
+    width: 100%;
+    height: 216px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .video-card-thumbnail-{{ section.id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .video-card-iframe-wrap-{{ section.id }} {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #000;
+  }
+
+  .video-card-iframe-wrap-{{ section.id }} iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* Mobile: iframe não captura touch, permite swipe no carrossel */
+  @media (hover: none) and (pointer: coarse) {
+    .video-card-iframe-wrap-{{ section.id }} iframe {
+      pointer-events: none;
+    }
+  }
+
+  .video-card-duration-{{ section.id }} {
+    position: absolute;
+    bottom: 14px;
+    right: 13px;
+    backdrop-filter: blur(7.5px);
+    background-color: rgba(0, 0, 0, 0.25);
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 2;
+  }
+
+  .video-card-duration-icon-{{ section.id }} {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .video-card-duration-text-{{ section.id }} {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #FFFFFF;
+  }
+
+  .video-card-title-{{ section.id }} {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: {{ section.settings.color_video_title }};
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .video-card-title-link-{{ section.id }} {
+    color: inherit;
+    text-decoration: none;
+  }
+  .video-card-title-link-{{ section.id }}:hover {
+    text-decoration: underline;
+  }
+
+  @media screen and (max-width: 768px) {
+    .carrousel-videos-header-{{ section.id }} {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .carrousel-videos-title-{{ section.id }} {
+      font-size: 28px;
+    }
+
+    .carrousel-videos-swiper-{{ section.id }} .swiper-slide {
+      width: 280px;
+    }
+
+    .video-card-thumbnail-{{ section.id }} {
+      height: 158px;
+    }
+  }
+{%- endstyle -%}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<div class="page-width section-{{ section.id }}-padding">
+  <div class="carrousel-videos-{{ section.id }}">
+    <div class="carrousel-videos-header-{{ section.id }}">
+      {%- if section.settings.title != blank -%}
+        <h2 class="carrousel-videos-title-{{ section.id }}">
+          {{ section.settings.title | escape }}
+        </h2>
+      {%- endif -%}
+
+      {%- if section.settings.button_text != blank and section.settings.button_url != blank -%}
+        <a href="{{ section.settings.button_url }}" class="carrousel-videos-button-{{ section.id }}" target="_blank" rel="noopener noreferrer">
+          <span class="carrousel-videos-button-text-{{ section.id }}">
+            {{ section.settings.button_text | escape }}
+          </span>
+          {%- if section.settings.button_icon != blank -%}
+            <div class="carrousel-videos-button-icon-{{ section.id }}">
+              {{ section.settings.button_icon }}
+            </div>
+          {%- else -%}
+            <svg class="carrousel-videos-button-icon-{{ section.id }}" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14.2857 0L12.9714 1.28571L18.9714 7.14286H0V9.14286H18.9714L12.9714 15L14.2857 16.2857L22.8571 8L14.2857 0Z" fill="white"/>
+            </svg>
+          {%- endif -%}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="carrousel-videos-swiper-container-{{ section.id }}">
+        <div class="swiper carrousel-videos-swiper-{{ section.id }}">
+          <div class="swiper-wrapper">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'video' -%}
+                {%- liquid
+                  assign video_url = block.settings.video_url | default: ''
+                  assign yt_id = ''
+                  assign vimeo_id = ''
+                  assign embed_url = ''
+                  if video_url != blank
+                    if video_url contains 'youtu.be/'
+                      assign yt_part = video_url | split: 'youtu.be/' | last
+                      assign yt_id = yt_part | split: '?' | first | split: '&' | first
+                    elsif video_url contains 'youtube.com'
+                      if video_url contains 'v='
+                        assign yt_part = video_url | split: 'v=' | last
+                        assign yt_id = yt_part | split: '&' | first | split: '?' | first
+                      elsif video_url contains 'embed/'
+                        assign yt_part = video_url | split: 'embed/' | last
+                        assign yt_id = yt_part | split: '?' | first
+                      elsif video_url contains 'shorts/'
+                        assign yt_part = video_url | split: 'shorts/' | last
+                        assign yt_id = yt_part | split: '?' | first
+                      endif
+                    elsif video_url contains 'vimeo.com'
+                      if video_url contains 'player.vimeo.com/video/'
+                        assign vimeo_part = video_url | split: 'player.vimeo.com/video/' | last
+                        assign vimeo_id = vimeo_part | split: '?' | first | split: '&' | first
+                      elsif video_url contains 'vimeo.com/'
+                        assign vimeo_part = video_url | split: 'vimeo.com/' | last
+                        assign vimeo_id = vimeo_part | split: '?' | first | split: '/' | first
+                      endif
+                    endif
+                  endif
+                  if yt_id != blank
+                    assign embed_url = 'https://www.youtube.com/embed/' | append: yt_id
+                  elsif vimeo_id != blank
+                    assign embed_url = 'https://player.vimeo.com/video/' | append: vimeo_id
+                  endif
+                  assign thumb_src = ''
+                  if yt_id != blank
+                    assign thumb_src = 'https://img.youtube.com/vi/' | append: yt_id | append: '/maxresdefault.jpg'
+                  endif
+                  assign use_iframe = block.settings.use_iframe
+                -%}
+                <div class="swiper-slide" {{ block.shopify_attributes }}>
+                  <div class="video-card-{{ section.id }}">
+                    {%- if block.settings.video_url != blank -%}
+                      {%- if use_iframe and embed_url != blank -%}
+                        <div class="video-card-iframe-wrap-{{ section.id }}">
+                          <iframe
+                            src="{{ embed_url }}"
+                            title="{{ block.settings.title | default: 'Vídeo' | escape }}"
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                          ></iframe>
+                        </div>
+                      {%- else -%}
+                        <a href="{{ block.settings.video_url }}" class="video-card-thumbnail-{{ section.id }}" target="_blank" rel="noopener noreferrer">
+                          {%- if block.settings.thumbnail != blank -%}
+                            {{ block.settings.thumbnail | image_url: width: 766 | image_tag: loading: 'lazy', alt: block.settings.title }}
+                          {%- elsif thumb_src != blank -%}
+                            <img src="{{ thumb_src }}" alt="{{ block.settings.title | default: 'Vídeo' | escape }}" loading="lazy" width="766">
+                          {%- else -%}
+                            <div style="background-color: #E7E7E7; width: 100%; height: 100%;"></div>
+                          {%- endif -%}
+
+                          {%- if block.settings.duration != blank -%}
+                            <div class="video-card-duration-{{ section.id }}">
+                              <svg class="video-card-duration-icon-{{ section.id }}" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 29.3333C8.64 29.3333 2.66667 23.36 2.66667 16C2.66667 8.64 8.64 2.66667 16 2.66667C23.36 2.66667 29.3333 8.64 29.3333 16C29.3333 23.36 23.36 29.3333 16 29.3333ZM16 5.33333C10.12 5.33333 5.33333 10.12 5.33333 16C5.33333 21.88 10.12 26.6667 16 26.6667C21.88 26.6667 26.6667 21.88 26.6667 16C26.6667 10.12 21.88 5.33333 16 5.33333Z" fill="white"/>
+                                <path d="M20.8267 20.16L15.3333 16.68V9.33334H17.3333V15.6533L22.1733 18.6933L20.8267 20.16Z" fill="white"/>
+                              </svg>
+                              <span class="video-card-duration-text-{{ section.id }}">{{ block.settings.duration }}</span>
+                            </div>
+                          {%- endif -%}
+                        </a>
+                      {%- endif -%}
+                    {%- endif -%}
+
+                    {%- if block.settings.title != blank -%}
+                      <p class="video-card-title-{{ section.id }}">
+                        {%- if use_iframe and block.settings.video_url != blank -%}
+                          <a href="{{ block.settings.video_url }}" target="_blank" rel="noopener noreferrer" class="video-card-title-link-{{ section.id }}">{{ block.settings.title | escape }}</a>
+                        {%- else -%}
+                          {{ block.settings.title | escape }}
+                        {%- endif -%}
+                      </p>
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const swiperCarrouselVideos{{ section.id | replace: '-', '_' }} =
+      new Swiper('.carrousel-videos-swiper-{{ section.id }}', {
+        slidesPerView: 'auto',
+        spaceBetween: 32,
+        grabCursor: true,
+        watchOverflow: false,
+
+        // 🔥 FIX MOBILE (essencial)
+        touchEventsTarget: 'container',
+        touchStartPreventDefault: false,
+        threshold: 5,
+
+        preventClicks: true,
+        preventClicksPropagation: true,
+
+        breakpoints: {
+          320: {
+            spaceBetween: 16
+          },
+          768: {
+            spaceBetween: 32
+          }
+        }
+      });
+  });
+</script>
+
+
+{% schema %}
+{
+  "name": "Carrousel de Vídeos",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Superior",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Inferior",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Título"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Tutoriais Tremaque"
+    },
+    {
+      "type": "color",
+      "id": "color_title",
+      "label": "Cor do Título",
+      "default": "#3D3D3D"
+    },
+    {
+      "type": "header",
+      "content": "Botão"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texto do Botão",
+      "default": "Conheça o Canal"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "URL do Botão",
+      "info": "Link para o canal do YouTube, por exemplo"
+    },
+    {
+      "type": "color",
+      "id": "color_button_bg",
+      "label": "Cor de Fundo do Botão",
+      "default": "#B10326"
+    },
+    {
+      "type": "color",
+      "id": "color_button_text",
+      "label": "Cor do Texto do Botão",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "html",
+      "id": "button_icon",
+      "label": "Ícone do Botão (SVG)",
+      "info": "Cole o código SVG aqui (opcional)"
+    },
+    {
+      "type": "header",
+      "content": "Vídeos"
+    },
+    {
+      "type": "color",
+      "id": "color_video_title",
+      "label": "Cor do Título do Vídeo",
+      "default": "#4F4F4F"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "video",
+      "name": "Vídeo",
+      "settings": [
+        {
+          "type": "url",
+          "id": "video_url",
+          "label": "URL do Vídeo",
+          "info": "Link para o vídeo no YouTube, Vimeo, etc."
+        },
+        {
+          "type": "checkbox",
+          "id": "use_iframe",
+          "label": "Incorporar vídeo (iframe)",
+          "default": false,
+          "info": "Se ativado, o vídeo é exibido incorporado no carrossel. Suporta YouTube e Vimeo. Se desativado, mostra thumbnail que abre o link em nova aba."
+        },
+        {
+          "type": "image_picker",
+          "id": "thumbnail",
+          "label": "Thumbnail do Vídeo",
+          "info": "Opcional. Para links do YouTube a thumbnail é preenchida automaticamente. Use uma imagem aqui para sobrescrever ou para Vimeo/outros."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título do Vídeo",
+          "default": "Título do vídeo"
+        },
+        {
+          "type": "text",
+          "id": "duration",
+          "label": "Duração do Vídeo",
+          "default": "00:00",
+          "info": "Formato: MM:SS ou HH:MM:SS"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carrousel de Vídeos",
+      "blocks": [
+        {
+          "type": "video",
+          "settings": {
+            "title": "Negócio Lucrativo | Chapa de Lanche Profissional a Gás",
+            "duration": "45:18"
+          }
+        },
+        {
+          "type": "video",
+          "settings": {
+            "title": "Ideia de Negócio | Masseira de Churros Automática Industrial",
+            "duration": "45:18"
+          }
+        },
+        {
+          "type": "video",
+          "settings": {
+            "title": "Como Fazer Churros | GOSTOSO mais Brinde",
+            "duration": "45:18"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,467 @@
+{% comment %}
+  Renders kit product selector based on KITPROD tags
+  
+  Tag format: KITPROD:product-handle;quantity
+  Example: KITPROD:produto-1;2 (creates 2 selection blocks for produto-1)
+  
+  Usage:
+  {% render 'kit-prod', product: product, section: section %}
+{% endcomment %}
+
+<div>
+  {% comment %} <h3>🐛 DEBUG - KITPROD Parser</h3>
+  
+  <p><strong>Produto atual:</strong> {{ product.title }}</p>
+  <p><strong>Total de tags:</strong> {{ product.tags.size }}</p>
+  
+  <h4>Todas as tags:</h4>
+  <ul>
+    {% for tag in product.tags %}
+      <li>{{ tag }}</li>
+    {% endfor %}
+  </ul> {% endcomment %}
+  
+  {%- comment -%} Build kitprod items string {%- endcomment -%}
+  {%- assign kitprod_items_string = '' -%}
+  {%- assign kitprod_count = 0 -%}
+  {% for tag in product.tags %}
+    {%- if tag contains 'KITPROD:' -%}
+      {%- assign tag_parts = tag | remove: 'KITPROD:' | split: ';' -%}
+      {%- if tag_parts.size == 2 -%}
+        {%- assign product_handle = tag_parts[0] | strip -%}
+        {%- assign quantity = tag_parts[1] | strip | plus: 0 -%}
+        {%- if kitprod_items_string != '' -%}
+          {%- assign kitprod_items_string = kitprod_items_string | append: '|||' -%}
+        {%- endif -%}
+        {%- assign kitprod_items_string = kitprod_items_string | append: product_handle | append: '|' | append: quantity -%}
+        {%- assign kitprod_count = kitprod_count | plus: 1 -%}
+        {% comment %} <p><strong>✅ Tag processada:</strong> {{ tag }} → Handle: {{ product_handle }}, Qty: {{ quantity }}</p> {% endcomment %}
+      {%- endif -%}
+    {%- endif -%}
+  {% endfor %}
+  
+  {% comment %} <p><strong>Total de tags KITPROD processadas:</strong> {{ kitprod_count }}</p>
+  <p><strong>String de items:</strong> {{ kitprod_items_string }}</p>
+  {%- if kitprod_count == 0 -%}
+    <p style="color: red;"><strong>❌ Nenhuma tag KITPROD válida foi encontrada!</strong></p>
+  {%- endif -%} {% endcomment %}
+</div>
+
+{%- if kitprod_items_string != '' and kitprod_count > 0 -%}
+  {%- assign kitprod_items = kitprod_items_string | split: '|||' -%}
+  <div class="kit-prod-container">
+    <h3 class="kit-prod-title">Selecione os produtos do kit</h3>
+    
+    {%- assign kit_form_id = 'kit-form-' | append: section.id -%}
+    
+    <div class="kit-product-form-wrapper" data-section-id="{{ section.id }}">
+      <div class="product-form__error-message-wrapper" role="alert" hidden>
+        <span class="svg-wrapper">
+          {{- 'icon-error.svg' | inline_asset_content -}}
+        </span>
+        <span class="product-form__error-message"></span>
+      </div>
+
+      <form method="post" action="{{ routes.cart_add_url }}" id="{{ kit_form_id }}" accept-charset="UTF-8" class="form" enctype="multipart/form-data" novalidate="novalidate" data-type="add-to-cart-form">
+        <input type="hidden" name="form_type" value="product">
+        <input type="hidden" name="utf8" value="✓">
+        
+        <div class="kit-prod-items">
+          {%- assign instance_counter = 0 -%}
+          
+          {%- for item in kitprod_items -%}
+            {%- assign item_parts = item | split: '|' -%}
+            {%- assign product_handle = item_parts[0] | strip -%}
+            {%- assign quantity = item_parts[1] | strip | plus: 0 -%}
+            
+            {%- assign kit_product = all_products[product_handle] -%}
+            
+            {%- comment -%} Debug: verificar produto {%- endcomment -%}
+            {%- if kit_product == blank -%}
+              <div style="background: #ffcccc; padding: 10px; margin: 10px 0; border: 1px solid #ff0000;">
+                <strong>⚠️ Produto não encontrado:</strong> {{ product_handle }}
+              </div>
+            {%- endif -%}
+            
+            {%- if kit_product and kit_product.id -%}
+              {%- for i in (1..quantity) -%}
+                {%- assign instance_counter = instance_counter | plus: 1 -%}
+                {%- assign instance_id = 'kit-item-' | append: section.id | append: '-' | append: instance_counter -%}
+                
+                <div class="kit-prod-item" data-kit-item="{{ instance_id }}">
+                  <div class="kit-prod-item__header">
+                    <h4 class="kit-prod-item__title">
+                      {{ kit_product.title }}
+                     
+                    </h4>
+                  </div>
+                  
+                  <div class="kit-prod-item__content">
+                    {%- unless kit_product.has_only_default_variant -%}
+                      <variant-selects
+                        id="variant-selects-{{ instance_id }}"
+                        data-section="{{ section.id }}"
+                        data-url="{{ kit_product.url }}"
+                      >
+                        {%- for option in kit_product.options_with_values -%}
+                          <fieldset class="js product-form__input product-form__input--pill">
+                            <legend class="form__label">{{ option.name }}:</legend>
+                            <div class="variant-input-wrapper">
+                              {%- for value in option.values -%}
+                                {%- assign option_disabled = true -%}
+                                {%- for variant in kit_product.variants -%}
+                                  {%- case option.position -%}
+                                    {%- when 1 -%}
+                                      {%- if variant.option1 == value and variant.available -%}
+                                        {%- assign option_disabled = false -%}
+                                      {%- endif -%}
+                                    {%- when 2 -%}
+                                      {%- if variant.option2 == value and variant.available -%}
+                                        {%- assign option_disabled = false -%}
+                                      {%- endif -%}
+                                    {%- when 3 -%}
+                                      {%- if variant.option3 == value and variant.available -%}
+                                        {%- assign option_disabled = false -%}
+                                      {%- endif -%}
+                                  {%- endcase -%}
+                                {%- endfor -%}
+                                
+                                <input
+                                  type="radio"
+                                  id="{{ instance_id }}-{{ option.position }}-{{ forloop.index0 }}"
+                                  name="{{ instance_id }}-options[{{ option.name | escape }}]"
+                                  value="{{ value | escape }}"
+                                  form="{{ kit_form_id }}"
+                                  {% if option.selected_value == value %}checked{% endif %}
+                                  {% if option_disabled %}disabled{% endif %}
+                                  data-kit-option="{{ instance_id }}"
+                                  data-option-position="{{ option.position }}"
+                                >
+                                <label for="{{ instance_id }}-{{ option.position }}-{{ forloop.index0 }}">
+                                  {{ value }}
+                                </label>
+                              {%- endfor -%}
+                            </div>
+                          </fieldset>
+                        {%- endfor -%}
+                        
+                        <input
+                          type="hidden"
+                          name="items[{{ instance_counter | minus: 1 }}][id]"
+                          value="{{ kit_product.selected_or_first_available_variant.id }}"
+                          class="kit-variant-id"
+                          data-kit-variant="{{ instance_id }}"
+                          form="{{ kit_form_id }}"
+                        >
+                        <input
+                          type="hidden"
+                          name="items[{{ instance_counter | minus: 1 }}][quantity]"
+                          value="1"
+                          form="{{ kit_form_id }}"
+                        >
+                        
+                        <script type="application/json" data-kit-variants="{{ instance_id }}">
+                          {{ kit_product.variants | json }}
+                        </script>
+                      </variant-selects>
+                    {%- else -%}
+                      <input
+                        type="hidden"
+                        name="items[{{ instance_counter | minus: 1 }}][id]"
+                        value="{{ kit_product.selected_or_first_available_variant.id }}"
+                        form="{{ kit_form_id }}"
+                      >
+                      <input
+                        type="hidden"
+                        name="items[{{ instance_counter | minus: 1 }}][quantity]"
+                        value="1"
+                        form="{{ kit_form_id }}"
+                      >
+                      <p class="kit-prod-item__no-variants"></p>
+                    {%- endunless -%}
+                  </div>
+                </div>
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+        
+        <div class="kit-prod-actions">
+          <button
+            type="submit"
+            name="add"
+            class="kit-prod-submit button button--full-width button--primary"
+          >
+            <span>Adicionar Kit ao Carrinho</span>
+            {%- render 'loading-spinner' -%}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    .kit-prod-container {
+      margin: 2rem 0;
+    }
+    
+    .kit-prod-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .kit-prod-items {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .kit-prod-item {
+      border: 1px solid var(--Rectangle-43357, #FE68A0);
+      border-radius: 8px;
+      padding: 1.5rem;
+      background: #FFF;
+    }
+    
+    .kit-prod-item__header {
+      margin-bottom: 1rem;
+    }
+    
+    .kit-prod-item__title {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0;
+    }
+    
+    .kit-prod-item__number {
+      color: rgba(var(--color-foreground), 0.3);
+      font-size: 0.875rem;
+      font-weight: 400;
+    }
+    
+    .kit-prod-item__content {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .kit-prod-item__no-variants {
+      color: rgba(var(--color-foreground), 0.7);
+      font-style: italic;
+    }
+    
+    .kit-prod-actions {
+      margin-top: 2rem;
+    }
+    
+    .kit-prod-submit {
+      position: relative;
+    }
+    
+    .variant-input-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .variant-input-wrapper input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .variant-input-wrapper label {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      background: var(--Rectangle-43353, #FEF1F6);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .variant-input-wrapper input[type="radio"]:checked + label {
+      border-radius: 8px;
+      border: 1px solid var(--Rectangle-43357, #FE68A0);
+      background: var(--Rectangle-43355, #FECCE1);
+    }
+    
+    .variant-input-wrapper input[type="radio"]:disabled + label {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .variant-input-wrapper input[type="radio"]:hover:not(:disabled) + label {
+      background: var(--Rectangle-43353, #FEF1F6);
+    }
+  </style>
+
+  <script>
+    if (!customElements.get('variant-selects')) {
+      customElements.define('variant-selects', class VariantSelects extends HTMLElement {
+        constructor() {
+          super();
+          this.addEventListener('change', this.onVariantChange.bind(this));
+        }
+
+        onVariantChange(event) {
+          if (!event.target.hasAttribute('data-kit-option')) return;
+          
+          const instanceId = event.target.getAttribute('data-kit-option');
+          this.updateVariantId(instanceId);
+        }
+
+        updateVariantId(instanceId) {
+          const options = Array.from(this.querySelectorAll(`input[data-kit-option="${instanceId}"]:checked`));
+          const selectedOptions = options.map(opt => opt.value);
+          
+          const variantsJson = this.querySelector(`[data-kit-variants="${instanceId}"]`);
+          if (!variantsJson) return;
+          
+          const variants = JSON.parse(variantsJson.textContent);
+          const selectedVariant = variants.find(variant => {
+            return selectedOptions.every((option, index) => {
+              return variant[`option${index + 1}`] === option;
+            });
+          });
+          
+          if (selectedVariant) {
+            const variantInput = this.querySelector(`[data-kit-variant="${instanceId}"]`);
+            if (variantInput) {
+              variantInput.value = selectedVariant.id;
+            }
+          }
+        }
+      });
+    }
+
+    // Kit Form Handler - Solução simples
+    (function() {
+      function initKitForm() {
+        const kitFormWrapper = document.querySelector('.kit-product-form-wrapper');
+        if (!kitFormWrapper) {
+          setTimeout(initKitForm, 100);
+          return;
+        }
+
+        const form = kitFormWrapper.querySelector('form');
+        if (!form) return;
+
+        const submitButton = form.querySelector('[type="submit"]');
+        const errorMessageWrapper = kitFormWrapper.querySelector('.product-form__error-message-wrapper');
+        const errorMessage = errorMessageWrapper?.querySelector('.product-form__error-message');
+        const loadingSpinner = submitButton?.querySelector('.loading__spinner');
+        const cart = document.querySelector('cart-notification') || document.querySelector('cart-drawer');
+
+        if (!submitButton) return;
+
+        form.addEventListener('submit', async function(evt) {
+          evt.preventDefault();
+          
+          if (submitButton.getAttribute('aria-disabled') === 'true') return;
+
+          // Reset error
+          if (errorMessageWrapper) {
+            errorMessageWrapper.setAttribute('hidden', '');
+          }
+
+          // Show loading
+          submitButton.setAttribute('aria-disabled', 'true');
+          submitButton.classList.add('loading');
+          if (loadingSpinner) {
+            loadingSpinner.classList.remove('hidden');
+          }
+
+          try {
+            const config = fetchConfig('javascript');
+            config.headers['X-Requested-With'] = 'XMLHttpRequest';
+            delete config.headers['Content-Type'];
+
+            const formData = new FormData(form);
+            
+            // Add sections for cart drawer
+            if (cart && typeof cart.getSectionsToRender === 'function') {
+              formData.append(
+                'sections',
+                cart.getSectionsToRender().map((section) => section.id)
+              );
+              formData.append('sections_url', window.location.pathname);
+              if (typeof cart.setActiveElement === 'function') {
+                cart.setActiveElement(document.activeElement);
+              }
+            }
+
+            config.body = formData;
+
+            const response = await fetch(`${routes.cart_add_url}`, config);
+            const data = await response.json();
+
+            if (data.status) {
+              // Error
+              if (typeof publish !== 'undefined' && typeof PUB_SUB_EVENTS !== 'undefined') {
+                publish(PUB_SUB_EVENTS.cartError, {
+                  source: 'kit-product-form',
+                  errors: data.errors || data.description,
+                  message: data.message,
+                });
+              }
+
+              if (errorMessageWrapper && errorMessage) {
+                errorMessageWrapper.removeAttribute('hidden');
+                errorMessage.textContent = data.description || data.message || 'Erro ao adicionar ao carrinho';
+              }
+              
+              submitButton.removeAttribute('aria-disabled');
+              submitButton.classList.remove('loading');
+              if (loadingSpinner) {
+                loadingSpinner.classList.add('hidden');
+              }
+              return;
+            }
+
+            // Success - Redirecionar se não tiver cart drawer
+            if (!cart) {
+              window.location = window.routes.cart_url;
+              return;
+            }
+
+            // Publicar evento cartUpdate
+            if (typeof publish !== 'undefined' && typeof PUB_SUB_EVENTS !== 'undefined') {
+              await publish(PUB_SUB_EVENTS.cartUpdate, {
+                source: 'kit-product-form',
+                cartData: data,
+              });
+            }
+
+            // Abrir cart drawer
+            if (cart && typeof cart.renderContents === 'function') {
+              cart.renderContents(data);
+            }
+
+          } catch (error) {
+            console.error('Error adding kit to cart:', error);
+            if (errorMessageWrapper && errorMessage) {
+              errorMessageWrapper.removeAttribute('hidden');
+              errorMessage.textContent = 'Erro ao adicionar ao carrinho. Tente novamente.';
+            }
+          } finally {
+            submitButton.classList.remove('loading');
+            if (cart && cart.classList && cart.classList.contains('is-empty')) {
+              cart.classList.remove('is-empty');
+            }
+            submitButton.removeAttribute('aria-disabled');
+            if (loadingSpinner) {
+              loadingSpinner.classList.add('hidden');
+            }
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initKitForm);
+      } else {
+        initKitForm();
+      }
+    })();
+  </script>
+{%- endif -%}

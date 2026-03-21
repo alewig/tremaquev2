@@ -1,0 +1,32 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-list-collections",
+      "custom_css": [
+        ".main-list-collections-wrapper {padding-top: 20px;}",
+        ".collection-list {margin-top: 20px;}",
+        ".icon-wrap {display: none;}",
+        "/* Títulos (h3) dentro dos cards de coleção — diminuídos */.collection-list .collection-card h3,.collection-list .card__heading,.collection-list h3 {color: #333333; font-size: 14px; /* ajuste esse valor conforme preferir */}"
+      ],
+      "settings": {
+        "title": "Categorias",
+        "sort": "alphabetical",
+        "image_ratio": "square",
+        "columns_desktop": 3,
+        "columns_mobile": "2"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,145 @@
+{% doc %}
+  Renders the predictive search empty state
+
+  @param {number} shadow_opacity - shadow opacity for the empty state container shadow
+  @param {string} products_test_id - a playwright test id, used to differentiate empty state from 'real' search results
+  @param {boolean} [load_empty_state] - Load the empty state or not
+
+  @example
+  {% render 'predictive-search-empty-state', shadow_opacity: 0.1, products_test_id: 'empty-state' %}
+{% enddoc %}
+
+<div
+  id="predictive-search-results"
+  class="predictive-search-dropdown"
+  role="listbox"
+  aria-expanded="true"
+  style="--color-shadow: rgb(var(--color-foreground-rgb) / {{ shadow_opacity }});"
+>
+  {% if load_empty_state %}
+    <div class="predictive-search-results__inner predictive-search-results__empty-layout">
+      {%- liquid
+        assign quick_links_menu = settings.search_quick_links_menu
+        assign collection = settings.empty_state_collection | default: collections.all
+        assign default_title = 'content.search_results_resource_products' | t
+        assign title = settings.search_inspiration_heading | default: settings.empty_state_collection.title | default: default_title
+      -%}
+
+      {%- comment -%} Left column: Quick links {%- endcomment -%}
+      {%- if quick_links_menu != blank and linklists[quick_links_menu].links.size > 0 -%}
+        <div class="predictive-search-empty__links-col">
+          <h4 class="predictive-search-results__title predictive-search-results__title--links">
+            {{- 'content.search_quick_links' | t | default: 'Links rápidos' -}}
+          </h4>
+          <ul class="predictive-search-empty__links-list list-unstyled">
+            {%- for link in linklists[quick_links_menu].links -%}
+              <li class="predictive-search-empty__link-item">
+                <a href="{{ link.url }}" class="predictive-search-empty__link">
+                  {{- link.title -}}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Right column: Suggested products {%- endcomment -%}
+      {%- paginate collection.products by 5 -%}
+        {%- assign products = collection.products -%}
+        {%- if products.size > 0 -%}
+          <div class="predictive-search-empty__products-col">
+            {%- render 'predictive-search-products-list',
+              products_test_id: products_test_id,
+              title: title,
+              products: products,
+              limit: 5
+            -%}
+          </div>
+        {%- else -%}
+          <div class="predictive-search-results__no-results">
+            <p>{{ 'content.no_products_found' | t }}</p>
+          </div>
+        {%- endif -%}
+      {%- endpaginate -%}
+    </div>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  /* Empty state layout */
+  .predictive-search-results__empty-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding: var(--padding-lg) var(--padding-xl) var(--padding-xl);
+
+    @media screen and (min-width: 750px) {
+      padding: var(--padding-xl) var(--padding-xl) var(--padding-xl);
+      align-items: start;
+    }
+  }
+
+  /* Two-column layout only when quick links exist */
+  .predictive-search-results__empty-layout:has(.predictive-search-empty__links-col) {
+    @media screen and (min-width: 750px) {
+      grid-template-columns: 200px 1fr;
+      gap: var(--padding-xl);
+    }
+  }
+
+  /* Quick links column */
+  .predictive-search-empty__links-col {
+    padding-block-end: var(--padding-lg);
+
+    @media screen and (min-width: 750px) {
+      padding-block-end: 0;
+      border-inline-end: var(--style-border-popover);
+      padding-inline-end: var(--padding-2xl);
+    }
+  }
+
+  .predictive-search-results__title--links {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--font-size--xs);
+    opacity: 0.55;
+    margin-block-end: var(--margin-md);
+  }
+
+  .predictive-search-empty__links-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+  }
+
+  .predictive-search-empty__link-item {
+    display: flex;
+  }
+
+  .predictive-search-empty__link {
+    display: block;
+    padding-block: var(--padding-xs);
+    color: var(--color-foreground);
+    font-size: var(--font-size--sm);
+    text-decoration: none;
+    transition: opacity var(--animation-speed) var(--animation-easing);
+
+    &:hover {
+      opacity: 0.65;
+    }
+  }
+
+  /* Products section heading — "PRECISA DE INSPIRAÇÃO?" style */
+  .predictive-search-empty__products-col .predictive-search-results__title {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--font-size--xs);
+    opacity: 0.6;
+    margin-block-end: var(--margin-lg);
+  }
+
+  /* Products column — padding/list-style overrides are in base.css */
+{% endstylesheet %}

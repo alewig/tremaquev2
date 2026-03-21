@@ -1,0 +1,340 @@
+<style>
+  .swiper-pagination {
+    z-index: 2 !important;
+  }
+    .slideshow-v2-section {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+    .swiper-container {
+      width: 100%;
+      height: 100%;
+    }
+    .swiper-slide {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      position: relative;
+    }
+    .slideshow-v2-media {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+    .swiper-pagination {
+      position: absolute;
+      bottom: 10px;
+    }
+    .swiper-pagination-bullet {
+      background: {{ section.settings.pagination_color }} !important;
+      width: {{ section.settings.pagination_size }}px;
+      height: {{ section.settings.pagination_size }}px;
+    }
+    .swiper-button-prev,
+    .swiper-button-next {
+      color: {{ section.settings.arrows_color }};
+      font-size: {{ section.settings.arrows_size }}px;
+      {% if section.settings.arrows_position == 'left' %}
+        left: 10px;
+        right: auto;
+      {% else %}
+        right: 10px;
+        left: auto;
+      {% endif %}
+    }
+    .swiper-button-prev {
+      {% if section.settings.arrows_position == 'left' %}
+        left: 10px;
+      {% else %}
+        right: 50px;
+      {% endif %}
+    }
+    .swiper-button-next {
+      {% if section.settings.arrows_position == 'left' %}
+        left: 50px;
+      {% else %}
+        right: 10px;
+      {% endif %}
+    }
+    .slide-link {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      text-decoration: none;
+    }
+
+    .autoplay-progress {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        z-index: 10;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: {{ section.settings.atuoplay_progress_color }};
+      }
+
+      .autoplay-progress svg {
+        --progress: 0;
+        position: absolute;
+        left: 0;
+        top: 0px;
+        z-index: 10;
+        width: 100%;
+        height: 100%;
+        stroke-width: 4px;
+        stroke: {{ section.settings.atuoplay_progress_color }};
+        fill: none;
+        stroke-dashoffset: calc(125.6px * (1 - var(--progress)));
+        stroke-dasharray: 125.6;
+        transform: rotate(-90deg);
+      }
+
+    {% comment %} Estilos responsivos para mobile {% endcomment %}
+  @media (max-width: 767px) {
+    .desktop-media {
+      display: none;
+    }
+    .mobile-media {
+      display: block;
+    }
+    .slideshow-v2-media{
+      height: 628px;
+    }
+  }
+  @media (min-width: 768px) {
+    .desktop-media {
+      display: block;
+    }
+    .mobile-media {
+      display: none;
+    }
+  }
+</style>
+{% comment %} Inicializando o Swiper CSS e JS via CDN {% endcomment %}
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<section class="slideshow-v2-section">
+  <div class="swiper-container">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+        <div class="swiper-slide" {{ block.shopify_attributes }}>
+          {% if block.settings.link != blank %}
+            <a href="{{ block.settings.link }}" class="slide-link">&nbsp;</a>
+          {% endif %}
+          {% if block.settings.desktop_image != blank or block.settings.desktop_video != blank %}
+            {% if block.settings.desktop_video != blank %}
+              <video
+                class="slideshow-v2-media desktop-media"
+                autoplay
+                loop
+                muted
+                playsinline
+              >
+                <source src="{{ block.settings.desktop_video | file_url }}" type="video/mp4">
+              </video>
+            {% else %}
+              {% assign img = block.settings.desktop_image %}
+              <img
+                class="slideshow-v2-media desktop-media"
+                src="{{ img | image_url: width: 1920 }}"
+                alt="{{ img.alt | escape }}"
+                width="{{ img.width }}"
+                height="{{ img.height }}"
+                loading="lazy"
+              >
+            {% endif %}
+          {% endif %}
+
+          {% if block.settings.mobile_image != blank or block.settings.mobile_video != blank %}
+            {% if block.settings.mobile_video != blank %}
+              <video
+                class="slideshow-v2-media mobile-media"
+                autoplay
+                loop
+                muted
+                playsinline
+              >
+                <source src="{{ block.settings.mobile_video | file_url }}" type="video/mp4">
+              </video>
+            {% else %}
+              {% assign img = block.settings.mobile_image %}
+              <img
+                class="slideshow-v2-media mobile-media"
+                src="{{ img | image_url: width: 720 }}"
+                alt="{{ img.alt | escape }}"
+                width="auto"
+                height="auto"
+                loading="lazy"
+              >
+            {% endif %}
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    {% comment %} Paginação e navegação do Swiper com   para divs vazias {% endcomment %}
+    {% if section.settings.show_pagination %}
+      <div class="swiper-pagination">&nbsp;</div>
+    {% endif %}
+    {% if section.settings.autoplay_progress %}
+      <div class="autoplay-progress">
+        <svg viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="20"></circle>
+        </svg>
+        <span>&nbsp;</span>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const progressCircle = document.querySelector(".autoplay-progress svg");
+    const progressContent = document.querySelector(".autoplay-progress span");
+    const swiper = new Swiper('.swiper-container', {
+      loop: true,
+      {% if section.settings.autoplay_enabled %}
+      autoplay: {
+        delay: {{ section.settings.autoplay_delay | times: 1000 }},
+        disableOnInteraction: false,
+      },
+      {% endif %}
+      {% if section.settings.show_pagination %}
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      {% endif %}
+      {% if section.settings.autoplay_progress %}
+      on:{
+        autoplayTimeLeft(s, time, progress) {
+          progressCircle.style.setProperty("--progress", 1 - progress);
+          progressContent.textContent = `${Math.ceil(time / 1000)}s`;
+        }
+      }
+      {% endif %}
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "slideshow-v2",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "autoplay_enabled",
+      "label": "Enable autoplay",
+      "default": true,
+      "info": "Automatically cycle through slides after a delay."
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_progress",
+      "label": "Enable AutoPlay Progress",
+      "default": true,
+      "info": "Automatically cycle through slides after a delay."
+    },
+    {
+      "type": "range",
+      "id": "autoplay_delay",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Autoplay delay (seconds)",
+      "default": 5,
+      "info": "How long to wait before switching to the next slide."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination dots",
+      "default": true,
+      "info": "Display navigation dots below the slideshow-v2."
+    },
+    {
+      "type": "color",
+      "id": "pagination_color",
+      "label": "Pagination dots color",
+      "default": "#ffffff",
+      "info": "Choose the color of the navigation dots."
+    },
+    {
+      "type": "color",
+      "id": "atuoplay_progress_color",
+      "label": "Autoplay Progress color",
+      "default": "#ffffff",
+      "info": "Choose the color of the autoplay progress."
+    },
+    {
+      "type": "range",
+      "id": "pagination_size",
+      "min": 6,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "Pagination dots size",
+      "default": 8,
+      "info": "Adjust the size of the navigation dots."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "desktop_image",
+          "label": "Desktop image",
+          "info": "Image displayed on desktop screens."
+        },
+        {
+          "type": "video",
+          "id": "desktop_video",
+          "label": "Desktop video",
+          "info": "Optional video for desktop screens."
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile image",
+          "info": "Image displayed on mobile screens."
+        },
+        {
+          "type": "video",
+          "id": "mobile_video",
+          "label": "Mobile video",
+          "info": "Optional video for mobile screens."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Slide link",
+          "info": "Makes the entire slide clickable."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "slideshow-v2",
+      "blocks": [
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

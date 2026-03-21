@@ -1,0 +1,199 @@
+<script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
+{{ 'quick-add.css' | asset_url | stylesheet_tag }}
+
+{% assign product_form_id = 'quick-add-' | append: section_id | append: card_product.id %}
+
+<div class="quick-add no-js-hidden">
+  {%- liquid
+    assign qty_rules = false
+    if card_product.selected_or_first_available_variant.quantity_rule.min > 1 or card_product.selected_or_first_available_variant.quantity_rule.max != null or card_product.selected_or_first_available_variant.quantity_rule.increment > 1
+      assign qty_rules = true
+    endif
+  -%}
+  {%- if card_product.variants.size > 0 or qty_rules -%}
+    <modal-opener data-modal="#QuickAdd-{{ card_product.id }}">
+      <button
+        id="{{ product_form_id }}-submit"
+        type="submit"
+        name="add"
+        class="quick-add__submit button button--full-width button--secondary{% if horizontal_quick_add %} card--horizontal__quick-add animate-arrow{% endif %}"
+        aria-haspopup="dialog"
+        aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
+        data-product-url="{{ card_product.url }}"
+      >
+        {% if custom_text != blank %}
+          {{ custom_text }}
+          {% else %}
+             {{ 'products.product.choose_options' | t }}
+          
+        {% endif %}
+       
+        {%- if horizontal_quick_add -%}
+          <span class="icon-wrap">
+            {{- 'icon-arrow.svg' | inline_asset_content -}}
+          </span>
+        {%- endif -%}
+        {%- render 'loading-spinner' -%}
+      </button>
+    </modal-opener>
+    <quick-add-modal id="QuickAdd-{{ card_product.id }}" class="quick-add-modal">
+      <div
+        role="dialog"
+        aria-label="{{ 'products.product.choose_product_options' | t: product_name: card_product.title | escape }}"
+        aria-modal="true"
+        class="quick-add-modal__content global-settings-popup"
+        tabindex="-1"
+      >
+        <button
+          id="ModalClose-{{ card_product.id }}"
+          type="button"
+          class="quick-add-modal__toggle"
+          aria-label="{{ 'accessibility.close' | t }}"
+        >
+         {{- 'icon-close.svg' | inline_asset_content -}}
+        </button>
+        <div id="QuickAddInfo-{{ card_product.id }}" class="quick-add-modal__content-info"></div>
+      </div>
+    </quick-add-modal>
+  {%- else -%}
+    <product-form data-section-id="{{ section.id }}">
+      {%- form 'product',
+        card_product,
+        id: product_form_id,
+        class: 'form',
+        novalidate: 'novalidate',
+        data-type: 'add-to-cart-form'
+      -%}
+        <input
+          type="hidden"
+          name="id"
+          value="{{ card_product.selected_or_first_available_variant.id }}"
+          class="product-variant-id"
+          {% if card_product.selected_or_first_available_variant.available == false %}
+            disabled
+          {% endif %}
+        >
+        <button
+          id="{{ product_form_id }}-submit"
+          type="submit"
+          name="add"
+          class="quick-add__submit button button--full-width button--secondary{% if horizontal_quick_add %} card--horizontal__quick-add{% endif %}"
+          aria-haspopup="dialog"
+          aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
+          aria-live="polite"
+          data-sold-out-message="true"
+          {% if card_product.selected_or_first_available_variant.available == false %}
+            disabled
+          {% endif %}
+        >
+          <span>
+            {%- if card_product.selected_or_first_available_variant.available -%}
+              {% if custom_text != blank %}
+                {{ custom_text }}
+                {% else %}
+                   {{ 'products.product.add_to_cart' | t }}
+              {% endif %}
+             
+            {%- else -%}
+              {{ 'products.product.sold_out' | t }}
+            {%- endif -%}
+          </span>
+          <span class="sold-out-message hidden">
+            {{ 'products.product.sold_out' | t }}
+          </span>
+          {%- if horizontal_quick_add -%}
+            <span class="icon-wrap">
+              {{- 'icon-plus.svg' | inline_asset_content -}}
+            </span>
+          {%- endif -%}
+          {%- render 'loading-spinner' -%}
+        </button>
+      {%- endform -%}
+    </product-form>
+  {%- endif -%}
+</div>
+
+<style>
+  @media(max-width: 768px) {
+    .button-conhecer__link p {
+      padding: 8px !important;
+    }
+    .button-conhecer__link {
+      padding: 8px !important;
+    }
+  }
+
+  .button-conhecer__link {
+    font-weight: 700;
+    text-transform: uppercase;
+    flex: 1 0 0;
+    height: 43px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    padding: 16px 20px;
+    align-items: center;
+    gap: 10px;
+    border-radius: 12px 0 0 12px;
+    background: var(--GREN2, #53B748);
+    transition: background 0.3s ease-out;
+    text-decoration: none;
+  }
+
+  .button-conhecer__link:hover {
+    opacity: 0.9;
+  }
+
+  .button-conhecer__items {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .button-conhecer {
+    width: 100%;
+  }
+
+  .button-conhecer__cart {
+    z-index: 2;
+    display: flex;
+        width: 45px !important;
+    height: 42px !important;
+    padding: 0px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0 12px 12px 0;
+    background: var(--GREN1, #C0D72F);
+    transition: background 0.3s ease-out;
+    cursor: pointer;
+  }
+
+  @media(max-width: 768px) {
+    .button-conhecer__cart {
+      padding: 0px;
+    }
+     .button-conhecer__items {
+       gap:3px;
+     }
+    .button-conhecer__cart svg{
+      width: 14px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Seleciona o botão de abrir o modal (ícone "+")
+    var modalButton = document.getElementById("openModalButton-{{ card_product.id }}");
+    if (modalButton) {
+      modalButton.addEventListener("click", function(event) {
+        event.preventDefault();
+        var submitButton = document.getElementById("{{ product_form_id }}-submit");
+        if (submitButton) {
+          submitButton.click();
+        }
+      });
+    }
+  });
+</script>

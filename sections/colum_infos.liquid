@@ -1,0 +1,258 @@
+{%- comment -%}
+  Seção de informações em duas colunas
+  Parâmetros esperados via settings ou metafields:
+  - meta_array_esquerda: nome do metacampo array para coluna esquerda
+  - meta_array_direita: nome do metacampo array para coluna direita
+  - title_esq: título da coluna esquerda
+  - title_dir: título da coluna direita
+  - id_section: ID único da seção
+{%- endcomment -%}
+
+{%- liquid
+  assign section_id = section.settings.id_section | default: section.id
+  assign title_left = section.settings.title_esq | default: ''
+  assign title_right = section.settings.title_dir | default: ''
+  assign meta_array_esquerda_name = section.settings.meta_array_esquerda | default: ''
+  assign meta_array_direita_name = section.settings.meta_array_direita | default: ''
+  
+  if product and meta_array_esquerda_name != blank
+    assign array_left = product.metafields.custom[meta_array_esquerda_name]
+  endif
+  
+  if product and meta_array_direita_name != blank
+    assign array_right = product.metafields.custom[meta_array_direita_name]
+  endif
+-%}
+
+<section 
+  id="colum-infos-{{ section_id }}" 
+  class="colum-infos-section"
+>
+  <div class="colum-infos-container page-width">
+    <div class="colum-infos-wrapper">
+      {%- comment -%} Coluna Esquerda {%- endcomment -%}
+      <div class="colum-infos-left">
+        {%- if title_left != blank -%}
+          <h3 class="colum-infos-title">{{ title_left }}</h3>
+        {%- endif -%}
+        
+        {%- if array_left != blank -%}
+          <div class="colum-infos-list">
+            {%- for item in array_left.value -%}
+              <div class="colum-infos-item">
+                <span class="colum-infos-icon colum-infos-icon--check" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <p class="colum-infos-text">{{ item }}</p>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Coluna Direita {%- endcomment -%}
+      <div class="colum-infos-right">
+        {%- if title_right != blank -%}
+          <h3 class="colum-infos-title">{{ title_right }}</h3>
+        {%- endif -%}
+        
+        {%- if array_right != blank -%}
+          <div class="colum-infos-list">
+            {%- for item in array_right.value -%}
+              <div class="colum-infos-item colum-infos-item--bullet">
+                <span class="colum-infos-bullet" aria-hidden="true">•</span>
+                <p class="colum-infos-text">{{ item }}</p>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    #colum-infos-{{ section_id }} {
+      background-color: #f6f6f6;
+      border: 1px solid #e7e7e7;
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-container {
+      margin: 0 auto;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-wrapper {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-left {
+      flex: 1 1 600px;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-right {
+      flex: 1 1 500px;
+      min-width: 280px;
+      background-color: #edfcf4;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-title {
+      font-family: 'League Spartan', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 24px;
+      color: #08744e;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      width: 100%;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-item--bullet {
+      align-items: center;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      color: #0a915f;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-bullet {
+      flex-shrink: 0;
+      font-family: 'League Spartan', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #0a915f;
+    }
+
+    #colum-infos-{{ section_id }} .colum-infos-text {
+      flex: 1 0 0;
+      font-family: 'League Spartan', sans-serif;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #4f4f4f;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+
+    /* Estilos para texto em negrito dentro do texto (para coluna esquerda) */
+    #colum-infos-{{ section_id }} .colum-infos-text strong,
+    #colum-infos-{{ section_id }} .colum-infos-text b {
+      font-weight: 700;
+    }
+
+    @media screen and (max-width: 989px) {
+      #colum-infos-{{ section_id }} .colum-infos-wrapper {
+        flex-direction: column;
+      }
+
+      #colum-infos-{{ section_id }} .colum-infos-left,
+      #colum-infos-{{ section_id }} .colum-infos-right {
+        flex: 1 1 100%;
+        min-width: 100%;
+      }
+    }
+
+    @media screen and (max-width: 749px) {
+      #colum-infos-{{ section_id }} {
+        padding: 16px;
+      }
+
+      #colum-infos-{{ section_id }} .colum-infos-right {
+        padding: 12px;
+      }
+
+      #colum-infos-{{ section_id }} .colum-infos-title {
+        font-size: 18px;
+        line-height: 22px;
+      }
+
+      #colum-infos-{{ section_id }} .colum-infos-text {
+        font-size: 14px;
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Colunas de Informações",
+  "settings": [
+    {
+      "type": "text",
+      "id": "id_section",
+      "label": "ID da Seção",
+      "info": "ID único para identificar esta seção (opcional)"
+    },
+    {
+      "type": "text",
+      "id": "title_esq",
+      "label": "Título Coluna Esquerda",
+      "default": "Ideal para confeiteiros profissionais"
+    },
+    {
+      "type": "text",
+      "id": "title_dir",
+      "label": "Título Coluna Direita",
+      "default": "Aplicações principais"
+    },
+    {
+      "type": "text",
+      "id": "meta_array_esquerda",
+      "label": "Nome do Metacampo Array (Esquerda)",
+      "info": "Nome do metacampo customizado do produto que contém o array para a coluna esquerda"
+    },
+    {
+      "type": "text",
+      "id": "meta_array_direita",
+      "label": "Nome do Metacampo Array (Direita)",
+      "info": "Nome do metacampo customizado do produto que contém o array para a coluna direita"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Colunas de Informações"
+    }
+  ]
+}
+{% endschema %}
+

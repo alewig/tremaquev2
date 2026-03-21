@@ -1,0 +1,452 @@
+{% comment %}
+  Pesquisa por Voz - Web Speech API
+  
+  Uso:
+  1. Renderize este snippet onde quiser o botão de microfone
+  2. Passe o ID do input de busca como parâmetro:
+     {% render 'search-via-voz', search_input_id: 'Search-Custom-Model-1' %}
+{% endcomment %}
+
+<button 
+  type="button" 
+  class="voice-search-toggle" 
+  aria-label="Pesquisa por voz"
+  data-voice-search-toggle
+  data-target-input="{{ search_input_id }}"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="15" viewBox="0 0 12 15" fill="none">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M6 0C4.20507 0 2.75 1.45507 2.75 3.25V5.25C2.75 7.04493 4.20507 8.5 6 8.5C7.79493 8.5 9.25 7.04493 9.25 5.25V3.25C9.25 1.45507 7.79493 0 6 0ZM7.75 5.25C7.75 6.2165 6.9665 7 6 7C5.0335 7 4.25 6.2165 4.25 5.25V3.25C4.25 2.2835 5.0335 1.5 6 1.5C6.9665 1.5 7.75 2.2835 7.75 3.25V5.25Z" fill="#F6F6F6"/>
+        <path d="M1.5 5C1.5 4.58579 1.16421 4.25 0.75 4.25C0.335786 4.25 0 4.58579 0 5V5.25C0 8.30971 2.29027 10.8345 5.25 11.2036V12.75H4C3.58579 12.75 3.25 13.0858 3.25 13.5C3.25 13.9142 3.58579 14.25 4 14.25H8C8.41421 14.25 8.75 13.9142 8.75 13.5C8.75 13.0858 8.41421 12.75 8 12.75H6.75V11.2036C9.70973 10.8345 12 8.30971 12 5.25V5C12 4.58579 11.6642 4.25 11.25 4.25C10.8358 4.25 10.5 4.58579 10.5 5V5.25C10.5 7.73528 8.48528 9.75 6 9.75C3.51472 9.75 1.5 7.73528 1.5 5.25V5Z" fill="#F6F6F6"/>
+      </svg>
+</button>
+
+<style>
+  .voice-search-toggle-container{
+    padding-left: 16px;
+  }
+  /* Botão de microfone */
+  .voice-search-toggle {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: #F6F6F6;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+  .voice-search-toggle {
+    border-radius: 4px;
+    background: var(--Red---800, #B10326);
+    padding: 4px;
+  }
+
+  .voice-search-toggle svg {
+        width: 12px;
+        height: 14.25px;
+  }
+
+  /* Toast de escuta - fixo no topo */
+  .voice-search-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: #B10326;
+    border-radius: 8px;
+    padding: 12px 24px;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+    min-width: 180px;
+    justify-content: center;
+  }
+
+  .voice-search-toast.is-active {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Animação de barras de áudio */
+  .voice-search-toast__bars {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+  }
+
+  .voice-search-toast__bar {
+    width: 3px;
+    background: white;
+    border-radius: 2px;
+    animation: voiceBar 0.8s ease-in-out infinite;
+  }
+
+  .voice-search-toast__bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .voice-search-toast__bar:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+  .voice-search-toast__bar:nth-child(3) { height: 12px; animation-delay: 0.2s; }
+  .voice-search-toast__bar:nth-child(4) { height: 20px; animation-delay: 0.15s; }
+  .voice-search-toast__bar:nth-child(5) { height: 10px; animation-delay: 0.25s; }
+
+  @keyframes voiceBar {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+
+  .voice-search-toast__text {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  /* Estados */
+  .voice-search-toast.is-error {
+    background: #4f4f4f;
+  }
+
+  .voice-search-toast.is-error .voice-search-toast__bars {
+    display: none;
+  }
+
+  .voice-search-toast.is-success {
+    background: #00973c;
+  }
+
+  .voice-search-toast.is-success .voice-search-toast__bar {
+    animation: none;
+    transform: scaleY(1);
+  }
+
+  /* Mobile */
+  @media screen and (max-width: 749px) {
+    .voice-search-toggle svg {
+      width: 14px;
+      height: 18px;
+    }
+
+    .voice-search-toast {
+      top: 80px;
+      padding: 10px 20px;
+      min-width: 160px;
+    }
+
+    .voice-search-toast__text {
+      font-size: 13px;
+    }
+  }
+</style>
+
+<script>
+(function() {
+  // Evitar múltiplas inicializações
+  if (window.voiceSearchInitialized) return;
+  window.voiceSearchInitialized = true;
+
+  // Verificar suporte à Web Speech API
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  if (!SpeechRecognition) {
+    document.querySelectorAll('.voice-search-toggle').forEach(btn => {
+      btn.style.display = 'none';
+    });
+    console.warn('Web Speech API não suportada neste navegador');
+    return;
+  }
+
+  // Criar toast único (apenas uma vez)
+  let toast = document.getElementById('voice-search-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'voice-search-toast';
+    toast.className = 'voice-search-toast';
+    toast.innerHTML = `
+      <div class="voice-search-toast__bars">
+        <span class="voice-search-toast__bar"></span>
+        <span class="voice-search-toast__bar"></span>
+        <span class="voice-search-toast__bar"></span>
+        <span class="voice-search-toast__bar"></span>
+        <span class="voice-search-toast__bar"></span>
+      </div>
+      <p class="voice-search-toast__text">Ouvindo...</p>
+    `;
+    document.body.appendChild(toast);
+  }
+
+  const toastText = toast.querySelector('.voice-search-toast__text');
+  let currentTargetInput = null;
+  let recognition = null;
+  let isListening = false;
+  let lastTranscript = '';
+
+  // Função para mostrar toast
+  function showToast(message, type = '') {
+    toast.classList.remove('is-error', 'is-success');
+    if (type) toast.classList.add(`is-${type}`);
+    toastText.textContent = message || 'Ouvindo...';
+    toast.classList.add('is-active');
+  }
+
+  function normalizeTranscript(text) {
+    return text
+      // remover pontuação comum
+      .replace(/[.,!?;:]/g, ' ')
+      // remover múltiplos espaços
+      .replace(/\s+/g, ' ')
+      // trim
+      .trim();
+  }
+
+  
+  // Função para esconder toast
+  function hideToast() {
+    toast.classList.remove('is-active');
+    setTimeout(() => {
+      toast.classList.remove('is-error', 'is-success');
+    }, 300);
+  }
+
+  // Função para iniciar reconhecimento
+  async function startListening(targetInputId) {
+    if (isListening) {
+      stopListening();
+      return;
+    }
+
+    // Em preview do editor do tema, normalmente roda dentro de iframe e pode bloquear a API
+    // (microfone/serviço), resultando em erros como "network".
+    if (window.self !== window.top) {
+      showToast('Abra a loja (fora do editor)', 'error');
+      setTimeout(hideToast, 2500);
+      return;
+    }
+
+    // Requer contexto seguro (HTTPS) para funcionar de forma confiável
+    if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      showToast('Requer HTTPS', 'error');
+      setTimeout(hideToast, 2500);
+      return;
+    }
+
+    // Precisa de internet (SpeechRecognition do Chrome é baseado em serviço remoto)
+    if (navigator.onLine === false) {
+      showToast('Sem internet', 'error');
+      setTimeout(hideToast, 2000);
+      return;
+    }
+
+    currentTargetInput = document.getElementById(targetInputId);
+    if (!currentTargetInput) {
+      console.error('Input de busca não encontrado:', targetInputId);
+      return;
+    }
+
+    // Se o usuário clicar novamente para tentar de novo,
+    // limpamos o valor anterior para não "misturar" buscas.
+    lastTranscript = '';
+    try {
+      currentTargetInput.value = '';
+      currentTargetInput.dispatchEvent(new Event('input', { bubbles: true }));
+    } catch (e) {}
+
+    // Safari costuma ser mais sensível a permissão do microfone.
+    // Fazemos um preflight para garantir que a permissão foi concedida antes de iniciar o SpeechRecognition.
+    async function ensureMicPermission() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    const micOk = await ensureMicPermission();
+    if (!micOk) {
+      showToast('Permita o microfone', 'error');
+      setTimeout(hideToast, 2500);
+      return;
+    }
+
+    // Criar nova instância para cada uso (evita problemas de estado)
+    recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    lastTranscript = '';
+
+    recognition.onstart = function() {
+      isListening = true;
+      showToast('Ouvindo...');
+    };
+
+    recognition.onresult = function(event) {
+      const result = event.results[event.results.length - 1];
+
+      const rawTranscript = result[0].transcript;
+
+      const transcript = normalizeTranscript(rawTranscript);
+      
+      if (transcript) {
+        lastTranscript = transcript;
+        showToast(transcript);
+      }
+
+      if (result.isFinal && transcript.trim()) {
+        lastTranscript = '';
+        executeSearch(transcript.trim());
+      }
+    };
+
+    recognition.onerror = function(event) {
+        console.warn('Erro no reconhecimento de voz:', event.error);
+      
+        isListening = false;
+      
+        switch (event.error) {
+          case 'language-not-supported':
+          case 'bad-grammar':
+            showToast('Voz indisponível (Safari)', 'error');
+            setTimeout(hideToast, 3000);
+            break;
+
+          case 'network':
+            showToast('Voz indisponível no momento', 'error');
+            setTimeout(hideToast, 3000);
+            break;
+      
+          case 'not-allowed':
+            showToast('Permita o microfone', 'error');
+            setTimeout(hideToast, 2500);
+            break;
+      
+          case 'no-speech':
+            showToast('Nenhuma fala detectada', 'error');
+            setTimeout(hideToast, 2000);
+            break;
+      
+          case 'audio-capture':
+            showToast('Microfone não encontrado', 'error');
+            setTimeout(hideToast, 2500);
+            break;
+      
+          case 'aborted':
+          case 'service-not-allowed':
+            hideToast();
+            return;
+      
+          default:
+            showToast('Erro ao ouvir', 'error');
+            setTimeout(hideToast, 2000);
+        }
+      
+        try {
+          recognition.stop();
+        } catch (e) {}
+      };
+      
+
+    recognition.onend = function() {
+      isListening = false;
+      // Safari às vezes encerra sem marcar `isFinal`.
+      // Se capturamos algo, usamos como fallback ao terminar.
+      if (
+        lastTranscript &&
+        !toast.classList.contains('is-success') &&
+        !toast.classList.contains('is-error')
+      ) {
+        const fallback = lastTranscript;
+        lastTranscript = '';
+        executeSearch(fallback);
+        return;
+      }
+      // Se não teve sucesso/erro explícito, esconder toast
+      if (!toast.classList.contains('is-success') && !toast.classList.contains('is-error')) {
+        setTimeout(hideToast, 500);
+      }
+    };
+
+    // Pedir permissão de microfone e iniciar
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error('Erro ao iniciar reconhecimento:', e);
+      showToast('Erro ao iniciar', 'error');
+      setTimeout(hideToast, 2000);
+    }
+  }
+
+  // Função para parar reconhecimento
+  function stopListening() {
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch (e) {
+        // Ignorar
+      }
+    }
+    isListening = false;
+    hideToast();
+  }
+
+  // Função para executar pesquisa
+  function executeSearch(text) {
+    if (!currentTargetInput || !text) return;
+
+    // Preencher input
+    currentTargetInput.value = text;
+    
+    // Disparar evento input
+    currentTargetInput.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    // Se estiver em mobile e a busca for do tipo "toggle", expandir
+    const searchContainer = currentTargetInput.closest('[data-predictive-search-container]');
+    const alwaysOpen = searchContainer && searchContainer.dataset && searchContainer.dataset.searchAlwaysOpen === 'true';
+    if (searchContainer && window.innerWidth <= 989 && !alwaysOpen) {
+      searchContainer.classList.add('search-expanded');
+    }
+
+    // Focar no input
+    currentTargetInput.focus();
+
+    // Mostrar sucesso
+    showToast(`"${text}"`, 'success');
+
+    // Esconder após sucesso
+    setTimeout(() => {
+      hideToast();
+    }, 1000);
+  }
+
+  // Event listener para botões (usando delegação)
+  document.addEventListener('click', function(e) {
+    const toggleBtn = e.target.closest('[data-voice-search-toggle]');
+    if (toggleBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const targetInputId = toggleBtn.dataset.targetInput;
+      if (targetInputId) {
+        startListening(targetInputId);
+      }
+    }
+  });
+
+  // Fechar com ESC
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && isListening) {
+      stopListening();
+    }
+  });
+})();
+</script>

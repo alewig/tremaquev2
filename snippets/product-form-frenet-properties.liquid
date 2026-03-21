@@ -1,0 +1,60 @@
+{% comment %}
+  Adiciona propriedades Frenet (dimensões) ao item do carrinho.
+  Usado no carrinho para calcular frete quando metafields não estão disponíveis.
+  Incluir dentro do form de produto.
+{% endcomment %}
+{%- if product != blank -%}
+  {%- assign v = product.selected_or_first_available_variant -%}
+  {%- if v != blank -%}
+    {%- assign m_altura = v.metafields.frenet.altura.value -%}
+    {%- assign m_comprimento = v.metafields.frenet.comprimento.value -%}
+    {%- assign m_largura = v.metafields.frenet.largura.value -%}
+    {%- assign num_altura = m_altura | split: ' ' | first -%}
+    {%- assign num_comprimento = m_comprimento | split: ' ' | first -%}
+    {%- assign num_largura = m_largura | split: ' ' | first -%}
+    <input type="hidden" name="properties[_frenet_altura]" value="{{ num_altura }}" data-frenet-altura>
+    <input type="hidden" name="properties[_frenet_comprimento]" value="{{ num_comprimento }}" data-frenet-comprimento>
+    <input type="hidden" name="properties[_frenet_largura]" value="{{ num_largura }}" data-frenet-largura>
+    <script type="application/json" data-frenet-variants>
+      {
+        {%- for variant in product.variants -%}
+          {%- assign vm_altura = variant.metafields.frenet.altura.value | split: ' ' | first -%}
+          {%- assign vm_comp = variant.metafields.frenet.comprimento.value | split: ' ' | first -%}
+          {%- assign vm_larg = variant.metafields.frenet.largura.value | split: ' ' | first -%}
+          "{{ variant.id }}": {"a":"{{ vm_altura }}","c":"{{ vm_comp }}","l":"{{ vm_larg }}"}
+          {%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      }
+    </script>
+    <script>
+      (function() {
+        var variantsJson = document.querySelector('[data-frenet-variants]');
+        if (!variantsJson) return;
+        var form = variantsJson.closest('form');
+        if (!form) return;
+        var variantsData = {};
+        try { variantsData = JSON.parse(variantsJson.textContent); } catch (e) { return; }
+        function updateFrenetInputs(variantId) {
+          var d = variantsData[variantId];
+          var inpA = form.querySelector('[data-frenet-altura]');
+          var inpC = form.querySelector('[data-frenet-comprimento]');
+          var inpL = form.querySelector('[data-frenet-largura]');
+          if (!inpA || !inpC || !inpL) return;
+          if (d && (d.a || d.c || d.l)) {
+            inpA.value = d.a || ''; inpC.value = d.c || ''; inpL.value = d.l || '';
+          }
+        }
+        if (typeof subscribe === 'function') {
+          var evName = (typeof PUB_SUB_EVENTS !== 'undefined' && PUB_SUB_EVENTS.variantChange) ? PUB_SUB_EVENTS.variantChange : 'variant-change';
+          subscribe(evName, function(evt) {
+            if (evt && evt.data && evt.data.variant && evt.data.variant.id) {
+              updateFrenetInputs(String(evt.data.variant.id));
+            }
+          });
+        }
+        var variantInput = form.querySelector('[name="id"]');
+        if (variantInput && variantInput.value) updateFrenetInputs(variantInput.value);
+      })();
+    </script>
+  {%- endif -%}
+{%- endif -%}

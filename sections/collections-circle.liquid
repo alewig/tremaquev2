@@ -1,0 +1,604 @@
+{% comment %}
+  Collections Circle Section
+  
+  Displays a carousel of circular collection images with titles below
+{% endcomment %}
+
+{%- liquid
+    assign section_title = section.settings.title | default: ''
+    assign section_title_color = section.settings.title_color | default: '#4f4f4f'
+    assign section_title_size = section.settings.title_size | default: 40
+    assign section_title_weight = section.settings.title_weight | default: 700
+    assign text_color = section.settings.text_color | default: '#313135'
+    assign hover_border_color = section.settings.hover_border_color | default: '#0A915F'
+    assign hover_text_color = section.settings.hover_text_color | default: '#0A915F'
+    assign circle_size = section.settings.circle_size | default: 150
+    assign padding_top = section.settings.padding_top | default: 40
+    assign padding_bottom = section.settings.padding_bottom | default: 40
+    assign slides_per_view_mobile = section.settings.slides_per_view_mobile | default: 2.5
+    assign slides_per_view_tablet = section.settings.slides_per_view_tablet | default: 4
+    assign slides_per_view_desktop = section.settings.slides_per_view_desktop | default: 7
+    assign space_between = section.settings.space_between | default: 40
+    assign dot_color_inactive = section.settings.dot_color_inactive | default: '#313135'
+    assign dot_color_active = section.settings.dot_color_active | default: '#0A915F'
+    assign display_mode = section.settings.display_mode | default: 'default'
+    assign marquee_speed = section.settings.marquee_speed | default: 3000
+    assign is_marquee = false
+    if display_mode == 'marquee'
+      assign is_marquee = true
+    endif
+  -%}
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  
+  <section class="collections-circle-{{ section.id }}" style="padding-top: {{ padding_top }}px; padding-bottom: {{ padding_bottom }}px;">
+    <div class="page-width">
+      {%- if section_title != blank -%}
+        <h2 class="collections-circle__title-{{ section.id }}" style="color: {{ section_title_color }}; font-size: {{ section_title_size }}px; font-weight: {{ section_title_weight }};">
+          {{ section_title }}
+        </h2>
+      {%- endif -%}
+  
+      {%- if section.blocks.size > 0 -%}
+        <div class="collections-circle__slider-wrap-{{ section.id }}{% if is_marquee %} collections-circle__slider-wrap--marquee-{{ section.id }}{% endif %}" data-display-mode="{{ display_mode }}">
+        <div class="collections-circle__slider-{{ section.id }} swiper">
+          <div class="swiper-wrapper">
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign collection_handle = block.settings.collection
+                assign collection_obj = collections[collection_handle]
+                assign circle_image = block.settings.circle_image
+                if block.settings.circle_title != blank
+                  assign circle_title = block.settings.circle_title
+                elsif collection_obj != blank and collection_obj.title != blank
+                  assign circle_title = collection_obj.title
+                else
+                  assign circle_title = 'Coleção'
+                endif
+                if collection_obj != blank and collection_obj.url != blank
+                  assign collection_url = collection_obj.url
+                else
+                  assign collection_url = '#'
+                endif
+              -%}
+              
+              <div class="swiper-slide" {{ block.shopify_attributes }}>
+                <a href="{{ collection_url }}" class="collections-circle__card-{{ section.id }}">
+                  <div class="collections-circle__circle-wrapper-{{ section.id }}">
+                    {%- if circle_image != blank -%}
+                      <img
+                        src="{{ circle_image | image_url: width: 300 }}"
+                        alt="{{ circle_title | escape }}"
+                        class="collections-circle__image-{{ section.id }}"
+                        loading="lazy"
+                        width="{{ circle_size }}"
+                        height="{{ circle_size }}"
+                        draggable="false"
+                      >
+                    {%- else -%}
+                      <div class="collections-circle__placeholder-{{ section.id }}">
+                        {{ 'collection-1' | placeholder_svg_tag: 'collections-circle__placeholder-svg' }}
+                      </div>
+                    {%- endif -%}
+                  </div>
+                  
+                  {%- unless is_marquee -%}
+                    <p class="collections-circle__card-title-{{ section.id }}">
+                      {{ circle_title }}
+                    </p>
+                  {%- endunless -%}
+                </a>
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+        {%- unless is_marquee -%}
+          <div class="swiper-pagination collections-circle__pagination-{{ section.id }}"></div>
+        {%- endunless -%}
+        </div>
+      {%- else -%}
+        <div class="collections-circle__empty-{{ section.id }}">
+          <p>{{ 'sections.collection_template.empty' | t | default: 'Adicione blocos de coleção nas configurações da seção.' }}</p>
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+  
+  <style>
+    .collections-circle__slider-{{ section.id }} .swiper-slide {
+      touch-action: pan-y;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    
+    .collections-circle-{{ section.id }} {
+      width: 100%;
+    }
+  
+    .collections-circle__title-{{ section.id }} {
+      padding-bottom: 50px;
+      line-height: 1.2;
+      text-align: start;
+    }
+  
+    .collections-circle__slider-wrap-{{ section.id }} {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      position: relative;
+    }
+
+    .collections-circle__slider-{{ section.id }} {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .collections-circle__slider-{{ section.id }} .swiper-wrapper {
+      display: flex;
+      align-items: flex-start;
+    }
+  
+  
+    .collections-circle__slider-{{ section.id }} .swiper-slide {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      height: auto;
+      width: {{ circle_size }}px;
+    }
+  
+    .collections-circle__card-{{ section.id }} {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      -webkit-user-select: none;
+      gap: 16px;
+      text-decoration: none;
+      width: 100%;
+      min-width: {{ circle_size }}px;
+      border: 3px;
+    }
+  
+    .collections-circle__circle-wrapper-{{ section.id }} {
+      width: {{ circle_size }}px;
+      height: {{ circle_size }}px;
+      min-width: {{ circle_size }}px;
+      min-height: {{ circle_size }}px;
+      border-radius: 50%;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid transparent;
+      transition: border-color 0.3s ease;
+      flex-shrink: 0;
+
+    }
+  
+    .collections-circle__card-{{ section.id }}:hover .collections-circle__circle-wrapper-{{ section.id }} {
+      border-color: {{ hover_border_color }} !important;
+    }
+  
+    .collections-circle__image-{{ section.id }} {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      -webkit-user-drag: none;
+      user-drag: none;
+      object-position: center;
+      display: block;
+      border-radius: 50%;
+    }
+  
+    .collections-circle__placeholder-{{ section.id }} {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f5;
+      border-radius: 50%;
+    }
+  
+    .collections-circle__placeholder-{{ section.id }} .collections-circle__placeholder-svg {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: block;
+    }
+  
+    .collections-circle__card-title-{{ section.id }} {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.2;
+      margin: 0;
+      padding-top: 0;
+      text-align: center;
+      transition: color 0.3s ease;
+      white-space: normal;
+      word-wrap: break-word;
+      max-width: {{ circle_size }}px;
+      display: block;
+      visibility: visible;
+      opacity: 1;
+      color: {{ text_color }};
+    }
+  
+    .collections-circle__card-{{ section.id }}:hover .collections-circle__card-title-{{ section.id }} {
+      color: {{ hover_border_color }} !important;
+    }
+  
+    .collections-circle__empty-{{ section.id }} {
+      text-align: center;
+      padding: 40px 20px;
+      color: #4F4F4F;
+    }
+
+    .collections-circle__pagination-{{ section.id }} {
+      position: relative !important;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
+      transform: none !important;
+      margin-top: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      z-index: 2 !important;
+    }
+
+    .collections-circle__pagination-{{ section.id }} .swiper-pagination-bullet {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: {{ dot_color_inactive }} !important;
+      background-color: {{ dot_color_inactive }} !important;
+      opacity: 1 !important;
+      transition: width 0.35s ease, height 0.35s ease, border-radius 0.35s ease, background 0.35s ease, background-color 0.35s ease, transform 0.35s ease;
+    }
+
+    .collections-circle__pagination-{{ section.id }} .swiper-pagination-bullet-active,
+    .collections-circle__pagination-{{ section.id }} .swiper-pagination-bullet.swiper-pagination-bullet-active {
+      width: 25px;
+      height: 10px;
+      border-radius: 20px;
+      background: {{ dot_color_active }} !important;
+      background-color: {{ dot_color_active }} !important;
+      opacity: 1 !important;
+    }
+
+    .collections-circle__pagination-{{ section.id }} .swiper-pagination-bullet:hover {
+      opacity: 0.85 !important;
+    }
+
+    /* Marquee mode: transição linear para scroll contínuo */
+    .collections-circle__slider-wrap--marquee-{{ section.id }} .collections-circle__slider-{{ section.id }} .swiper-wrapper {
+      transition-timing-function: linear !important;
+    }
+  
+    @media (max-width: 749px) {
+      .collections-circle__title-{{ section.id }} {
+        font-size: 32px;
+        margin-bottom: 24px;
+      }
+    }
+  </style>
+  
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+  <script>
+    (function () {
+      function initCollectionsCircleSlider() {
+        const slider = document.querySelector('.collections-circle__slider-{{ section.id }}');
+        if (!slider || slider.swiper) return;
+  
+        if (typeof Swiper === 'undefined') {
+          setTimeout(initCollectionsCircleSlider, 100);
+          return;
+        }
+  
+        const wrap = slider.closest('.collections-circle__slider-wrap-{{ section.id }}');
+        const displayMode = wrap && wrap.getAttribute('data-display-mode') || 'default';
+        const isMarquee = displayMode === 'marquee';
+  
+        const paginationEl = !isMarquee && wrap
+          ? wrap.querySelector('.collections-circle__pagination-{{ section.id }}')
+          : null;
+  
+        const marqueeSpeed = {{ marquee_speed }};
+  
+        const baseOptions = {
+          slidesPerView: 'auto',
+          spaceBetween: {{ space_between }},
+          preventClicks: true,
+          preventClicksPropagation: true,
+        };
+  
+        let swiperOptions;
+        if (isMarquee) {
+          swiperOptions = {
+            ...baseOptions,
+            loop: true,
+            speed: marqueeSpeed,
+            allowTouchMove: false,
+            grabCursor: false,
+            autoplay: {
+              delay: 0,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: false,
+            },
+            pagination: false,
+          };
+        } else {
+          swiperOptions = {
+            ...baseOptions,
+            grabCursor: true,
+            allowTouchMove: true,
+            watchOverflow: false,
+            touchEventsTarget: 'container',
+            touchStartPreventDefault: false,
+            threshold: 5,
+            pagination: paginationEl
+              ? { el: paginationEl, clickable: true }
+              : false,
+          };
+        }
+  
+        const swiperInstance = new Swiper(slider, swiperOptions);
+        slider.swiper = swiperInstance;
+
+        (wrap || slider).addEventListener('dragstart', function(e) {
+          e.preventDefault();
+        });
+      }
+  
+      function waitForSwiper() {
+        if (typeof Swiper !== 'undefined') {
+          initCollectionsCircleSlider();
+        } else {
+          setTimeout(waitForSwiper, 50);
+        }
+      }
+  
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitForSwiper);
+      } else {
+        waitForSwiper();
+      }
+    })();
+  </script>
+  
+  
+  
+  
+  
+  {% schema %}
+  {
+    "name": "Collections Circle",
+    "tag": "section",
+    "class": "section section-collections-circle",
+    "max_blocks": 20,
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Título da seção",
+        "default": "Compre por categoria"
+      },
+      {
+        "type": "range",
+        "id": "title_size",
+        "min": 24,
+        "max": 80,
+        "step": 2,
+        "unit": "px",
+        "label": "Tamanho do título",
+        "default": 40
+      },
+      {
+        "type": "range",
+        "id": "title_weight",
+        "min": 400,
+        "max": 900,
+        "step": 100,
+        "label": "Peso do título",
+        "default": 700
+      },
+      {
+        "type": "color",
+        "id": "title_color",
+        "label": "Cor do título",
+        "default": "#4f4f4f"
+      },
+      {
+        "type": "color",
+        "id": "text_color",
+        "label": "Cor dos textos",
+        "default": "#313135"
+      },
+      {
+        "type": "color",
+        "id": "hover_border_color",
+        "label": "Cor da borda hover",
+        "default": "#0A915F"
+      },
+      {
+        "type": "color",
+        "id": "hover_text_color",
+        "label": "Cor do texto no hover",
+        "default": "#0A915F"
+      },
+      {
+        "type": "range",
+        "id": "circle_size",
+        "min": 80,
+        "max": 300,
+        "step": 10,
+        "unit": "px",
+        "label": "Tamanho dos círculos",
+        "default": 150
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Padding superior",
+        "default": 40
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Padding inferior",
+        "default": 40
+      },
+      {
+        "type": "header",
+        "content": "Configurações do Carrossel"
+      },
+      {
+        "type": "select",
+        "id": "display_mode",
+        "label": "Modo de exibição",
+        "options": [
+          {
+            "value": "default",
+            "label": "Carrossel (com dots e títulos)"
+          },
+          {
+            "value": "marquee",
+            "label": "Marquee (rolagem contínua, sem dots e títulos)"
+          }
+        ],
+        "default": "default"
+      },
+      {
+        "type": "range",
+        "id": "marquee_speed",
+        "min": 1000,
+        "max": 9500,
+        "step": 500,
+        "unit": "ms",
+        "label": "Velocidade do marquee",
+        "default": 3000,
+        "info": "Quanto menor o valor, mais rápido a rolagem. Apenas no modo Marquee."
+      },
+      {
+        "type": "range",
+        "id": "slides_per_view_mobile",
+        "min": 1,
+        "max": 5,
+        "step": 0.1,
+        "label": "Slides por visualização (Mobile)",
+        "default": 2.5,
+        "info": "Use valores decimais (ex: 2.5) para mostrar parte do próximo slide"
+      },
+      {
+        "type": "range",
+        "id": "slides_per_view_tablet",
+        "min": 1,
+        "max": 8,
+        "step": 0.1,
+        "label": "Slides por visualização (Tablet)",
+        "default": 4
+      },
+      {
+        "type": "range",
+        "id": "slides_per_view_desktop",
+        "min": 1,
+        "max": 10,
+        "step": 0.1,
+        "label": "Slides por visualização (Desktop)",
+        "default": 7
+      },
+      {
+        "type": "range",
+        "id": "space_between",
+        "min": 0,
+        "max": 80,
+        "step": 4,
+        "unit": "px",
+        "label": "Espaçamento entre slides",
+        "default": 40
+      },
+      {
+        "type": "header",
+        "content": "Navegação (dots)"
+      },
+      {
+        "type": "color",
+        "id": "dot_color_inactive",
+        "label": "Cor do dot inativo",
+        "default": "#313135"
+      },
+      {
+        "type": "color",
+        "id": "dot_color_active",
+        "label": "Cor do dot ativo",
+        "default": "#0A915F"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "collection_circle",
+        "name": "Circle de Coleção",
+        "settings": [
+          {
+            "type": "collection",
+            "id": "collection",
+            "label": "Coleção"
+          },
+          {
+            "type": "image_picker",
+            "id": "circle_image",
+            "label": "Imagem do circle"
+          },
+          {
+            "type": "text",
+            "id": "circle_title",
+            "label": "Título do circle",
+            "info": "Se deixado vazio, será usado o título da coleção"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Collections Circle",
+        "blocks": [
+          {
+            "type": "collection_circle"
+          },
+          {
+            "type": "collection_circle"
+          },
+          {
+            "type": "collection_circle"
+          },
+          {
+            "type": "collection_circle"
+          },
+          {
+            "type": "collection_circle"
+          }
+        ]
+      }
+    ],
+    "disabled_on": {
+      "groups": ["header", "footer"]
+    }
+  }
+  {% endschema %}

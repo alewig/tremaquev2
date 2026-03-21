@@ -1,0 +1,88 @@
+{%- liquid
+  assign wpp_product = product
+  if wpp_product == blank
+    assign wpp_product = card_product
+  endif
+
+  if wpp_product != blank and settings.number_contato != blank
+    assign product_title = wpp_product.title
+    assign product_url = shop.url | append: wpp_product.url
+
+    # Template message (priority): mensagem_produto > mensagem_padrao (legacy) > hardcoded default
+    assign message_template = settings.mensagem_produto
+    if message_template == blank
+      assign message_template = settings.mensagem_padrao
+    endif
+    if message_template == blank
+      assign message_template = 'Gostaria de saber mais sobre\n{product_title}\n{product_url}'
+    endif
+
+    assign page_url = request.origin | append: request.path
+
+    assign whatsapp_message = message_template | replace: '{product_title}', product_title | replace: '{product_url}', product_url | replace: '{shop_name}', shop.name | replace: '{page_url}', page_url | url_encode
+
+    assign whatsapp_number = settings.number_contato | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+    assign whatsapp_link = 'https://wa.me/' | append: whatsapp_number | append: '?text=' | append: whatsapp_message
+  endif
+-%}
+
+{%- if whatsapp_link != blank -%}
+  <a href="{{ whatsapp_link }}" class="call-wpp-container" target="_blank" rel="noopener noreferrer" aria-label="Falar no WhatsApp sobre {{ product_title | escape }}">
+{%- else -%}
+  <div class="call-wpp-container">
+{%- endif -%}
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <path d="M25.5024 4.36208C22.7013 1.54669 18.9665 0 14.9893 0C6.7997 0 0.128296 6.67142 0.121169 14.861C0.121169 17.484 0.805415 20.0356 2.10263 22.2951L0 30L7.88309 27.933C10.057 29.1162 12.5018 29.7434 14.9893 29.7434H14.9964C23.186 29.7434 29.8574 23.072 29.8645 14.8753C29.8574 10.9052 28.3107 7.17035 25.5024 4.36208ZM14.9893 27.2274C12.7655 27.2274 10.5916 26.6287 8.69564 25.5025L8.2466 25.2316L3.57091 26.4576L4.81824 21.8959L4.52601 21.4255C3.28581 19.4583 2.6372 17.1846 2.6372 14.8539C2.6372 8.05417 8.18245 2.50891 14.9964 2.50891C18.2965 2.50891 21.397 3.799 23.7348 6.12972C26.0655 8.46757 27.3485 11.5681 27.3485 14.8681C27.3414 21.6892 21.7961 27.2274 14.9893 27.2274ZM21.7676 17.9758C21.397 17.7905 19.5723 16.8924 19.2302 16.7641C18.8881 16.6429 18.6386 16.5788 18.3963 16.9494C18.1468 17.32 17.434 18.1611 17.2202 18.4034C17.0064 18.6529 16.7854 18.6814 16.4148 18.4961C16.0442 18.3108 14.8467 17.9187 13.4283 16.65C12.3236 15.6664 11.5823 14.4476 11.3613 14.077C11.1475 13.7063 11.34 13.5068 11.5253 13.3215C11.6892 13.1575 11.8959 12.8867 12.0812 12.6728C12.2665 12.459 12.3307 12.3022 12.4519 12.0527C12.573 11.8033 12.516 11.5895 12.4234 11.4041C12.3307 11.2188 11.5894 9.38703 11.2758 8.64576C10.9765 7.91875 10.67 8.01853 10.4419 8.0114C10.2281 7.99715 9.9786 7.99715 9.72913 7.99715C9.47967 7.99715 9.08052 8.08981 8.7384 8.46044C8.39628 8.83108 7.44118 9.72915 7.44118 11.5609C7.44118 13.3927 8.77404 15.1532 8.95936 15.4027C9.14467 15.6522 11.5752 19.4013 15.3029 21.0121C16.1867 21.397 16.8781 21.6251 17.4198 21.7962C18.3107 22.0813 19.1161 22.0385 19.7576 21.9458C20.4704 21.8389 21.9529 21.0478 22.2665 20.1782C22.573 19.3086 22.573 18.5674 22.4804 18.4105C22.3877 18.2537 22.1382 18.1611 21.7676 17.9758Z" fill="url(#paint0_linear_14043_1759)"/>
+        <defs>
+          <linearGradient id="paint0_linear_14043_1759" x1="0" y1="0" x2="29.9997" y2="29.8642" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#05DF72"/>
+            <stop offset="1" stop-color="#00A63E"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <h2 class="title-call-wpp">FALAR NO WHATSAPP</h2>
+{%- if whatsapp_link != blank -%}
+  </a>
+{%- else -%}
+  </div>
+{%- endif -%}
+
+<style>
+    .title-call-wpp{
+        color: var(--gray-700, #4F4F4F);
+        leading-trim: both;
+        text-edge: cap;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        text-transform: uppercase;
+    }
+    .call-wpp-container svg{
+        width: 30px;
+        height: 30px;
+    }
+    .call-wpp-container{
+        display: flex;
+        padding: 16px 20px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        border-radius: 8px;
+        background: #CEFFE1;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-height: calc(4.5rem + var(--buttons-border-width) * 2);
+        text-decoration: none;
+        transition: opacity 0.3s ease;
+        cursor: pointer;
+    }
+    a.call-wpp-container:hover {
+        opacity: 0.9;
+    }
+    @media (max-width: 1100px){
+      .title-call-wpp{  
+        display: none;
+      }
+    }
+</style>

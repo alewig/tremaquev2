@@ -1,0 +1,57 @@
+{% doc %}
+  Renders a floating WhatsApp button fixed at the bottom-right corner.
+  Reads the URL from theme settings (floating_whatsapp_url).
+  Configure via: Shopify Admin → Temas → Personalizar → Configurações do tema → Botão flutuante
+{% enddoc %}
+
+{%- if settings.floating_whatsapp_url != blank -%}
+  <a
+    href="{{ settings.floating_whatsapp_url }}"
+    class="floating-whatsapp"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="WhatsApp"
+  >
+    <svg
+      class="floating-whatsapp__icon"
+      aria-hidden="true"
+      focusable="false"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+    >
+      {%- render 'icon', icon: 'whatsapp' -%}
+    </svg>
+  </a>
+{%- endif -%}
+
+{% stylesheet %}
+  .floating-whatsapp {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background-color: #25d366;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .floating-whatsapp:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .floating-whatsapp__icon {
+    width: 32px;
+    height: 32px;
+    display: block;
+    flex-shrink: 0;
+  }
+{% endstylesheet %}

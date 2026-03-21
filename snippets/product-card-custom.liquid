@@ -1,0 +1,76 @@
+{% comment %}
+  Renderiza um card de produto.
+
+  Parâmetros:
+  - item: O produto a ser renderizado.
+  - section_id: O ID da seção para classes únicas.
+  - show_secondary_image: Exibe a segunda imagem do produto (opcional).
+  - show_price: Exibe o preço do produto (opcional).
+  - show_buy_button: Exibe o botão de compra (opcional).
+{% endcomment %}
+
+{% assign discount_amount = item.price | times: settings.pix_discount | divided_by: 100 %}
+{% assign pix_price = item.price | minus: discount_amount %}
+{% assign discount_percentage = item.compare_at_price
+  | minus: pix_price
+  | times: 100
+  | divided_by: item.compare_at_price
+  | round
+%}
+
+<div class="swiper-slide product-card-custom">
+  <a href="{{ item.url }}">
+    <div class="featured-collection-image-{{ section_id }} {% if item.images.size > 1 and show_secondary_image %} has-secondary-{{ section_id }} {% endif %}">
+    {%  render 'card-badge', card_product: item %}
+      {% if item.images.size > 0 %}
+        <img
+          class="{% if item.images.size > 1 and show_secondary_image %}featured-collection-first-image-{{ section_id }}{% endif %}"
+          src="{{ item.featured_image | image_url }}"
+          alt="{{ item.featured_image.alt | escape }}"
+          loading="lazy"
+          width="auto"
+          height="auto"
+        >
+      {% else %}
+        {{ 'collection-1' | placeholder_svg_tag }}
+      {% endif %}
+      {% if item.images.size > 1 and show_secondary_image %}
+        {% for img in item.images %}
+          {% if forloop.index == 2 %}
+            <img
+              class="featured-collection-second-image-{{ section_id }}"
+              src="{{ img | image_url }}"
+              alt="{{ img.alt | escape }}"
+              loading="lazy"
+              width="auto"
+              height="auto"
+            >
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </a>
+  <div class="featured-collection-content-{{ section_id }}">
+    <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
+      {{ item.metafields.judgeme.badge }}
+    </div>
+    <a class="link-custom" href="{{ item.url }}">
+      <p class="featured-collection-title-{{ section_id }}">{{ item.title }}</p>
+    </a>
+
+
+    {% if show_price %}
+      <p class="featured-collection-price-{{ section_id }}">
+        {% render 'price', product: item, price_class: '', show_compare_at_price: true %}
+      </p>
+    {% endif %}
+    {% if show_buy_button %}
+      <div>
+        {% render 'buy-modal', item: item, card_product: item %}
+      </div>
+    {% endif %}
+   
+  </div>
+</div>
+
+

@@ -1,0 +1,392 @@
+{{ 'benefits-bar.css' | asset_url | stylesheet_tag }}
+{% comment %} Inicializando o Swiper CSS e JS via CDN {% endcomment %}
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<style>
+  .benefits-exeption-container-{{ section.id }} {
+    padding-top: {{ section.settings.padding_section_beneficios }}px;
+   
+  }
+  .title_main_beneficios_exeption-{{ section.id }} {
+    color: {{ section.settings.color_title_main_beneficios }};
+    font-size: {{ section.settings.width_title_main_beneficios }}px;
+  }
+  .exeption-benefit-{{ section.id }} {
+    background-color: {{ section.settings.color_background_card_beneficios }};
+    border: 1px solid{{ section.settings.color_borda_card_beneficios }};
+    border-radius: {{ section.settings.border_radius_card_beneficios }}px;
+    box-shadow: 0px 4px 8px{{ section.settings.box_shadow_card_beneficios }};
+  }
+
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section.settings.color_background_section_main }};
+  }
+  .title-benefits-{{ section.id }} {
+    color: {{ section.settings.color_title_beneficios_card }};
+    font-size: {{ section.settings.width_title_cards_beneficios }}px;
+    font-weight: 600;
+  }
+  .description-benefits-{{ section.id }} {
+    color: {{ section.settings.color_description_beneficios_card }};
+    
+    font-size: 11px;
+  }
+  .exeption-benefit-{{ section.id }}
+  img
+  , .exeption-benefit-{{ section.id }}
+  svg {
+    width: {{ section.settings.width_icons_beneficios }}px;
+    height: {{ section.settings.width_icons_beneficios }}px;
+    background-color: {{ section.settings.color_background_icon_beneficios }};
+    border-radius: {{ section.settings.border_radius_icon_beneficios }}px;
+    padding: {{ section.settings.padding_icon_beneficios }}px;
+  }
+  /* Swiper-specific styles */
+  .swiper-container-{{ section.id }} {
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .swiper-pagination-benefit-{{ section.id }} {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .swiper-container-{{ section.id }}
+  .swiper-pagination-bullet {
+    background-color: black;
+  }
+  .swiper-button-prev-{{ section.id }}
+  , .swiper-button-next-{{ section.id }} {
+    color: black;
+  }
+
+  .swiper-wrapper {
+    height: auto;
+    transition-timing-function: linear !important;
+  }
+
+  /* Marquee mode styles */
+  .swiper-container-{{ section.id }} .marquee-mode .swiper-wrapper {
+    transition-timing-function: linear !important;
+  }
+  .swiper-container-{{ section.id }}
+  .marquee-mode .swiper-slide {
+    width: auto !important;
+  }
+</style>
+
+{% if section.settings.title_main_beneficios != blank %}
+  <h2 class="title_main_beneficios_exeption-{{ section.id }} title_main_beneficios page-width">
+    {{ section.settings.title_main_beneficios }}
+  </h2>
+{% endif %}
+
+<section
+  class="benefits-container {% if section.settings.full_width_beneficios %} page-width {% endif %}  benefits-exeption-container-{{ section.id }}"
+  aria-label="Benefícios da Loja"
+>
+  <div class="swiper-container-{{ section.id }}" data-display-mode="{{ section.settings.display_mode }}">
+    <div id="wrapper-{{ section.id }}" class="swiper-wrapper">
+      {% for block in section.blocks %}
+        <div class="swiper-slide">
+          <article
+            class="benefit-card exeption-benefit-{{ section.id }}"
+            {{ block.shopify_attributes }}
+            role="region"
+            aria-labelledby="benefit-title-{{ block.id }}"
+          >
+            {% if block.settings.svg_icon_benef %}
+              <div class="benefit-icon-svg-{{ section.id }}" aria-hidden="true">
+                {{ block.settings.svg_icon_benef }}
+              </div>
+            {% endif %}
+
+            {% if block.settings.icon_beneficio %}
+              <img
+                src="{{ block.settings.icon_beneficio | image_url: width: 100 }}"
+                alt="{{ block.settings.title_beneficio | escape }}"
+                width="200"
+                height="auto"
+                loading="lazy"
+              >
+            {% endif %}
+
+            <div class="block-description-benefit">
+              {% if block.settings.title_beneficio != blank %}
+                <h2 class="title-benefits-{{ section.id }} smt">
+                  <a
+                    href="{{ block.settings.link_beneficio }}"
+                    id="benefit-title-{{ block.id }}"
+                    class="link-custom smt"
+                  >
+                    {{ block.settings.title_beneficio }}
+                  </a>
+                </h2>
+              {% endif %}
+
+              {% if block.settings.descricao_beneficio != blank %}
+                <div class="description-benefits-{{ section.id }} rte">
+                  {{ block.settings.descricao_beneficio }}
+                </div>
+              {% endif %}
+            </div>
+          </article>
+        </div>
+      {% endfor %}
+    </div>
+    <!-- Add Pagination -->
+    <div class="swiper-pagination-benefit-{{ section.id }}"></div>
+    <!-- Add Navigation -->
+    <div class="swiper-button-prev-{{ section.id }}"></div>
+    <div class="swiper-button-next-{{ section.id }}"></div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var container = document.querySelector('.swiper-container-{{ section.id }}');
+    var displayMode = container.getAttribute('data-display-mode');
+    var marqueeSpeed = {{ section.settings.marquee_speed | json }};
+
+    var swiperOptions = {
+      lazy: true,
+    };
+
+    if (displayMode === 'slider') {
+      swiperOptions.slidesPerView = 1;
+      swiperOptions.spaceBetween = {{ section.settings.padding_between_beneficios }};
+      swiperOptions.pagination = {
+        el: '.swiper-pagination-benefit-{{ section.id }}',
+        clickable: true,
+      };
+      swiperOptions.navigation = {
+        nextEl: '.swiper-button-next-{{ section.id }}',
+        prevEl: '.swiper-button-prev-{{ section.id }}',
+      };
+      swiperOptions.autoplay = {
+      delay: 3000,
+      disableOnInteraction: true,
+      pauseOnMouseEnter: true,
+    };
+      swiperOptions.breakpoints = {
+        840: {
+          slidesPerView: 3,
+          spaceBetween: {{ section.settings.padding_between_beneficios }} * 2,
+        },
+        1024: {
+          slidesPerView: 3,
+          spaceBetween: {{ section.settings.padding_between_beneficios }},
+        },
+      };
+    } else if (displayMode === 'marquee') {
+      swiperOptions.loop = true;
+      swiperOptions.speed = marqueeSpeed;
+      swiperOptions.allowTouchMove = false;
+      swiperOptions.spaceBetween = {{ section.settings.padding_between_beneficios }};
+      swiperOptions.autoplay = {
+        delay: 0,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: false,
+        stopOnLastSlide: false
+      };
+      swiperOptions.breakpoints = {
+        0: {
+          slidesPerView: 1, // Mobile (até 767px)
+        },
+        768: {
+          slidesPerView: 3, // Desktop (768px em diante)
+        }
+        };
+      // Hide pagination and navigation
+      document.querySelector('.swiper-pagination-benefit-{{ section.id }}').style.display = 'none';
+      document.querySelector('.swiper-button-prev-{{ section.id }}').style.display = 'none';
+      document.querySelector('.swiper-button-next-{{ section.id }}').style.display = 'none';
+      container.classList.add('marquee-mode');
+    }
+
+    new Swiper('.swiper-container-{{ section.id }}', swiperOptions);
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Beneficios",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Seção Principal"
+    },
+    {
+      "type": "text",
+      "id": "title_main_beneficios",
+      "label": "Título da Seção"
+    },
+    {
+      "type": "color",
+      "id": "color_title_main_beneficios",
+      "label": "Cor do Título da Seção",
+      "default": "#000000"
+    },
+    {
+      "type": "number",
+      "id": "width_title_main_beneficios",
+      "label": "Largura do Título da Seção",
+      "default": 18
+    },
+     {
+      "type": "number",
+      "id": "width_title_cards_beneficios",
+      "label": "Largura do Título dos Cards",
+      "default": 14
+    },
+    
+    {
+      "type": "color",
+      "id": "color_background_section_main",
+      "label": "Cor de Fundo da Seção",
+      "default": "#000"
+    }, {
+      "type": "checkbox",
+      "id": "full_width_beneficios",
+      "label": "Usar padrão de largura total",
+      "default": false
+    }, {
+      "type": "number",
+      "id": "padding_section_beneficios",
+      "label": "Padding da Seção",
+      "default": 0
+    }, {
+      "type": "number",
+      "id": "padding_between_beneficios",
+      "label": "Padding Entre os Cards",
+      "default": 10
+    }, {
+      "type": "select",
+      "id": "display_mode",
+      "label": "Modo de Exibição",
+      "options": [
+        {
+          "value": "slider",
+          "label": "Slider (com navegação)"
+        }, {
+          "value": "marquee",
+          "label": "Marquee (rolagem contínua)"
+        }
+      ],
+      "default": "slider"
+    }, {
+      "type": "number",
+      "id": "marquee_speed",
+      "label": "Velocidade do Marquee (ms)",
+      "default": 5500
+
+    }, {
+      "type": "header",
+      "content": "Estilo dos Cards"
+    }, {
+      "type": "color",
+      "id": "color_background_card_beneficios",
+      "label": "Cor de Fundo do Card",
+      "default": "#000"
+    }, {
+      "type": "color",
+      "id": "color_borda_card_beneficios",
+      "label": "Cor da Borda do Card",
+      "default": "#000"
+    }, {
+      "type": "color_background",
+      "id": "box_shadow_card_beneficios",
+      "label": "Sombra do Card",
+      "default": "none"
+    }, {
+      "type": "number",
+      "id": "border_radius_card_beneficios",
+      "label": "Borda Arredondada do Card",
+      "default": 10
+    }, {
+      "type": "color",
+      "id": "color_title_beneficios_card",
+      "label": "Cor do Título do Card",
+      "default": "#fff"
+    }, {
+      "type": "color",
+      "id": "color_description_beneficios_card",
+      "label": "Cor da Descrição do Card",
+      "default": "#fff"
+    }, {
+      "type": "header",
+      "content": "Estilo dos Ícones"
+    }, {
+      "type": "number",
+      "id": "width_icons_beneficios",
+      "label": "Largura do Ícone",
+      "default": 40
+    }, {
+      "type": "color",
+      "id": "color_background_icon_beneficios",
+      "label": "Cor de Fundo do Ícone",
+      "default": "#000"
+    }, {
+      "type": "number",
+      "id": "border_radius_icon_beneficios",
+      "label": "Borda Arredondada do Ícone",
+      "default": 100
+    }, {
+      "type": "number",
+      "id": "padding_icon_beneficios",
+      "label": "Padding do Ícone",
+      "default": 10
+    }
+  ],
+
+  "blocks": [
+    {
+      "type": "Beneficio",
+      "name": "Benefício",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title_beneficio",
+          "label": "Título do Benefício",
+          "default": "Benefício X"
+        },
+        {
+          "type": "richtext",
+          "id": "descricao_beneficio",
+          "label": "Descrição do Benefício",
+          "default": "<p>FRETE X</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_beneficio",
+          "label": "Ícone (deixe vazio se usar SVG)"
+        },
+        {
+          "type": "textarea",
+          "id": "svg_icon_benef",
+          "label": "Código SVG (deixe vazio se usar imagem)"
+        }, {
+          "type": "url",
+          "id": "link_beneficio",
+          "label": "Link do Benefício"
+
+        }
+      ]
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "Beneficio",
+      "blocks": [
+        {
+          "type": "Beneficio"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

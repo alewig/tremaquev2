@@ -1,0 +1,27 @@
+{% comment %}
+  Usado apenas via Section Rendering API para renderizar um card de produto.
+  Request: GET /products/{handle}?section_id=fav-card
+  O contexto product vem da URL do produto.
+{% endcomment %}
+{%- if product != blank -%}
+  <div class="fav-card-wrapper">
+    {%- render 'cards-new',
+      card_product: product,
+      section_id: section.id,
+      show_secondary_image: true,
+      show_rating: true,
+      show_variants: true,
+      skip_styles: true
+    -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Fav Card (API)",
+  "tag": "section",
+  "class": "section",
+  "settings": [],
+  "presets": []
+}
+{% endschema %}

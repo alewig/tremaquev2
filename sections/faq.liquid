@@ -1,0 +1,410 @@
+{%- liquid
+  # Hide section if all FAQ blocks are empty (metafields connected but blank)
+  assign has_valid_ask = false
+  for block in section.blocks
+    assign q_text = block.settings.question | strip_html | strip | replace: '&nbsp;', '' | replace: ' ', '' | strip
+    assign a_text = block.settings.answer | strip_html | strip | replace: '&nbsp;', '' | replace: ' ', '' | strip
+    if q_text != '' and a_text != ''
+      assign has_valid_ask = true
+    endif
+  endfor
+-%}
+
+{%- unless has_valid_ask == false -%}
+<section
+    id="asks-zerocandi-{{ section.id }}"
+    class="asks-zerocandi"
+    style="
+        --asks-title-color: {{ section.settings.color_title | default: '#5f013f' }};
+        --asks-title-size: {{ section.settings.font_size_title | default: 42 }}px;
+        --asks-question-size: {{ section.settings.font_size_text | default: 18 }}px;
+        --asks-item-bg: {{ section.settings.color_background_asks | default: '#ffd6e6' }};
+        --asks-item-bg-active: {{ section.settings.color_background_active | default: '#ffc9df' }};
+        --asks-question-color: {{ section.settings.color_title_asks | default: '#5f013f' }};
+        --asks-answer-color: {{ section.settings.color_text_asks | default: '#5f013f' }};
+        --asks-active-text: {{ section.settings.color_text_active | default: '#5f013f' }};
+        --asks-section-bg: {{ section.settings.color_background_section | default: 'transparent' }};
+        --asks-icon-color: {{ section.settings.color_icons | default: '#5f013f' }};
+    "
+>
+    <div class="spacer-{{ section.id }}-top">&nbsp;</div>
+    <div class="asks-zerocandi__inner page-width">
+        {% if section.settings.title != blank %}
+            <h2 class="asks-zerocandi__title">{{ section.settings.title }}</h2>
+        {% endif %}
+
+        <div class="asks-zerocandi__grid">
+            {% for block in section.blocks %}
+                {%- liquid
+                  assign q_text = block.settings.question | strip_html | strip | replace: '&nbsp;', '' | replace: ' ', '' | strip
+                  assign a_text = block.settings.answer | strip_html | strip | replace: '&nbsp;', '' | replace: ' ', '' | strip
+                -%}
+
+                {%- if q_text != '' and a_text != '' -%}
+                    <div class="ask-item" {{ block.shopify_attributes }}>
+                        <button class="ask-toggle" type="button" aria-expanded="false">
+                            <span class="ask-question">{{ block.settings.question }}</span>
+                            <span class="ask-icons" aria-hidden="true">
+                                <span class="icon-plus">
+                                    <img src="{{ 'icon-plus.svg' | asset_url }}" alt="" loading="lazy" width="20" height="20">
+                                </span>
+                                <span class="icon-minus">
+                                    <img src="{{ 'icon-minus.svg' | asset_url }}" alt="" loading="lazy" width="20" height="20">
+                                </span>
+                            </span>
+                        </button>
+                        <div class="ask-answer" aria-hidden="true">
+                            {{ block.settings.answer }}
+                        </div>
+                    </div>
+                {%- endif -%}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="spacer-{{ section.id }}-bottom">&nbsp;</div>
+
+    <style>
+        .spacer-{{ section.id }}-top{
+        padding-top: {{ section.settings.padding_space }}px;
+    }
+    .spacer-{{ section.id }}-bottom{
+        padding-bottom: {{ section.settings.padding_space }}px;
+    }
+    @media (max-width: 749px){
+        .spacer-{{ section.id }}-top{
+            padding-top: {{ section.settings.padding_space_mobile }}px;
+        }
+        .spacer-{{ section.id }}-bottom{
+            padding-bottom: {{ section.settings.padding_space_mobile }}px;
+        }
+    }
+        #asks-zerocandi-{{ section.id }} {
+            background-color: var(--asks-section-bg);
+        }
+        #asks-zerocandi-{{ section.id }} .asks-zerocandi__inner {
+            margin: 0 auto;
+        }
+        #asks-zerocandi-{{ section.id }} .asks-zerocandi__title {
+            color: var(--asks-title-color);
+            font-size: 24px;
+            line-height: 1.2;
+            text-align: center;
+            padding-bottom: 40px;
+            font-weight: 800;
+        }
+        #asks-zerocandi-{{ section.id }} .asks-zerocandi__grid {
+            column-count: 1;
+            column-gap: 16px;
+        }
+        @media (min-width: 990px) {
+            #asks-zerocandi-{{ section.id }} .asks-zerocandi__grid {
+                column-count: 2;
+                column-gap: 24px;
+            }
+        }
+        @media (max-width: 749px) {
+            #asks-zerocandi-{{ section.id }} .asks-zerocandi__title {
+                padding-bottom: 20px;
+                font-size: 20px;
+            }
+            #asks-zerocandi-{{ section.id }} .asks-zerocandi__grid {
+                column-gap: 0;
+            }
+            #asks-zerocandi-{{ section.id }} .ask-item {
+                margin-bottom: 10px;
+                border-radius: 10px;
+            }
+            #asks-zerocandi-{{ section.id }} .ask-toggle {
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+            #asks-zerocandi-{{ section.id }} .ask-answer {
+                padding: 0 16px;
+                font-size: 15px;
+                line-height: 1.45;
+            }
+            #asks-zerocandi-{{ section.id }} .ask-item.is-open .ask-answer {
+                padding-bottom: 14px;
+            }
+            #asks-zerocandi-{{ section.id }} .ask-icons {
+                width: 20px;
+                height: 20px;
+                flex: 0 0 20px;
+            }
+            #asks-zerocandi-{{ section.id }} .icon-plus,
+            #asks-zerocandi-{{ section.id }} .icon-minus {
+                width: 18px;
+                height: 18px;
+            }
+        }
+        #asks-zerocandi-{{ section.id }} .ask-item {
+            background: var(--asks-item-bg);
+            border-radius: 12px;
+            overflow: clip;
+            transition: background 300ms ease;
+            display: inline-block;
+            width: 100%;
+            margin: 0 0 16px;
+            break-inside: avoid;
+        }
+        #asks-zerocandi-{{ section.id }} .ask-item.is-open {
+            background: var(--asks-item-bg-active);
+        }
+        #asks-zerocandi-{{ section.id }} .ask-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            background: transparent;
+            border: 0;
+            padding: 18px 20px;
+            color: var(--asks-question-color);
+            font-size: var(--asks-question-size);
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+        }
+        #asks-zerocandi-{{ section.id }} .ask-item.is-open .ask-toggle {
+            color: var(--asks-active-text);
+        }
+        #asks-zerocandi-{{ section.id }} .ask-item.is-open .ask-answer {
+            color: var(--asks-active-text);
+        }
+        #asks-zerocandi-{{ section.id }} .ask-icons {
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            flex: 0 0 24px;
+            align-items: center;
+            justify-content: center;
+        }
+        #asks-zerocandi-{{ section.id }} .ask-icons img {
+            display: none;
+        }
+        #asks-zerocandi-{{ section.id }} .icon-plus {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: var(--asks-icon-color);
+            mask-image: url('{{ "icon-plus.svg" | asset_url }}');
+            -webkit-mask-image: url('{{ "icon-plus.svg" | asset_url }}');
+            mask-size: contain;
+            -webkit-mask-size: contain;
+            mask-repeat: no-repeat;
+            -webkit-mask-repeat: no-repeat;
+            mask-position: center;
+            -webkit-mask-position: center;
+        }
+        #asks-zerocandi-{{ section.id }} .icon-minus {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: var(--asks-icon-color);
+            mask-image: url('{{ "icon-minus.svg" | asset_url }}');
+            -webkit-mask-image: url('{{ "icon-minus.svg" | asset_url }}');
+            mask-size: contain;
+            -webkit-mask-size: contain;
+            mask-repeat: no-repeat;
+            -webkit-mask-repeat: no-repeat;
+            mask-position: center;
+            -webkit-mask-position: center;
+        }
+        #asks-zerocandi-{{ section.id }} .icon-minus { display: none; }
+        #asks-zerocandi-{{ section.id }} .ask-item.is-open .icon-plus { display: none; }
+        #asks-zerocandi-{{ section.id }} .ask-item.is-open .icon-minus { display: inline-block; }
+        #asks-zerocandi-{{ section.id }} .ask-answer {
+            padding: 0 20px;
+            color: var(--asks-answer-color);
+            font-size: 16px;
+            line-height: 1.5;
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: height 320ms ease, opacity 320ms ease, color 200ms ease;
+        }
+        #asks-zerocandi-{{ section.id }} .ask-item.is-open .ask-answer {
+            opacity: 1;
+            padding-bottom: 18px;
+        }
+    </style>
+
+    <script>
+        (function() {
+            var root = document.getElementById('asks-zerocandi-{{ section.id }}');
+            if (!root) return;
+
+            var isMobile = function() { return window.matchMedia('(max-width: 749px)').matches; };
+
+            function openItem(item) {
+                var btn = item.querySelector('.ask-toggle');
+                var answer = item.querySelector('.ask-answer');
+                if (!answer || !btn) return;
+                item.classList.add('is-open');
+                btn.setAttribute('aria-expanded', 'true');
+                answer.setAttribute('aria-hidden', 'false');
+                answer.style.height = 'auto';
+            }
+
+            function setInitialMobileState() {
+                if (!isMobile()) return;
+                root.querySelectorAll('.ask-item').forEach(openItem);
+            }
+
+            setInitialMobileState();
+            window.addEventListener('resize', function() {
+                if (isMobile()) setInitialMobileState();
+            });
+
+            var toggles = root.querySelectorAll('.ask-toggle');
+            toggles.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var item = btn.closest('.ask-item');
+                    var answer = item && item.querySelector('.ask-answer');
+                    if (!item || !answer) return;
+                    var willOpen = !item.classList.contains('is-open');
+
+                    var startHeight = answer.offsetHeight;
+                    if (willOpen) {
+                        answer.style.height = 'auto';
+                        var targetHeight = answer.scrollHeight;
+                        answer.style.height = startHeight + 'px';
+                        answer.offsetHeight;
+                        answer.style.height = targetHeight + 'px';
+                        answer.setAttribute('aria-hidden', 'false');
+                        item.classList.add('is-open');
+                    } else {
+                        var currentHeight = answer.scrollHeight;
+                        answer.style.height = currentHeight + 'px';
+                        answer.offsetHeight;
+                        answer.style.height = '0px';
+                        answer.setAttribute('aria-hidden', 'true');
+                        item.classList.remove('is-open');
+                    }
+
+                    btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+
+                    var onEnd = function(e) {
+                        if (e.propertyName !== 'height') return;
+                        answer.removeEventListener('transitionend', onEnd);
+                        if (item.classList.contains('is-open')) {
+                            answer.style.height = 'auto';
+                        } else {
+                            answer.style.height = '0px';
+                        }
+                    };
+                    answer.addEventListener('transitionend', onEnd);
+                });
+            });
+        })();
+    </script>
+</section>
+{%- endunless -%}
+
+{% schema %}
+    {
+        "name": "Perguntas Frequentes",
+        "settings": [
+            {
+                "type": "number",
+                 "id":"padding_space",
+                 "label": "Padding Space",
+                 "default": 125
+            },
+            {
+                "type": "number",
+                 "id":"padding_space_mobile",
+                 "label": "Padding Space Mobile",
+                 "default": 60
+            },
+            {
+                "type": "text",
+                "id": "title",
+                "label": "Título",
+                "default": "Perguntas Frequentes"
+            },
+            {
+                "type": "color",
+                "id": "color_title",
+                "label": "Cor do título",
+                "default": "#5f013f"
+            },
+            {
+                "type": "number",
+                "id": "font_size_title",
+                "label": "Tamanho do título (px)",
+                "default": 42
+            },
+            {
+                "type": "number",
+                "id": "font_size_text",
+                "label": "Tamanho das perguntas (px)",
+                "default": 18
+            },
+            {
+                "type": "color",
+                "id": "color_background_asks",
+                "label": "Cor de fundo das perguntas",
+                "default": "#ffd6e6"
+            },
+            {
+                "type": "color",
+                "id": "color_title_asks",
+                "label": "Cor do texto das perguntas",
+                "default": "#5f013f"
+            },
+            {
+                "type": "color",
+                "id": "color_text_asks",
+                "label": "Cor do texto das respostas",
+                "default": "#5f013f"
+            },
+            {
+                "type": "color",
+                "id": "color_text_active",
+                "label": "Cor do texto ativo",
+                "default": "#5f013f"
+            },
+            {
+                "type": "color",
+                "id": "color_background_active",
+                "label": "Cor de fundo ativa",
+                "default": "#ffc9df"
+            },
+            {
+                "type": "color",
+                "id": "color_background_section",
+                "label": "Cor de fundo da seção",
+                "default": "transparent"
+            },
+            {
+                "type": "color",
+                "id": "color_icons",
+                "label": "Cor dos ícones",
+                "default": "#5f013f"
+            }
+        ],
+        "blocks": [
+            {
+                "type": "question",
+                "name": "Pergunta",
+                "settings": [
+                    {
+                        "type": "text",
+                        "id": "question",
+                        "label": "Pergunta"
+                    },
+                    {
+                        "type": "richtext",
+                        "id": "answer",
+                        "label": "Resposta"
+                    }
+                ]
+            }
+        ],
+        "presets": [
+            {
+                "name": "Perguntas Frequentes"
+            }
+        ]
+    }
+{% endschema %}

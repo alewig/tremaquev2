@@ -1,0 +1,119 @@
+{% liquid
+    assign metaobject_videos = insta_block.settings.metacampo_videos
+    assign metaobject_videos_array = product.metafields.custom[metaobject_videos].value
+    assign thumb_border_color = insta_block.settings.thumb_border_color | default: '#B253F9'
+    assign thumb_width = insta_block.settings.thumb_width | default: 60
+    assign thumb_height = insta_block.settings.thumb_height | default: 60
+    assign modal_mode = insta_block.settings.modal_mode | default: 'product'
+    assign thumb_preview_size = thumb_width | append: 'x'
+    assign show_controls = false
+    if modal_mode == 'video'
+      assign show_controls = true
+    endif
+  %}
+  
+  {%- comment -%}
+    Prepara texto de parcelas de forma segura (sem pipes dentro de parênteses)
+  {%- endcomment -%}
+  {% capture installments_text %}até {{ settings.parcelas_sem_juros }}x de {{ product.price | divided_by: settings.parcelas_sem_juros | money }} sem juros{% endcapture %}
+  
+  <div class="insta-videos-main-v2" data-section-id="insta-videos-{{ section.id }}">
+    {% for metaobject in metaobject_videos_array %}
+      <div class="video-circle-v2" data-index="{{ forloop.index0 }}">
+        {{ metaobject | video_tag: image_size: thumb_preview_size, autoplay: true, loop: true, muted: true, playsinline: true, controls: false }}
+      </div>
+    {% endfor %}
+  </div>
+  
+  
+  <style>
+    .insta-videos-main-v2{ 
+        display: flex;
+        gap: 12px;
+        align-items: center;
+       }
+    .video-circle-v2 video{ 
+      width: {{ thumb_width }}px;
+      height: {{ thumb_height }}px; 
+      border-radius: 50%; 
+      object-fit: cover; 
+      border: 2px solid {{ thumb_border_color }};
+      cursor: pointer; }
+    @media(max-width:768px){ 
+    .video-circle-v2 video{
+         width: {{ thumb_width }}px; 
+         height: {{ thumb_height }}px; 
+         border-radius: 50%; 
+        }
+       }
+  </style>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var container = document.querySelector('.insta-videos-main-v2[data-section-id="insta-videos-{{ section.id }}"]');
+    if (!container) return;
+  
+    var videosData = [
+      {% for metaobject in metaobject_videos_array %}
+        {%- comment -%} calcula a video_url com fallback {%- endcomment -%}
+        {% assign video_url = '' %}
+        {% if metaobject.sources and metaobject.sources.size > 1 %}
+          {% assign video_url = metaobject.sources[1].url %}
+        {% elsif metaobject.sources and metaobject.sources.size == 1 %}
+          {% assign video_url = metaobject.sources[0].url %}
+        {% endif %}
+  
+        {
+          videoUrl: {{ video_url | json }},
+          muted: true,
+          modalMode: {{ modal_mode | json }},
+          showControls: {{ show_controls | json }},
+          {% if show_controls %}
+          product: null
+          {% else %}
+          product: {
+            productUrl: "{{ shop.url | append: product.url }}",
+            variantId: {{ product.selected_or_first_available_variant.id | json }},
+            priceOld: {{ product.compare_at_price | money | json }},
+            price: {{ product.price | money | json }},
+            installments: {{ installments_text | json }}
+          }
+          {% endif %}
+        }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ];
+  
+    var sectionId = 'insta-videos-{{ section.id }}';
+  
+    if (window.videoModalManager && typeof window.videoModalManager.registerDataSource === 'function') {
+      try {
+        window.videoModalManager.registerDataSource(sectionId, videosData);
+      } catch(e) { console.error('Erro registrando datasource diretamente', e); }
+    } else {
+      window.__pendingVideoDataSources = window.__pendingVideoDataSources || [];
+      window.__pendingVideoDataSources.push({ id: sectionId, data: videosData });
+    }
+  
+    container.addEventListener('click', function (e) {
+      var cell = e.target.closest('.video-circle-v2');
+      if (!cell || !container.contains(cell)) return;
+      var index = parseInt(cell.dataset.index, 10) || 0;
+      if (window.videoModalManager && typeof window.videoModalManager.openModal === 'function') {
+        window.videoModalManager.openModal(sectionId, index);
+      } else {
+        // garante que a fonte esteja na fila e tenta abrir após curto timeout
+        window.__pendingVideoDataSources = window.__pendingVideoDataSources || [];
+        var exists = window.__pendingVideoDataSources.some(function(it){ return it && it.id === sectionId; });
+        if (!exists) window.__pendingVideoDataSources.push({ id: sectionId, data: videosData });
+        setTimeout(function(){
+          if (window.videoModalManager && typeof window.videoModalManager.openModal === 'function') {
+            window.videoModalManager.openModal(sectionId, index);
+          } else {
+            console.error('videoModalManager ainda não disponível — modal não abriu.');
+          }
+        }, 150);
+      }
+    }, false);
+  });
+  </script>
+  

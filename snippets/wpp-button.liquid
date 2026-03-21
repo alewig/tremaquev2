@@ -1,0 +1,157 @@
+{% if settings.number_contato != blank and settings.codigo_svg != blank %}
+  {%- liquid
+    assign wpp_number = settings.number_contato | replace: '+', '' | replace: ' ', '' | replace: '-', '' | replace: '(', '' | replace: ')', ''
+
+    # Pick a message template based on context
+    # Priority:
+    # - Product page: mensagem_produto
+    # - Search page with no results: mensagem_search_empty
+    # - Else: mensagem_home
+    # Fallback to mensagem_padrao (legacy) if the chosen template is blank.
+
+    assign message_template = ''
+
+    if template.name == 'product' and product != blank
+      assign message_template = settings.mensagem_produto
+    elsif template.name == 'search' and search.performed and search.results_count == 0
+      assign message_template = settings.mensagem_search_empty
+    else
+      assign message_template = settings.mensagem_home
+    endif
+
+    if message_template == blank
+      assign message_template = settings.mensagem_padrao
+    endif
+
+    # If still blank, just open chat.
+    assign wpp_href = ''
+    if message_template == blank
+      assign wpp_href = 'https://wa.me/' | append: wpp_number
+    else
+      assign product_title = product.title
+      assign product_url = shop.url | append: product.url
+      assign page_url = request.origin | append: request.path
+      assign search_terms = search.terms
+
+      assign whatsapp_message = message_template | replace: '{product_title}', product_title | replace: '{product_url}', product_url | replace: '{shop_name}', shop.name | replace: '{page_url}', page_url | replace: '{search_terms}', search_terms | url_encode
+
+      assign wpp_href = 'https://wa.me/' | append: wpp_number | append: '?text=' | append: whatsapp_message
+    endif
+  -%}
+
+  <a
+    href="{{ wpp_href }}"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="wpp-button"
+    aria-label="Fale conosco pelo WhatsApp"
+  >
+    <span class="wpp-button__inner" aria-hidden="true">
+      {{ settings.codigo_svg | replace: 'viewbox', 'viewBox' }}
+    </span>
+  </a>
+{% endif %}
+
+{% if template.name == 'product' %}
+  <style>
+    body.sticky-buy-visible a.wpp-button {
+      bottom: calc(var(--sticky-buy-height, 80px)) !important;
+    }
+    @media (max-width: 768px) {
+      body.sticky-buy-visible a.wpp-button {
+        bottom: calc(var(--sticky-buy-height, 78px)) !important;
+      }
+    }
+  </style>
+{% endif %}
+<style>
+  a.wpp-button {
+    position: fixed;
+    bottom: 5%;
+    {% if settings.lado_botao == 'left' %}
+      left: 5%;
+    {% else %}
+      right: 5%;
+    {% endif %}
+    z-index: 2;
+    transition: all 1.5s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    line-height: 0;
+    isolation: isolate;
+  }
+
+  .wpp-button__inner {
+    display: block;
+    position: relative;
+    z-index: 0;
+  }
+
+  .wpp-button__inner::before,
+  .wpp-button__inner::after {
+    content: '';
+    position: absolute;
+    top: 36%;
+    left: 48%;
+    width: 75%;
+    height: 75%;
+    border-radius: 999px;
+    background: #00c950;
+    transform: translate(-50%, -50%) scale(1.22);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    will-change: transform, opacity;
+  }
+
+  .wpp-button__inner::before {
+    animation: wpp-button-pulse 2.1s cubic-bezier(0.2, 0, 0.2, 1) infinite;
+  }
+
+  .wpp-button__inner::after {
+    animation: wpp-button-pulse 2.1s cubic-bezier(0.2, 0, 0.2, 1) infinite 1.05s;
+  }
+
+  a.wpp-button svg {
+    width: {{ settings.tamanho_icone }}px;
+    height: {{ settings.tamanho_icone }}px;
+    display: block;
+  }
+
+  @keyframes wpp-button-pulse {
+    0% {
+      transform: translate(-50%, -50%) scale(1.15);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.42;
+    }
+    70% {
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.52);
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    a.wpp-button svg {
+      width: 80px;
+      height: 80px;
+    }
+    a.wpp-button{
+       bottom: 5%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wpp-button__inner::before,
+    .wpp-button__inner::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+</style>

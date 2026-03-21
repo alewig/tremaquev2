@@ -1,0 +1,369 @@
+{%- liquid
+  assign has_media = false
+  if section.settings.video_url != blank or section.settings.image != blank
+    assign has_media = true
+  endif
+
+  assign hide_section = false
+  if section.settings.hide_if_incomplete and has_media == false
+    assign hide_section = true
+  endif
+-%}
+
+{%- unless hide_section -%}
+{%- style -%}
+  .image-with-text-v2-section-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .image-with-text-v2-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .image-with-text-v2-{{ section.id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    width: 100%;
+  }
+
+  .image-with-text-v2-{{ section.id }}__image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    overflow: hidden;
+  }
+
+  .image-with-text-v2-{{ section.id }}__image-wrapper img,
+  .image-with-text-v2-{{ section.id }}__image-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 16px;
+    border: none;
+  }
+
+  .image-with-text-v2-{{ section.id }}__text-wrapper {
+    background-color: {{ section.settings.color_background_text_container | default: '#F7FCF5' }};
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 350px;
+    overflow: hidden;
+  }
+
+  .image-with-text-v2-{{ section.id }}__title {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: {{ section.settings.color_text_title | default: '#388E3C' }};
+    margin: 0 0 8px 0;
+  }
+
+  .image-with-text-v2-{{ section.id }}__subtitle {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: {{ section.settings.color_text_title | default: '#388E3C' }};
+    margin: 0 0 32px 0;
+  }
+
+  .image-with-text-v2-{{ section.id }}__description {
+    padding-top: 24px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: {{ section.settings.color_text_description | default: '#4A4A4A' }};
+    margin: 0 0 24px 0;
+  }
+
+  .image-with-text-v2-{{ section.id }}__description:last-child {
+    margin-bottom: 0;
+  }
+
+  .image-with-text-v2-{{ section.id }}__description p {
+    margin: 0 0 24px 0;
+  }
+
+  .image-with-text-v2-{{ section.id }}__description p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .image-with-text-v2-{{ section.id }} {
+      grid-template-columns: 1fr;
+      border-radius: 16px;
+      overflow: hidden;
+      direction: ltr;
+    }
+
+    .image-with-text-v2-{{ section.id }}__image-wrapper {
+      order: 2;
+      min-height: 196.672px;
+      height: 196.672px;
+      border-radius: 8.669px;
+    }
+
+    .image-with-text-v2-{{ section.id }}__image-wrapper img {
+      border-radius: 16px 16px 0 0;
+    }
+
+    .image-with-text-v2-{{ section.id }}__image-wrapper iframe {
+      border-radius: 8.669px;
+      height: 196.672px;
+      min-height: 196.672px;
+    }
+
+    .image-with-text-v2-{{ section.id }}__text-wrapper {
+      order: 1;
+      padding: 0px 0px 32px;
+      min-height: auto;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .image-with-text-v2-{{ section.id }}__title {
+      font-size: 24px;
+      padding-bottom: 16px;
+    }
+
+    .image-with-text-v2-{{ section.id }}__subtitle {
+      font-size: 28px;
+      margin: 0 0 24px 0;
+    }
+
+    .image-with-text-v2-{{ section.id }}__description {
+      font-size: 14px;
+      padding-top: 0;
+      line-height: 1.5;
+    }
+
+    .image-with-text-v2-{{ section.id }}__description p {
+      margin: 0 0 16px 0;
+    }
+  }
+
+  {% if section.settings.style_container == 'page-width' %}
+    .image-with-text-v2-container-{{ section.id }} {
+      max-width: {{ settings.page_width }}px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    @media screen and (max-width: 749px) {
+      .image-with-text-v2-container-{{ section.id }} {
+        padding: 0 16px;
+      }
+    }
+  {% else %}
+    .image-with-text-v2-container-{{ section.id }} {
+      width: 100%;
+    }
+
+    @media screen and (max-width: 749px) {
+      .image-with-text-v2-container-{{ section.id }} {
+        padding: 0px;
+      }
+    }
+  {% endif %}
+
+  {% if section.settings.alignment_image == 'right' %}
+    .image-with-text-v2-{{ section.id }} {
+      direction: rtl;
+    }
+    .image-with-text-v2-{{ section.id }} > * {
+      direction: ltr;
+    }
+  {% endif %}
+{%- endstyle -%}
+
+<div class="image-with-text-v2-section-{{ section.id }}">
+  <div class="image-with-text-v2-container-{{ section.id }}">
+  <div class="image-with-text-v2-{{ section.id }}">
+    <div class="image-with-text-v2-{{ section.id }}__image-wrapper">
+      {% if section.settings.video_url != blank %}
+        {% if section.settings.video_url contains 'youtube.com' or section.settings.video_url contains 'youtu.be' %}
+          {% assign video_id = section.settings.video_url | split: 'v=' | last | split: '&' | first %}
+          {% if section.settings.video_url contains 'youtu.be' %}
+            {% assign video_id = section.settings.video_url | split: '/' | last | split: '?' | first %}
+          {% endif %}
+          <iframe
+            src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1"
+            class="shopify-video-player"
+            title="{{ section.settings.title | escape }}"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+            referrerpolicy="strict-origin-when-cross-origin"
+          ></iframe>
+        {% elsif section.settings.video_url contains 'vimeo.com' %}
+          {% assign video_id = section.settings.video_url | split: '/' | last | split: '?' | first %}
+          <iframe
+            src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1&muted=1&loop=1&background=1"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        {% endif %}
+      {% elsif section.settings.image != blank %}
+        {{
+          section.settings.image
+          | image_url: width: 1500
+          | image_tag: loading: 'lazy', sizes: '50vw', widths: '375, 550, 750, 1100, 1500'
+        }}
+      {% else %}
+        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+      {% endif %}
+    </div>
+
+    {%- if section.settings.title != blank or section.settings.subtitle != blank or section.settings.description != blank -%}
+      <div class="image-with-text-v2-{{ section.id }}__text-wrapper">
+        {% if section.settings.title != blank %}
+          <h2 class="image-with-text-v2-{{ section.id }}__title">
+            {{ section.settings.title }}
+          </h2>
+        {% endif %}
+
+        {% if section.settings.subtitle != blank %}
+          <h3 class="image-with-text-v2-{{ section.id }}__subtitle">
+            {{ section.settings.subtitle }}
+          </h3>
+        {% endif %}
+
+        {% if section.settings.description != blank %}
+          <div class="image-with-text-v2-{{ section.id }}__description">
+            {{ section.settings.description }}
+          </div>
+        {% endif %}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+</div>
+
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "Image with Text v2",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "hide_if_incomplete",
+      "label": "Ocultar seção se mídia ou texto não estiver preenchido",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "RECOMENDADO: 700x700px"
+    },
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "Video URL",
+      "info": "Cole a URL do vídeo (YouTube ou Vimeo)"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "O padrão Harmony"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "começa na escolha"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Na Harmony, cada ingrediente carrega uma história. Selecionamos cuidadosamente produtores e parceiros que compartilham do nosso compromisso com a origem, a pureza e o sabor verdadeiro.</p><p>Das castanhas colhidas manualmente às especiarias que atravessam continentes, dos vinhos que nascem em solos férteis às massas e azeites que revelam tradição, tudo é escolhido com rigor e respeito ao processo.</p><p>Valorizamos o tempo, a natureza e quem está por trás de cada colheita. O resultado é um portfólio que traduz a harmonia entre qualidade, autenticidade e prazer à mesa, do campo à sua casa.</p>"
+    },
+    {
+      "type": "color",
+      "id": "color_text_title",
+      "label": "Color Text Title",
+      "default": "#388E3C"
+    },
+    {
+      "type": "color",
+      "id": "color_text_description",
+      "label": "Color Text Description",
+      "default": "#4A4A4A"
+    },
+    {
+      "type": "color",
+      "id": "color_background_text_container",
+      "label": "Color Background",
+      "default": "#F7FCF5"
+    },
+    {
+      "type": "select",
+      "id": "style_container",
+      "label": "Style Container",
+      "default": "full-width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Espaçamento Padrão"
+        },
+        {
+          "value": "full-width",
+          "label": "Sem Espaçamento"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "alignment_image",
+      "label": "Alignment Image",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image with Text v2"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,345 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .map-video-container-{{ section.id }} {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* Lado Esquerdo - Mapa */
+  .map-section-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 520px;
+    flex-shrink: 0;
+  }
+
+  .map-title-{{ section.id }} {
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.2;
+    color: {{ section.settings.color_title }};
+    margin: 0;
+  }
+
+  .map-iframe-container-{{ section.id }} {
+    width: 100%;
+    height: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .map-iframe-container-{{ section.id }} iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  .map-address-{{ section.id }} {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .map-icon-{{ section.id }} {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .map-icon-{{ section.id }} svg,
+  .map-icon-{{ section.id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .map-address-text-{{ section.id }} {
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.4;
+    color: {{ section.settings.color_address }};
+    margin: 0;
+  }
+
+  /* Lado Direito - Vídeo */
+  .video-section-{{ section.id }} {
+    background-color: {{ section.settings.color_video_bg }};
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+    width: 656px;
+    flex-shrink: 0;
+  }
+
+  .video-header-{{ section.id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .video-title-{{ section.id }} {
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.2;
+    color: {{ section.settings.color_video_title }};
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .video-iframe-container-{{ section.id }} {
+    width: 100%;
+    height: 343px;
+    border-radius: 13.421px;
+    overflow: hidden;
+    background-color: #d1d1d1;
+    position: relative;
+  }
+
+  .video-iframe-container-{{ section.id }} iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  /* Mobile */
+  @media screen and (max-width: 1024px) {
+    .map-video-container-{{ section.id }} {
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .map-section-{{ section.id }},
+    .video-section-{{ section.id }} {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .map-title-{{ section.id }},
+    .video-title-{{ section.id }} {
+      font-size: 24px;
+    }
+
+    .map-iframe-container-{{ section.id }} {
+      height: 183px;
+    }
+
+    .video-section-{{ section.id }} {
+      padding: 16px;
+      gap: 16px;
+    }
+
+    .video-iframe-container-{{ section.id }} {
+      height: 179px;
+      border-radius: 7px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="page-width section-{{ section.id }}-padding">
+  <div class="map-video-container-{{ section.id }}">
+    
+    <!-- Lado Esquerdo: Mapa -->
+    <div class="map-section-{{ section.id }}">
+      {%- if section.settings.map_title != blank -%}
+        <h2 class="map-title-{{ section.id }}">
+          {{ section.settings.map_title | escape }}
+        </h2>
+      {%- endif -%}
+
+      {%- if section.settings.map_iframe != blank -%}
+        <div class="map-iframe-container-{{ section.id }}">
+          {{ section.settings.map_iframe }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.address != blank -%}
+        <div class="map-address-{{ section.id }}">
+          <div class="map-icon-{{ section.id }}">
+            {%- if section.settings.map_icon_svg != blank -%}
+              {{ section.settings.map_icon_svg }}
+            {%- else -%}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 8.5C9.10457 8.5 10 7.60457 10 6.5C10 5.39543 9.10457 4.5 8 4.5C6.89543 4.5 6 5.39543 6 6.5C6 7.60457 6.89543 8.5 8 8.5Z" stroke="rgba(0,0,0,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 14.5C10 11.5 13 9.24264 13 6.5C13 3.73858 10.7614 1.5 8 1.5C5.23858 1.5 3 3.73858 3 6.5C3 9.24264 6 11.5 8 14.5Z" stroke="rgba(0,0,0,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            {%- endif -%}
+          </div>
+          <div class="map-address-text-{{ section.id }}">
+            {{ section.settings.address }}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <!-- Lado Direito: Vídeo -->
+    <div class="video-section-{{ section.id }}">
+      <div class="video-header-{{ section.id }}">
+        {%- if section.settings.video_title != blank -%}
+          <h2 class="video-title-{{ section.id }}">
+            {{ section.settings.video_title | escape }}
+          </h2>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.video_url != blank -%}
+        <div class="video-iframe-container-{{ section.id }}">
+          {%- if section.settings.video_url contains 'youtube.com' or section.settings.video_url contains 'youtu.be' -%}
+            {%- assign video_id = section.settings.video_url | split: 'v=' | last | split: '&' | first -%}
+            {%- if section.settings.video_url contains 'youtu.be' -%}
+              {%- assign video_id = section.settings.video_url | split: '/' | last | split: '?' | first -%}
+            {%- endif -%}
+            <iframe
+              src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1"
+              title="{{ section.settings.video_title | escape }}"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              referrerpolicy="strict-origin-when-cross-origin"
+            ></iframe>
+          {%- elsif section.settings.video_url contains 'vimeo.com' -%}
+            {%- assign video_id = section.settings.video_url | split: '/' | last | split: '?' | first -%}
+            <iframe
+              src="https://player.vimeo.com/video/{{ video_id }}"
+              title="{{ section.settings.video_title | escape }}"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+            ></iframe>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Map and Video",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Superior",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Inferior",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Seção Mapa (Esquerda)"
+    },
+    {
+      "type": "text",
+      "id": "map_title",
+      "label": "Título",
+      "default": "Encontre a Tremaque"
+    },
+    {
+      "type": "color",
+      "id": "color_title",
+      "label": "Cor do Título",
+      "default": "#3D3D3D"
+    },
+    {
+      "type": "html",
+      "id": "map_iframe",
+      "label": "Código Iframe do Mapa",
+      "info": "Cole o código iframe do Google Maps aqui"
+    },
+    {
+      "type": "richtext",
+      "id": "address",
+      "label": "Endereço",
+      "default": "<p>R. Serra das Marrecas, 102 - Messiânico,</p><p>Londrina - PR, 86065-270</p>"
+    },
+    {
+      "type": "color",
+      "id": "color_address",
+      "label": "Cor do Endereço",
+      "default": "rgba(0,0,0,0.8)"
+    },
+    {
+      "type": "html",
+      "id": "map_icon_svg",
+      "label": "SVG do Ícone do Mapa (Opcional)",
+      "info": "Cole o código SVG aqui"
+    },
+    {
+      "type": "header",
+      "content": "Seção Vídeo (Direita)"
+    },
+    {
+      "type": "text",
+      "id": "video_title",
+      "label": "Título do Vídeo",
+      "default": "Conheça a Tremaque"
+    },
+    {
+      "type": "color",
+      "id": "color_video_title",
+      "label": "Cor do Título do Vídeo",
+      "default": "#3D3D3D"
+    },
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "URL do Vídeo (YouTube ou Vimeo)",
+      "info": "Cole a URL do vídeo aqui. Ex: https://www.youtube.com/watch?v=..."
+    },
+    {
+      "type": "color",
+      "id": "color_video_bg",
+      "label": "Cor de Fundo da Seção Vídeo",
+      "default": "#FFDDE4"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Map and Video"
+    }
+  ]
+}
+{% endschema %}

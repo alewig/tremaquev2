@@ -1,0 +1,806 @@
+{% comment %}
+  Sticky Buy (Desktop + Mobile) - Tremaque
+{% endcomment %}
+
+{%- if product != blank -%}
+  {%- liquid
+    assign css_prefix = 'sticky-buy'
+    assign target = product.selected_or_first_available_variant
+
+    assign compare_at_price = target.compare_at_price
+    assign price = target.price
+    assign available = target.available
+
+    assign money_price = price | money
+    assign money_compare_price = compare_at_price | money
+    if settings.currency_code_enabled
+      assign money_price = price | money_with_currency
+      assign money_compare_price = compare_at_price | money_with_currency
+    endif
+
+    assign has_discount = false
+    assign discount_percentage = 0
+    if compare_at_price > price
+      assign has_discount = true
+      assign discount_percentage = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+    endif
+
+    assign parcelas = settings.parcelas_sem_juros | default: 12
+    assign installment_price = price | divided_by: parcelas
+    assign money_installment_price = installment_price | money
+    if settings.currency_code_enabled
+      assign money_installment_price = installment_price | money_with_currency
+    endif
+
+    assign pix_enabled = settings.pix_enabled
+    assign pix_discount = settings.pix_discount | default: 0
+    if pix_enabled and pix_discount > 0
+      assign discount_multiplier = pix_discount | times: 0.01
+      assign pix_discount_amount = price | times: discount_multiplier
+      assign pix_price = price | minus: pix_discount_amount
+      assign money_pix_price = pix_price | money
+      if settings.currency_code_enabled
+        assign money_pix_price = pix_price | money_with_currency
+      endif
+    endif
+
+    assign featured_media = product.featured_media
+    if target.featured_media != blank
+      assign featured_media = target.featured_media
+    endif
+  -%}
+
+  <div
+    id="{{ css_prefix }}-{{ section.id }}"
+    class="{{ css_prefix }}-{{ section.id }}"
+    data-parcelas="{{ parcelas }}"
+    data-money-format="{% if settings.currency_code_enabled %}{{ shop.money_with_currency_format | escape }}{% else %}{{ shop.money_format | escape }}{% endif %}"
+    data-currency-code-enabled="{{ settings.currency_code_enabled }}"
+    data-pix-enabled="{{ pix_enabled }}"
+    data-pix-discount="{{ pix_discount }}"
+  >
+    <div class="{{ css_prefix }}-{{ section.id }}__content page-width">
+      <div class="{{ css_prefix }}-{{ section.id }}__desktop">
+        {%- if featured_media != blank and section.settings.show_image -%}
+          <div class="{{ css_prefix }}-{{ section.id }}__image">
+            {{
+              featured_media.preview_image
+              | image_url: width: 158
+              | image_tag:
+                loading: 'lazy',
+                widths: '79, 158',
+                sizes: '79px',
+                alt: product.title
+            }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.show_title -%}
+          <p class="{{ css_prefix }}-{{ section.id }}__title">{{ product.title }}</p>
+        {%- endif -%}
+
+        <div class="{{ css_prefix }}-{{ section.id }}__prices">
+          {%- if section.settings.show_compare_and_discount and has_discount -%}
+            <div class="{{ css_prefix }}-{{ section.id }}__compare-row">
+              <span class="{{ css_prefix }}-{{ section.id }}__compare" data-sticky-buy-compare>
+                De <s>{{ money_compare_price }}</s>
+              </span>
+              <span class="{{ css_prefix }}-{{ section.id }}__discount-badge" data-sticky-buy-discount>
+                <svg width="6.333" height="8.667" viewBox="0 0 7 9" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <path d="M3.5 9L0 5.5H2.5V0H4.5V5.5H7L3.5 9Z" fill="currentColor"/>
+                </svg>
+                <span data-sticky-buy-discount-text>{{ discount_percentage }}% Desconto</span>
+              </span>
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.show_installments -%}
+            <div class="{{ css_prefix }}-{{ section.id }}__installment-row">
+              <span class="{{ css_prefix }}-{{ section.id }}__installment" data-sticky-buy-installment>
+                {{ parcelas }}x de {{ money_installment_price }}
+              </span>
+              <span class="{{ css_prefix }}-{{ section.id }}__installment-label">
+                <span>sem</span>
+                <span>juros</span>
+              </span>
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.show_pix and pix_enabled and pix_discount > 0 -%}
+            <div class="{{ css_prefix }}-{{ section.id }}__pix-row">
+              <span class="{{ css_prefix }}-{{ section.id }}__pix-text" data-sticky-buy-pix>
+                ou <strong>{{ money_pix_price }}</strong> via PIX
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true" focusable="false">
+                <path d="M4.55518 5.39453L5.87061 6.70898C6.02109 6.86004 6.19997 6.97995 6.39697 7.06152C6.44083 7.07968 6.48563 7.09519 6.53076 7.10938L5.25342 8.3877C4.83699 8.80397 4.161 8.80407 3.74463 8.3877L2.49365 7.13672C2.56681 7.11791 2.63937 7.09639 2.70947 7.06738C2.8573 7.00618 2.99559 6.9236 3.11865 6.82227L3.23584 6.71484L4.55518 5.39453ZM4.49951 0.299805C4.74707 0.299853 4.98543 0.386485 5.17529 0.541992L5.25342 0.612305L6.53076 1.88965C6.48567 1.90383 6.44079 1.91934 6.39697 1.9375C6.20042 2.01895 6.02177 2.13838 5.87158 2.28906L4.55615 3.60449L3.23584 2.28418C3.0279 2.07627 2.77197 1.93362 2.49365 1.8623L3.74463 0.612305C3.94478 0.412293 4.21656 0.299805 4.49951 0.299805Z" stroke="#00C34D" stroke-width="0.6"/>
+                <path d="M2.08789 2.80542C2.21269 2.80575 2.33415 2.8427 2.43652 2.91089L2.53125 2.98901L3.88574 4.34351V4.34448C3.94735 4.40639 4.01791 4.45813 4.09375 4.50073C4.0206 4.54069 3.95198 4.59075 3.89062 4.64917L3.88574 4.65405L2.53125 6.00952C2.4154 6.12537 2.25384 6.19214 2.08887 6.19214H1.5498L0.612305 5.25464C0.195649 4.83748 0.195965 4.16122 0.612305 3.74487L1.55078 2.80542H2.08789ZM7.01855 2.81128H7.45312L8.38672 3.74487C8.80314 4.16129 8.80314 4.83725 8.38672 5.25366L7.4541 6.18628H7.01855C6.85409 6.18628 6.69203 6.11986 6.57715 6.00464V6.00366L5.22656 4.65405L5.22168 4.64917L5.15137 4.58862C5.10924 4.55558 5.0642 4.52714 5.01758 4.50171C5.09415 4.45892 5.16444 4.40594 5.22656 4.34351L6.57715 2.99487V2.9939C6.6924 2.8783 6.85463 2.81128 7.01855 2.81128Z" stroke="#00C34D" stroke-width="0.6"/>
+              </svg>
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="{{ css_prefix }}-{{ section.id }}__cta">
+          <product-form class="product-form" data-direct-checkout="true">
+            {%- assign form_id = css_prefix | append: '-form-' | append: section.id -%}
+            {%- form 'product', product, id: form_id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+              <input
+                type="hidden"
+                name="id"
+                value="{{ target.id }}"
+                class="product-variant-id"
+                data-sticky-buy-variant-input
+                {% unless available %}disabled{% endunless %}
+              >
+              <button
+                type="submit"
+                name="add"
+                class="{{ css_prefix }}-{{ section.id }}__button"
+                data-sticky-buy-button
+                {% unless available %}disabled{% endunless %}
+              >
+                <span class="{{ css_prefix }}-{{ section.id }}__button-text">{{ section.settings.button_label_desktop }}</span>
+                {%- render 'loading-spinner' -%}
+              </button>
+            {%- endform -%}
+          </product-form>
+        </div>
+      </div>
+
+      <div class="{{ css_prefix }}-{{ section.id }}__mobile">
+        <product-form class="product-form" data-direct-checkout="true">
+          {%- assign form_id_mobile = css_prefix | append: '-form-mobile-' | append: section.id -%}
+          {%- form 'product', product, id: form_id_mobile, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+            <input
+              type="hidden"
+              name="id"
+              value="{{ target.id }}"
+              class="product-variant-id"
+              data-sticky-buy-variant-input
+              {% unless available %}disabled{% endunless %}
+            >
+            <button
+              type="submit"
+              name="add"
+              class="{{ css_prefix }}-{{ section.id }}__button-mobile"
+              data-sticky-buy-button
+              {% unless available %}disabled{% endunless %}
+            >
+              <span class="{{ css_prefix }}-{{ section.id }}__button-mobile-icon" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3.75 4.375C3.75 4.16789 3.91789 4 4.125 4H4.93099C5.36696 4 5.73518 4.32065 5.797 4.75H10.625C10.7294 4.75 10.8292 4.79357 10.9002 4.8702C10.9711 4.94684 11.0069 5.0496 10.9989 5.15375L10.8199 7.48047C10.7648 8.19685 10.1674 8.75 9.44897 8.75H6.2735L6.3199 9.1398C6.32736 9.20267 6.3807 9.25 6.444 9.25H9.625C9.8321 9.25 10 9.4179 10 9.625C10 9.8321 9.8321 10 9.625 10H6.444C6.00075 10 5.62756 9.66855 5.57515 9.22845L5.0551 4.86023C5.04765 4.79734 4.99431 4.75 4.93099 4.75H4.125C3.91789 4.75 3.75 4.58211 3.75 4.375Z" fill="#FAFAFA"/>
+                  <path d="M7.5 11C7.5 11.2761 7.27614 11.5 7 11.5C6.72386 11.5 6.5 11.2761 6.5 11C6.5 10.7239 6.72386 10.5 7 10.5C7.27614 10.5 7.5 10.7239 7.5 11Z" fill="#FAFAFA"/>
+                  <path d="M10 11C10 11.2761 9.77614 11.5 9.5 11.5C9.22386 11.5 9 11.2761 9 11C9 10.7239 9.22386 10.5 9.5 10.5C9.77614 10.5 10 10.7239 10 11Z" fill="#FAFAFA"/>
+                </svg>
+              </span>
+              <span class="{{ css_prefix }}-{{ section.id }}__button-mobile-text">
+                {{ section.settings.button_label_mobile }}
+                <span data-sticky-buy-mobile-price> | {{ money_price }}</span>
+              </span>
+              {%- render 'loading-spinner' -%}
+            </button>
+          {%- endform -%}
+        </product-form>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .{{ css_prefix }}-{{ section.id }} {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: {{ section.settings.z_index }};
+      transform: translateY(110%);
+      transition: transform 0.28s ease-in-out;
+      background: {{ section.settings.bg_desktop }};
+      border-left: 1px solid {{ section.settings.border_color }};
+      border-right: 1px solid {{ section.settings.border_color }};
+      border-top: 1px solid {{ section.settings.border_color }};
+      border-bottom: 0;
+      border-radius: {{ section.settings.radius_desktop }}px {{ section.settings.radius_desktop }}px 0 0;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}.is-visible {
+      transform: translateY(0);
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__content {
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__desktop {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__image {
+      width: 79px;
+      height: 79px;
+      flex: 0 0 79px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 16px;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__title {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 32px;
+      color: {{ section.settings.title_color }};
+      margin: 0;
+      max-width: 430px;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__prices {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 241px;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__compare-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__compare {
+      font-size: 12px;
+      line-height: 1.4;
+      color: {{ section.settings.muted_color }};
+      white-space: nowrap;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__compare s {
+      text-decoration: line-through;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__discount-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 20px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: {{ section.settings.badge_bg }};
+      color: {{ section.settings.badge_color }};
+      font-size: 12px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__installment-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__installment {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: {{ section.settings.installment_color }};
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__installment-label {
+      display: flex;
+      flex-direction: column;
+      font-size: 12px;
+      line-height: 0.9;
+      color: {{ section.settings.installment_label_color }};
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__pix-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__pix-text {
+      font-size: 12px;
+      line-height: 1.4;
+      color: {{ section.settings.muted_color }};
+      white-space: nowrap;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__pix-text strong {
+      font-weight: 700;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__cta {
+      margin-left: auto;
+      flex: 1 1 auto;
+      max-width: 380px;
+
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__button {
+      width: 100%;
+      min-height: 61px;
+      border: 0;
+      border-radius: 8px;
+      background: {{ section.settings.button_bg }};
+      color: {{ section.settings.button_text_color }};
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 20px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      transition: filter 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__button:disabled,
+    .{{ css_prefix }}-{{ section.id }}__button-mobile:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__button:hover {
+      filter: brightness(0.95);
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__button-text {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__mobile {
+      display: none;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__button-mobile {
+      width: 100%;
+      height: 62px;
+      border: 0;
+      border-radius: 8px;
+      background: {{ section.settings.button_bg }};
+      color: #fafafa;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 20px;
+      cursor: pointer;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__button-mobile-text {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .{{ css_prefix }}-{{ section.id }}__button-mobile-icon {
+      width: 14.5px;
+      height: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 990px) {
+      .{{ css_prefix }}-{{ section.id }}__desktop {
+        gap: 24px;
+      }
+
+      .{{ css_prefix }}-{{ section.id }}__title {
+        font-size: 18px;
+        line-height: 1.3;
+        max-width: 280px;
+      }
+
+      .{{ css_prefix }}-{{ section.id }}__prices {
+        width: 220px;
+      }
+
+      .{{ css_prefix }}-{{ section.id }}__installment {
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .{{ css_prefix }}-{{ section.id }} {
+        background: {{ section.settings.bg_mobile }};
+        border-radius: {{ section.settings.radius_mobile }}px {{ section.settings.radius_mobile }}px 0 0;
+      }
+
+      .{{ css_prefix }}-{{ section.id }}__content {
+        padding: 8px;
+      }
+
+      .{{ css_prefix }}-{{ section.id }}__desktop {
+        display: none;
+      }
+
+      .{{ css_prefix }}-{{ section.id }}__mobile {
+        display: block;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .{{ css_prefix }}-{{ section.id }} {
+        transition: none;
+      }
+    }
+  </style>
+
+  <script>
+    (function () {
+      const root = document.getElementById({{ css_prefix | json }} + '-' + {{ section.id | json }});
+      if (!root) return;
+
+      const variantInputs = root.querySelectorAll('[data-sticky-buy-variant-input]');
+      const compareEl = root.querySelector('[data-sticky-buy-compare]');
+      const discountEl = root.querySelector('[data-sticky-buy-discount]');
+      const discountTextEl = root.querySelector('[data-sticky-buy-discount-text]');
+      const installmentEl = root.querySelector('[data-sticky-buy-installment]');
+      const pixEl = root.querySelector('[data-sticky-buy-pix]');
+      const mobilePriceEl = root.querySelector('[data-sticky-buy-mobile-price]');
+      const buttons = root.querySelectorAll('[data-sticky-buy-button]');
+      const imageEl = root.querySelector('.{{ css_prefix }}-{{ section.id }}__image img');
+
+      const parcelas = Number(root.dataset.parcelas || 12);
+      const pixEnabled = String(root.dataset.pixEnabled) === 'true';
+      const pixDiscount = Number(root.dataset.pixDiscount || 0);
+      const moneyFormat = root.dataset.moneyFormat || {{ shop.money_format | json }};
+
+      function formatMoney(cents) {
+        if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
+          return window.Shopify.formatMoney(cents, moneyFormat);
+        }
+        try {
+          return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((cents || 0) / 100);
+        } catch (e) {
+          return (cents || 0) / 100;
+        }
+      }
+
+      function setDisabled(isDisabled) {
+        variantInputs.forEach((input) => {
+          input.toggleAttribute('disabled', isDisabled);
+        });
+        buttons.forEach((btn) => {
+          btn.toggleAttribute('disabled', isDisabled);
+        });
+      }
+
+      function updateFromVariant(variant) {
+        if (!variant || !variant.id) return;
+
+        variantInputs.forEach((input) => {
+          input.value = variant.id;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        setDisabled(!variant.available);
+
+        const price = Number(variant.price || 0);
+        const compareAt = Number(variant.compare_at_price || 0);
+        const hasDiscount = compareAt > price;
+
+        if (compareEl) {
+          compareEl.classList.toggle('hidden', !hasDiscount);
+          if (hasDiscount) {
+            compareEl.innerHTML = 'De <s>' + formatMoney(compareAt) + '</s>';
+          }
+        }
+
+        if (discountEl && discountTextEl) {
+          discountEl.classList.toggle('hidden', !hasDiscount);
+          if (hasDiscount) {
+            const pct = Math.round(((compareAt - price) * 100) / compareAt);
+            discountTextEl.textContent = pct + '% OFF';
+          }
+        }
+
+        if (installmentEl) {
+          const installment = Math.floor(price / Math.max(parcelas, 1));
+          installmentEl.textContent = parcelas + 'x de ' + formatMoney(installment);
+        }
+
+        if (pixEl) {
+          const showPix = pixEnabled && pixDiscount > 0;
+          pixEl.closest('.{{ css_prefix }}-{{ section.id }}__pix-row')?.classList.toggle('hidden', !showPix);
+          if (showPix) {
+            const pixPrice = Math.round(price - price * (pixDiscount / 100));
+            pixEl.innerHTML = 'ou <strong>' + formatMoney(pixPrice) + '</strong> via PIX';
+          }
+        }
+
+        if (mobilePriceEl) {
+          mobilePriceEl.textContent = ' | ' + formatMoney(price);
+        }
+
+        if (imageEl && variant.featured_media && variant.featured_media.preview_image && variant.featured_media.preview_image.src) {
+          imageEl.src = variant.featured_media.preview_image.src;
+        }
+      }
+
+      // Visibilidade (quando o botão principal some + não colidir com footer)
+      const mainProductInfo = document.querySelector('product-info');
+      const mainAtcButton =
+        mainProductInfo?.querySelector('.product-form__submit') ||
+        document.querySelector('main .product-form__submit');
+
+      // Footer real do tema (sections/footer.liquid)
+      const footer = document.querySelector('footer.footer') || document.querySelector('footer');
+
+      let shouldShow = false;
+      let isFooterNearby = false;
+
+      let atcObserver = null;
+      let footerObserver = null;
+
+      function getStickyHeight() {
+        return root.offsetHeight || 120;
+      }
+
+      function updateVisibility() {
+        root.classList.toggle('is-visible', shouldShow && !isFooterNearby);
+        var isVisible = root.classList.contains('is-visible');
+        document.body.classList.toggle('sticky-buy-visible', isVisible);
+        document.body.style.setProperty('--sticky-buy-height', isVisible ? (root.offsetHeight + 'px') : '0px');
+      }
+
+      function setupVisibilityObservers() {
+        atcObserver?.disconnect?.();
+        footerObserver?.disconnect?.();
+
+        // 1) Aparecer mais cedo: quando o botão principal sobe para o topo da viewport
+        //    Ajuste fino: 20% do topo (um pouco mais cedo do que "sumiu totalmente")
+        const triggerTopPercent = 20;
+
+        if (mainAtcButton && 'IntersectionObserver' in window) {
+          atcObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                const rootTop = entry.rootBounds ? entry.rootBounds.top : 0;
+                const isAboveTriggerLine = entry.boundingClientRect.bottom < rootTop;
+                shouldShow = isAboveTriggerLine;
+                updateVisibility();
+              });
+            },
+            {
+              root: null,
+              threshold: 0,
+              rootMargin: `-${triggerTopPercent}% 0px 0px 0px`,
+            }
+          );
+          atcObserver.observe(mainAtcButton);
+        }
+
+        // 2) Sumir quando chegar no footer: esconder quando o footer entrar na área visível acima do sticky
+        //    (viewport menos a altura do sticky) para evitar sobreposição com o footer.
+        const stickyHeight = getStickyHeight();
+        if (footer && 'IntersectionObserver' in window) {
+          footerObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                isFooterNearby = entry.isIntersecting;
+                updateVisibility();
+              });
+            },
+            {
+              root: null,
+              threshold: 0,
+              rootMargin: `0px 0px -${stickyHeight}px 0px`,
+            }
+          );
+          footerObserver.observe(footer);
+        }
+
+        updateVisibility();
+      }
+
+      setupVisibilityObservers();
+
+      // Recalcular em resize/orientação (altura do sticky muda; Safari/iOS também)
+      let resizeT;
+      window.addEventListener(
+        'resize',
+        () => {
+          clearTimeout(resizeT);
+          resizeT = setTimeout(function() {
+            setupVisibilityObservers();
+            if (root.classList.contains('is-visible')) {
+              document.body.style.setProperty('--sticky-buy-height', root.offsetHeight + 'px');
+            }
+          }, 150);
+        },
+        { passive: true }
+      );
+
+      // Atualização de variante via pubsub do tema
+      function trySubscribeToVariantChange() {
+        // No tema, `PUB_SUB_EVENTS` é `const` (escopo global), então não existe em `window.PUB_SUB_EVENTS`
+        if (typeof subscribe !== 'function') return false;
+        if (typeof PUB_SUB_EVENTS === 'undefined' || !PUB_SUB_EVENTS.variantChange) return false;
+
+        subscribe(PUB_SUB_EVENTS.variantChange, ({ data }) => {
+          if (!data || !data.variant) return;
+          updateFromVariant(data.variant);
+        });
+
+        return true;
+      }
+
+      // Tenta imediatamente; se o pubsub ainda não carregou, tenta por um curto período
+      if (!trySubscribeToVariantChange()) {
+        let tries = 0;
+        const maxTries = 20; // ~5s
+        const interval = setInterval(() => {
+          tries += 1;
+          if (trySubscribeToVariantChange() || tries >= maxTries) clearInterval(interval);
+        }, 250);
+      }
+    })();
+  </script>
+
+{%- endif -%}
+
+  {% schema %}
+  {
+    "name": "Sticky Buy",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "show_image",
+        "label": "Exibir imagem do produto",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_title",
+        "label": "Exibir título do produto",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_compare_and_discount",
+        "label": "Exibir preço de comparação e badge de desconto",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_installments",
+        "label": "Exibir parcelamento",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_pix",
+        "label": "Exibir preço via PIX (usa configurações globais de PIX)",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "button_label_desktop",
+        "label": "Texto do botão (desktop)",
+        "default": "COMPRAR AGORA"
+      },
+      {
+        "type": "text",
+        "id": "button_label_mobile",
+        "label": "Texto do botão (mobile)",
+        "default": "Comprar Agora"
+      },
+      {
+        "type": "color",
+        "id": "bg_desktop",
+        "label": "Cor de fundo (desktop)",
+        "default": "#F6F6F6"
+      },
+      {
+        "type": "color",
+        "id": "bg_mobile",
+        "label": "Cor de fundo (mobile)",
+        "default": "#E7E7E7"
+      },
+      {
+        "type": "color",
+        "id": "border_color",
+        "label": "Cor da borda",
+        "default": "#E7E7E7"
+      },
+      {
+        "type": "range",
+        "id": "radius_desktop",
+        "label": "Arredondamento (desktop)",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "radius_mobile",
+        "label": "Arredondamento (mobile)",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "default": 8
+      },
+      {
+        "type": "color",
+        "id": "title_color",
+        "label": "Cor do título",
+        "default": "#4F4F4F"
+      },
+      {
+        "type": "color",
+        "id": "muted_color",
+        "label": "Cor dos textos secundários",
+        "default": "#888888"
+      },
+      {
+        "type": "color",
+        "id": "badge_bg",
+        "label": "Cor de fundo do badge",
+        "default": "#CEFFE1"
+      },
+      {
+        "type": "color",
+        "id": "badge_color",
+        "label": "Cor do badge",
+        "default": "#00973C"
+      },
+      {
+        "type": "color",
+        "id": "installment_color",
+        "label": "Cor do parcelamento",
+        "default": "#00C34D"
+      },
+      {
+        "type": "color",
+        "id": "installment_label_color",
+        "label": "Cor do texto 'sem juros'",
+        "default": "#6D6D6D"
+      },
+      {
+        "type": "color",
+        "id": "button_bg",
+        "label": "Cor do botão",
+        "default": "#00C34D"
+      },
+      {
+        "type": "color",
+        "id": "button_text_color",
+        "label": "Cor do texto do botão (desktop)",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "range",
+        "id": "z_index",
+        "label": "Z-index",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "default": 6
+      }
+    ],
+    "presets": [
+      {
+        "name": "Sticky Buy"
+      }
+    ],
+    "enabled_on": {
+      "templates": ["product"]
+    }
+  }
+  {% endschema %}

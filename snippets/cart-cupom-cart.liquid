@@ -1,0 +1,131 @@
+<script src="{{ 'cart-discount-cart.js' | asset_url }}" defer></script>
+
+{%- style -%}
+  .cart-cupom-cart__details { border-bottom: 1px solid #E5E5E5; }
+  .cart-cupom-cart { margin: 1rem 0; border-radius: 8px; overflow: hidden; }
+  .cart-cupom-cart summary {
+    list-style: none;
+    padding: 0.75rem 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    color: #4A4A4A;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cart-cupom-cart summary::-webkit-details-marker { display: none; }
+  .cart-cupom-cart__icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: #4A4A4A;
+  }
+  .cart-cupom-cart__icon--minus { display: none; }
+  .cart-cupom-cart__details[open] .cart-cupom-cart__icon--plus { display: none; }
+  .cart-cupom-cart__details[open] .cart-cupom-cart__icon--minus { display: block; }
+  .cart-cupom-cart__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease-out;
+  }
+  .cart-cupom-cart__details[open] .cart-cupom-cart__panel { grid-template-rows: 1fr; }
+  .cart-cupom-cart__panel-inner { overflow: hidden; min-height: 0; }
+  .cart-cupom-cart__content { padding: 0 0 1rem 0; opacity: 0; transition: opacity 0.25s ease 0.05s; }
+  .cart-cupom-cart__details[open] .cart-cupom-cart__content { opacity: 1; }
+  .cart-discount__form {     width: 70%; display: flex; margin-top: 0.75rem; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .cart-discount__input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid #E5E5E5;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    font-size: 14px;
+    background: #fff;
+    color: #1a1a1a;
+  }
+  .cart-discount__input::placeholder { color: #9E9E9E; }
+  .cart-discount__input:focus { outline: none; border-color: #E5E5E5; }
+  .cart-discount__submit {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 0 8px 8px 0;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    background: #F62D13;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .cart-discount__submit:hover { opacity: 0.92; }
+  .cart-discount__submit:disabled { opacity: 0.7; cursor: not-allowed; }
+  .cart-discount__codes { margin-top: 0.75rem; padding-top: 0.5rem; list-style: none; padding-left: 0; margin-bottom: 0; }
+  .cart-discount__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    margin: 4px 8px 4px 0;
+    background: rgba(0,0,0,0.06);
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .cart-discount__pill-remove {
+    padding: 0 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #6d6d6d;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .cart-discount__pill-remove:hover { color: #1a1a1a; }
+  .cart-discount__error {
+    margin-top: 0.5rem;
+    font-size: 13px;
+    color: #B10326;
+  }
+  .cart-discount__error.hidden { display: none; }
+{%- endstyle -%}
+
+<div class="cart-cupom-cart">
+  <details class="cart-cupom-cart__details" close>
+    <summary>
+      <span>Cupom</span>
+      <span class="cart-cupom-cart__icon cart-cupom-cart__icon--plus" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false"><path d="M4 12H20M12 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="cart-cupom-cart__icon cart-cupom-cart__icon--minus" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false"><path d="M6 12L18 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </summary>
+    <div class="cart-cupom-cart__panel">
+      <div class="cart-cupom-cart__panel-inner">
+        <div class="cart-cupom-cart__content">
+          <cart-discount-cart data-section-id="{{ section.id }}">
+            <form class="cart-discount__form" action="{{ routes.cart_url }}" method="post">
+              <input type="text" id="cart-discount" class="cart-discount__input" name="discount" placeholder="Código do cupom" autocomplete="off" aria-label="Código do cupom">
+              <button type="submit" class="cart-discount__submit">APLICAR</button>
+            </form>
+            <ul class="cart-discount__codes list-unstyled" role="list">
+              {%- for discount in cart.cart_level_discount_applications -%}
+                <li class="cart-discount__pill" data-discount-code="{{ discount.title | escape }}">
+                  <span>{{ discount.title | escape }}</span>
+                  <button type="button" class="cart-discount__pill-remove" aria-label="Remover {{ discount.title | escape }}">&times;</button>
+                </li>
+              {%- endfor -%}
+            </ul>
+            <div class="cart-discount__error hidden" role="alert">
+              <span ref="cartDiscountErrorDiscountCode"></span>
+              <span ref="cartDiscountErrorShipping" class="hidden"></span>
+            </div>
+          </cart-discount-cart>
+        </div>
+      </div>
+    </div>
+  </details>
+</div>

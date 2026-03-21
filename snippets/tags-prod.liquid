@@ -1,0 +1,59 @@
+
+{%- if product.metafields.custom.tags_prod != blank -%}
+  {%- assign tags_metafield = product.metafields.custom.tags_prod -%}
+  
+  <div class="product-tags-container-{{ product.id }}">
+    {%- for tag in tags_metafield.value -%}
+      {%- assign tag_trimmed = tag | strip -%}
+      {%- if tag_trimmed != blank -%}
+        <span class="product-tag-{{ product.id }} product-tag-{{ product.id }}--4">
+          {{ tag_trimmed }}
+        </span>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  {%- style -%}
+    .product-tags-container-{{ product.id }} {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .product-tag-{{ product.id }} {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.4;
+      border-radius: 20px;
+      background-color: #f5f5f5;
+      color: #333333;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .product-tag-{{ product.id }}:hover {
+      transform: translateY(-1px);
+    }
+
+    .product-tag-{{ product.id }}--4 {
+      background-color: #fce4ec;
+      color: #c2185b;
+    }
+
+    /* Para tags além da 5ª, usa o estilo padrão */
+    @media screen and (max-width: 749px) {
+      .product-tag-{{ product.id }} {
+        font-size: 11px;
+        padding: 5px 10px;
+      }
+
+      .product-tags-container-{{ product.id }} {
+        gap: 6px;
+      }
+    }
+  {%- endstyle -%}
+{%- endif -%}

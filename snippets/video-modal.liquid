@@ -1,0 +1,460 @@
+<div id="global-video-modal" class="video-modal-overlay">
+  <div class="video-modal-content">
+    <div class="video-modal-header">
+      <button class="modal-close-button" aria-label="Fechar">{% render 'icon-close' %}</button>
+      <div class="modal-brand-name">
+        <img src="{{ settings.logo | image_url: width: 200 }}" width="auto" height="auto">
+      </div>
+      <button class="modal-share-button" aria-label="Compartilhar">{% render 'icon-share' %}</button>
+    </div>
+
+    <div class="modal-video-container">
+      <video id="global-modal-video-player" class="modal-video-player" playsinline muted controls="false"></video>
+    </div>
+    
+    <div class="modal-navigation">
+      <button class="modal-nav-button prev" aria-label="Vídeo anterior">{% render 'icon-caret' %}</button>
+      <button class="modal-nav-button next" aria-label="Próximo vídeo">{% render 'icon-caret' %}</button>
+    </div>
+
+    <div class="video-progress-bar">&nbsp;</div>
+    <div class="modal-product-info">
+      <div class="product-details">
+        <div class="price-container-modal">
+          <s class="modal-product-price-old"></s>
+          <p class="modal-product-price"></p>
+        </div>
+        <p class="modal-product-installments"></p>
+      </div>
+      <div class="product-add-to-cart">
+        <form method="post" action="/cart/add" class="modal-add-to-cart-form">
+          <input type="hidden" name="id" class="modal-variant-id" value="">
+          <button type="submit" class="modal-add-button">+ Adicionar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* === Global Video Modal Manager (colocar uma vez, antes das sections) === */
+(function () {
+  if (window.videoModalManager) return;
+
+  window.videoModalManager = {
+    dataSources: {},
+    activeDataSourceId: null,
+    currentIndex: 0,
+
+    registerDataSource(id, data) {
+      try {
+        this.dataSources[id] = data || [];
+        // se já estiver aberto e for mesma fonte podemos atualizar
+        // (comportamento extra opcional)
+      } catch (e) {
+        console.error('registerDataSource error', e);
+      }
+    },
+
+    openModal(sourceId, index) {
+      var ds = this.dataSources[sourceId];
+      if (!ds || !ds.length) {
+        console.warn('DataSource vazio ou não encontrado para', sourceId);
+      }
+      this.activeDataSourceId = sourceId;
+      this.currentIndex = typeof index === 'number' ? index : 0;
+      this.updateModalContent();
+      var modal = document.getElementById('global-video-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      } else {
+        console.warn('global-video-modal não encontrado no DOM.');
+      }
+    },
+
+    closeModal() {
+      var modal = document.getElementById('global-video-modal');
+      var player = document.getElementById('global-modal-video-player');
+      if (player) {
+        player.pause();
+        player.src = '';
+      }
+      if (modal) {
+        modal.style.display = 'none';
+      }
+      document.body.style.overflow = 'auto';
+      this.activeDataSourceId = null;
+      this.currentIndex = 0;
+    },
+
+    navigate(direction) {
+      var ds = this.dataSources[this.activeDataSourceId];
+      if (!ds) return;
+      var total = ds.length;
+      this.currentIndex = (this.currentIndex + direction + total) % total;
+      this.updateModalContent();
+    },
+
+    updateModalContent() {
+      var ds = this.dataSources[this.activeDataSourceId];
+      if (!ds || !ds[this.currentIndex]) {
+        console.warn('Nothing to play in updateModalContent.');
+        return;
+      }
+      var data = ds[this.currentIndex];
+
+      var player = document.getElementById('global-modal-video-player');
+      var priceEl = document.querySelector('#global-video-modal .modal-product-price');
+      var priceOldEl = document.querySelector('#global-video-modal .modal-product-price-old');
+      var installmentsEl = document.querySelector('#global-video-modal .modal-product-installments');
+      var form = document.querySelector('#global-video-modal .modal-add-to-cart-form');
+      var variantInput = document.querySelector('#global-video-modal .modal-variant-id');
+      var progressBar = document.querySelector('#global-video-modal .video-progress-bar');
+      var brandEl = document.querySelector('#global-video-modal .modal-brand-name');
+      var productInfoEl = document.querySelector('#global-video-modal .modal-product-info');
+
+      var isVideoOnly = data && (data.modalMode === 'video' || data.showControls === true);
+
+      if (progressBar) {
+        progressBar.style.width = '0%';
+        progressBar.style.display = isVideoOnly ? 'none' : 'block';
+      }
+      if (brandEl) {
+        brandEl.style.display = isVideoOnly ? 'none' : '';
+      }
+      if (productInfoEl) {
+        productInfoEl.style.display = isVideoOnly ? 'none' : '';
+      }
+
+      if (player) {
+        player.src = data.videoUrl || '';
+        try {
+          player.load();
+          player.muted = !!data.muted || true;
+          player.controls = !!isVideoOnly;
+          if (isVideoOnly) {
+            player.setAttribute('controls', 'true');
+          } else {
+            player.removeAttribute('controls');
+          }
+          player.play().catch(function(){ /* autoplay pode falhar */ });
+        } catch (e) { console.warn(e); }
+      }
+
+      if (data.product && !isVideoOnly) {
+        if (priceEl) priceEl.textContent = data.product.price || '';
+        if (priceOldEl) priceOldEl.textContent = data.product.priceOld || '';
+        if (installmentsEl) installmentsEl.textContent = data.product.installments || '';
+        if (variantInput && data.product.variantId) variantInput.value = data.product.variantId;
+        if (form) form.style.display = 'block';
+      } else {
+        if (priceEl) priceEl.textContent = '';
+        if (priceOldEl) priceOldEl.textContent = '';
+        if (installmentsEl) installmentsEl.textContent = '';
+        if (form) form.style.display = 'none';
+      }
+    }
+  };
+
+  /* - listeners do modal (uma vez) - */
+  document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('global-video-modal');
+    if (!modal) return;
+
+    var shareBtn = modal.querySelector('.modal-share-button');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', function () {
+        var manager = window.videoModalManager;
+        if (!manager.activeDataSourceId) return;
+
+        var currentData = manager.dataSources[manager.activeDataSourceId][manager.currentIndex];
+        var shareUrl = null;
+        if (currentData) {
+          if (currentData.product && currentData.product.productUrl) {
+            shareUrl = currentData.product.productUrl;
+          } else if (currentData.videoUrl) {
+            shareUrl = currentData.videoUrl;
+          }
+        }
+
+        if (shareUrl) {
+          var message = encodeURIComponent('Olha isso: ' + shareUrl);
+          var whatsappUrl = 'https://api.whatsapp.com/send?text=' + message;
+          window.open(whatsappUrl, '_blank');
+        } else {
+          console.error('Nada para compartilhar.');
+          alert('Não foi possível compartilhar este conteúdo.');
+        }
+      });
+    }
+
+    var closeBtn = modal.querySelector('.modal-close-button');
+    if (closeBtn) closeBtn.addEventListener('click', function () { window.videoModalManager.closeModal(); });
+
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) window.videoModalManager.closeModal();
+    });
+
+    var prev = modal.querySelector('.modal-nav-button.prev');
+    var next = modal.querySelector('.modal-nav-button.next');
+    if (prev) prev.addEventListener('click', function () { window.videoModalManager.navigate(-1); });
+    if (next) next.addEventListener('click', function () { window.videoModalManager.navigate(1); });
+
+    // barra de progresso do vídeo
+    var player = document.getElementById('global-modal-video-player');
+    var progressBar = modal.querySelector('.video-progress-bar');
+    if (player && progressBar) {
+      player.addEventListener('timeupdate', function () {
+        if (!player.duration || isNaN(player.duration)) return;
+        var progress = (player.currentTime / player.duration) * 100;
+        progressBar.style.width = progress + '%';
+      });
+      player.addEventListener('ended', function () { progressBar.style.width = '0%'; });
+      player.addEventListener('loadstart', function () { progressBar.style.width = '0%'; });
+    }
+
+    // intercepta o submit do add-to-cart dentro do modal (se existir)
+    var addForm = modal.querySelector('.modal-add-to-cart-form');
+    if (addForm) {
+      addForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var btn = addForm.querySelector('button');
+        var original = btn ? btn.textContent : null;
+        if (btn) { btn.textContent = 'Adicionando...'; btn.disabled = true; }
+        var variant = addForm.querySelector('.modal-variant-id').value;
+        var body = { items: [{ id: variant, quantity: 1 }]};
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        }).then(function(res){ return res.json(); }).then(function(data){
+          if (btn) { btn.textContent = 'Adicionado!'; }
+          // você pode chamar uma função para abrir o drawer se existir
+          if (document.querySelector('cart-drawer')) {
+            try { document.querySelector('cart-drawer').open(); } catch(e){}
+          }
+          setTimeout(function(){
+            if (btn) { btn.textContent = original; btn.disabled = false; }
+            window.videoModalManager.closeModal();
+            // opcional: acionar update do drawer
+            if (typeof updateCartDrawer === 'function') updateCartDrawer();
+          }, 1200);
+        }).catch(function(err){
+          console.error(err);
+          if (btn) { btn.textContent = 'Erro'; }
+          setTimeout(function(){ if (btn) { btn.textContent = original; btn.disabled = false; } }, 1200);
+        });
+      });
+    }
+  });
+
+  /* - processa datasources pendentes (se sections registraram antes do manager estar pronto) - */
+  // se já existirem itens pendentes, consome
+  if (window.__pendingVideoDataSources && Array.isArray(window.__pendingVideoDataSources)) {
+    window.__pendingVideoDataSources.forEach(function (item) {
+      if (item && item.id) {
+        window.videoModalManager.registerDataSource(item.id, item.data || []);
+      }
+    });
+    // limpa
+    window.__pendingVideoDataSources = [];
+  } else {
+    window.__pendingVideoDataSources = [];
+  }
+
+})();
+</script>
+
+
+<style>
+    .price-container-modal{
+      display: flex;
+      gap: 12px;
+      align-items: baseline;
+    }
+      /* Estilos do Modal Global de Vídeo */
+    .video-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      display: none; /* Inicia escondido */
+      justify-content: center;
+      align-items: center;
+      -webkit-tap-highlight-color: transparent; /* Remove highlight azul no mobile */
+    }
+    .video-modal-content {
+      width: 350px;
+      height: 621px;
+      background-color: #1a1a1a;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-video-container {
+      flex-grow: 1;
+      position: relative;
+    }
+    .modal-video-player {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .video-modal-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+      color: white;
+    }
+    .modal-brand-name {
+      text-align: center;
+      width: 100%;
+      font-weight: bold;
+      font-size: 1.2rem;
+      letter-spacing: 0.2em;
+    }
+    .modal-close-button, .modal-share-button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      width: 33.333px;
+      height: 33.333px;
+      padding: 3.333px;
+      border-radius: 33.333px;
+      background: rgba(0, 0, 0, 0.10);
+      backdrop-filter: blur(7.5px);
+    }
+    .modal-close-button svg, .modal-share-button svg {
+      width: 16.667px;
+      height: 16.667px;
+      stroke: white;
+    }
+    .modal-navigation {
+      position: absolute;
+      right: 0px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+    }
+    .modal-nav-button {
+      background: rgba(0, 0, 0, 0.10);
+      backdrop-filter: blur(7.5px);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-nav-button svg {
+      width: 18px;
+      height: 18px;
+      stroke: white;
+    }
+    .modal-nav-button.prev svg { transform: rotate(0deg); }
+    .modal-nav-button.next svg { transform: rotate(-180deg); }
+    .modal-product-info {
+          min-height: 100px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      background: var(--WHITE, #FAFAFA);
+      color: white;
+    }
+    .modal-product-price {
+      color: var(--700, #8C20D5);
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0;
+    }
+    .modal-product-installments {
+      color: var(--Gray-500, #4B4B53);
+      font-size: 14px;
+      margin: 0;
+    }
+    .modal-product-price-old{
+      color: var(--Gray-300, #7C7C83);
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 300;
+      line-height: normal;
+      text-decoration-line: line-through;
+    }
+    .modal-add-button {
+      border-radius: 40px;
+      background: var(--Gray-200, #DFDFE0);
+      color: black;
+      border: none;
+      padding: 12px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .modal-add-button:hover { background-color: #f0f0f0; }
+    
+    .video-progress-bar {
+      position: absolute;
+      bottom: 100px; /* Posiciona acima do modal-product-info */
+      left: 0;
+      width: 0%;
+      height: 5px;
+      background: var(--700, #8C20D5);
+      transition: width 0.1s ease;
+      z-index: 15;
+    }
+    
+    @media screen and (max-width: 768px) {
+      .video-modal-content { max-height: 100vh;}
+    }
+</style>
+
+<script>
+  // Controle da barra de progresso do vídeo
+  document.addEventListener('DOMContentLoaded', () => {
+    const videoPlayer = document.getElementById('global-modal-video-player');
+    const progressBar = document.querySelector('.video-progress-bar');
+    
+    if (videoPlayer && progressBar) {
+      // Atualizar barra de progresso durante a reprodução
+      videoPlayer.addEventListener('timeupdate', () => {
+        const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+        progressBar.style.width = progress + '%';
+      });
+      
+      // Resetar barra quando o vídeo terminar
+      videoPlayer.addEventListener('ended', () => {
+        progressBar.style.width = '0%';
+      });
+      
+      // Resetar barra quando um novo vídeo for carregado
+      videoPlayer.addEventListener('loadstart', () => {
+        progressBar.style.width = '0%';
+      });
+    }
+  });
+  </script>

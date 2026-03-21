@@ -1,0 +1,119 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "name": "t:sections.footer.name",
+  "type": "footer",
+  "sections": {
+    "pre_footer_QaxePq": {
+      "type": "pre-footer",
+      "name": "Pre Footer",
+      "settings": {
+        "imagem_logo": "{{ shop.brand.square_logo }}",
+        "logo_width_desktop": 70,
+        "logo_height_desktop": 0,
+        "logo_width_mobile": 60,
+        "logo_height_mobile": 0,
+        "color_background": "#f6f6f6",
+        "color_text": "#f62d13",
+        "color_border": "#f62d13"
+      }
+    },
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "link_list_WYm8nG": {
+          "type": "link_list",
+          "settings": {
+            "heading": "<strong>Institucional</strong>",
+            "menu": "institucional",
+            "heading_2": "",
+            "menu_2": "",
+            "heading_3": "",
+            "menu_3": ""
+          }
+        },
+        "contact_payment_C7qcV9": {
+          "type": "contact_payment",
+          "settings": {
+            "contact_heading": "<strong>Entre em Contato</strong>",
+            "contact_subheading": "Fale com a Tremaque",
+            "contact_subheading2": "Segunda à Sexta das 08h às 18h.",
+            "contact_text_1": "<p><a href=\"https://api.whatsapp.com/send?phone=5543984172561\" title=\"Whatsapp Telefone da Tremaque\">Whatsapp: (43) 98417-2561</a></p>",
+            "contact_icon_1": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewbox=\"0 0 20 20\" fill=\"none\">\n  <path d=\"M14.5817 11.985C14.333 11.8608 13.1097 11.2625 12.882 11.1792C12.6534 11.0967 12.4876 11.0558 12.321 11.3042C12.156 11.5517 11.6788 12.1092 11.5339 12.2742C11.3891 12.44 11.2434 12.46 10.9947 12.3367C10.746 12.2117 9.94388 11.9508 8.99353 11.1075C8.25419 10.4509 7.75431 9.64002 7.60946 9.39169C7.46461 9.14419 7.59439 9.01002 7.71831 8.88669C7.83051 8.77585 7.96783 8.59752 8.09175 8.45335C8.21651 8.30835 8.25754 8.20502 8.34127 8.03919C8.42416 7.87419 8.38313 7.73002 8.32034 7.60585C8.25754 7.48169 7.76018 6.26252 7.55336 5.76669C7.35073 5.28419 7.14559 5.35003 6.9932 5.34169C6.84835 5.33503 6.68256 5.33336 6.51594 5.33336C6.35015 5.33336 6.08053 5.39503 5.85279 5.64336C5.62504 5.89086 4.98199 6.49002 4.98199 7.70919C4.98199 8.92752 5.87372 10.105 5.99764 10.2709C6.1224 10.4359 7.75264 12.9375 10.2487 14.01C10.8423 14.265 11.3053 14.4175 11.6671 14.5308C12.2632 14.72 12.8058 14.6933 13.2337 14.6292C13.7118 14.5583 14.7057 14.03 14.9133 13.4517C15.121 12.8733 15.121 12.3775 15.0582 12.2742C14.9962 12.1708 14.8312 12.1092 14.5817 11.985ZM10.0418 18.1542H10.0385C8.55626 18.1543 7.10128 17.7577 5.82599 17.0058L5.52372 16.8275L2.39135 17.6458L3.22699 14.6058L3.03022 14.2942C2.20165 12.9811 1.76332 11.4614 1.76588 9.91085C1.76672 5.36919 5.48018 1.6742 10.0452 1.6742C12.2557 1.6742 14.3339 2.53253 15.8963 4.08919C16.6672 4.85304 17.2782 5.76146 17.694 6.76189C18.1098 7.76232 18.3221 8.83489 18.3186 9.91752C18.3161 14.4592 14.6035 18.1542 10.0418 18.1542ZM17.0861 2.9067C16.1636 1.98247 15.0659 1.24965 13.8567 0.7507C12.6475 0.251754 11.3508 -0.00339687 10.0418 3.41479e-05C4.55328 3.41479e-05 0.0862428 4.44586 0.0837309 9.91002C0.0837309 11.6567 0.541739 13.3617 1.41338 14.8642L0 20L5.27923 18.6217C6.73916 19.4133 8.37513 19.8281 10.0377 19.8283H10.0418C15.5296 19.8283 19.9974 15.3825 20 9.91752C20.004 8.61525 19.7486 7.32511 19.2484 6.12172C18.7483 4.91833 18.0133 3.82559 17.0861 2.9067Z\" fill=\"#D6002A\"></path>\n</svg>",
+            "contact_text_2": "<p>tremaque@tremaque.com.br</p>",
+            "contact_icon_2": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewbox=\"0 0 24 24\" fill=\"none\">\n  <path d=\"M21.5 18L14.8571 12M9.14286 12L2.50003 18M2 7L10.1649 12.7154C10.8261 13.1783 11.1567 13.4097 11.5163 13.4993C11.8339 13.5785 12.1661 13.5785 12.4837 13.4993C12.8433 13.4097 13.1739 13.1783 13.8351 12.7154L22 7M6.8 20H17.2C18.8802 20 19.7202 20 20.362 19.673C20.9265 19.3854 21.3854 18.9265 21.673 18.362C22 17.7202 22 16.8802 22 15.2V8.8C22 7.11984 22 6.27976 21.673 5.63803C21.3854 5.07354 20.9265 4.6146 20.362 4.32698C19.7202 4 18.8802 4 17.2 4H6.8C5.11984 4 4.27976 4 3.63803 4.32698C3.07354 4.6146 2.6146 5.07354 2.32698 5.63803C2 6.27976 2 7.11984 2 8.8V15.2C2 16.8802 2 17.7202 2.32698 18.362C2.6146 18.9265 3.07354 19.3854 3.63803 19.673C4.27976 20 5.11984 20 6.8 20Z\" stroke=\"#D6002A\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n</svg>",
+            "contact_text_3": "<p>R. Serra das Marrecas, 102<br/>Messiânico, Londrina - PR, 86065-270</p>",
+            "contact_icon_3": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewbox=\"0 0 24 24\" fill=\"none\">\n  <path d=\"M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z\" stroke=\"#D6002A\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n  <path d=\"M12 22C16 18 20 14.4183 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 14.4183 8 18 12 22Z\" stroke=\"#D6002A\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n</svg>",
+            "show_payment_seals": false,
+            "payment_seals_heading": "<strong>Formas de Pagamento</strong>",
+            "payment_seals_content": "",
+            "payment_seals_image_width": 200
+          }
+        },
+        "link_list_PqTehP": {
+          "type": "link_list",
+          "settings": {
+            "heading": "<a href=\"https://x.com/tremaque\" title=\"https://x.com/tremaque\"><strong>Acompanhe seu Pedido</strong></a>",
+            "menu": "",
+            "heading_2": "<a href=\"https://x.com/tremaque\" title=\"Seus pedidos\"><strong>Sua conta</strong></a>",
+            "menu_2": "",
+            "heading_3": "",
+            "menu_3": ""
+          }
+        },
+        "seals_and_security_KEe4Hw": {
+          "type": "SealsAndSecurity",
+          "settings": {
+            "show_payment_seals": true,
+            "payment_seals_heading": "<strong>Formas de Pagamento</strong>",
+            "payment_seals_content": "",
+            "payment_seals_image": "shopify://shop_images/Frame_1321316949.png",
+            "payment_seals_image_width": 190,
+            "show_security_seals": true,
+            "security_seals_heading": "<strong>Selos de Segurança</strong>",
+            "security_seals_image_1": "shopify://shop_images/icone_rodape-Ativo_5-seguranca_1.png",
+            "security_seals_link_1": "https://transparencyreport.google.com/safe-browsing/search?url=http:%2F%2Ftremaque.com.br%2F",
+            "security_seals_link_2": "https://www.sslshopper.com/ssl-checker.html#hostname=http://tremaque.com.br/",
+            "security_seals_link_3": "",
+            "security_seals_image_width": 56,
+            "reclame_aqui_code": "<div id=\"ra-verified-seal\"><script type=\"text/javascript\" id=\"ra-embed-verified-seal\" src=\"https://s3.amazonaws.com/raichu-beta/ra-verified/bundle.js\" data-id=\"Wm1MdzRmekFjS3ZmVVhZcTp0cmVtYXF1ZQ==\" data-target=\"ra-verified-seal\" data-model=\"horizontal_1\"></script></div>"
+          }
+        }
+      },
+      "block_order": [
+        "link_list_WYm8nG",
+        "contact_payment_C7qcV9",
+        "link_list_PqTehP",
+        "seals_and_security_KEe4Hw"
+      ],
+      "settings": {
+        "cnpj": "24.359.230/0001-00",
+        "color_scheme": "scheme-2",
+        "newsletter_enable": false,
+        "newsletter_heading": "Subscribe to our emails",
+        "enable_follow_on_shop": false,
+        "show_social": false,
+        "social_icons_color": "#fe68a0",
+        "color_footer_heading": "#f62d13",
+        "enable_country_selector": false,
+        "enable_language_selector": false,
+        "payment_enable": false,
+        "show_policy": false,
+        "margin_top": 0,
+        "padding_top": 44,
+        "padding_bottom": 48
+      }
+    }
+  },
+  "order": [
+    "pre_footer_QaxePq",
+    "footer"
+  ]
+}

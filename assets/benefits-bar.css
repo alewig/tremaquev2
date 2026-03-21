@@ -1,0 +1,30 @@
+.title_main_beneficios {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.benefit-card {
+  display: flex;
+
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+}
+.benefit-card svg {
+  min-width: 10px;
+  min-height: 10px;
+}
+.block-description-benefit {
+  display: grid;
+}
+
+.benefits-container {
+  display: flex;
+  overflow: hidden;
+  gap: 10px;
+}
+
+.smt{
+  margin: 0px;
+}

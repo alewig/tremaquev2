@@ -1,0 +1,48 @@
+
+{%- liquid
+  assign text_tag = tag_block.settings.text_tag
+  assign img_tag = tag_block.settings.img_tag
+  assign background_tag = tag_block.settings.background_tag | default: '#f1f1f1'
+-%}
+
+<div class="custom-tag-{{ tag_block.id }}">
+  {%- if img_tag != blank -%}
+    <img
+      class="custom-tag__icon-{{ tag_block.id }}"
+      src="{{ img_tag | image_url: width: 40 }}"
+      alt="{{ img_tag.alt | default: 'Ícone da tag' | escape }}"
+      width="20"
+      height="20"
+      loading="lazy"
+    >
+  {%- endif -%}
+
+  {%- if text_tag != blank -%}
+    <p class="custom-tag__text-{{ tag_block.id }}">{{ text_tag }}</p>
+  {%- endif -%}
+</div>
+
+{%- style -%}
+  .custom-tag-{{ tag_block.id }} {
+    display: inline-flex; 
+    align-items: center;
+    gap: 8px; 
+    
+    background-color: {{ background_tag }};
+    padding: 8px 16px; 
+    border-radius: 50px; 
+  }
+
+  .custom-tag__icon-{{ tag_block.id }} {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0; 
+  }
+
+  .custom-tag__text-{{ tag_block.id }} {
+    margin: 0; 
+    font-size: 12px;
+    color: #333; 
+    line-height: 1.4;
+  }
+{%- endstyle -%}

@@ -1,0 +1,111 @@
+{%- comment -%}
+  yampi-product-page.liquid
+  Intercepta o botão "Comprar Agora" (checkout mode) na página de produto
+  e executa o mesmo fluxo que o botão da Yampi na página do carrinho:
+    1. Adiciona ao carrinho via /cart/add.js
+    2. Busca /cart.json
+    3. Chama a API da Yampi para obter checkout_direct_url
+    4. Redireciona diretamente para o checkout Yampi
+{%- endcomment -%}
+
+{%- if template.name == 'product' -%}
+<script>
+(function () {
+  'use strict';
+
+  var YAMPI_CART_ENDPOINT = 'https://api.dooki.com.br/v2/public/shopify/cart';
+  var SHOP_HOST = window.location.host;
+
+  function showLoader() {
+    var el = document.querySelector('.yampi-loader');
+    if (el) el.style.display = 'block';
+  }
+
+  function hideLoader() {
+    var el = document.querySelector('.yampi-loader');
+    if (el) el.style.display = 'none';
+  }
+
+  // Chama a API da Yampi com o payload do carrinho e redireciona para o checkout
+  function redirectToYampiCheckout() {
+    fetch('/cart.json', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (cartPayload) {
+        return fetch(YAMPI_CART_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop: SHOP_HOST,
+            cart_payload: cartPayload
+          })
+        });
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (resp) {
+        if (resp && resp.checkout_direct_url) {
+          window.location.href = resp.checkout_direct_url;
+        } else {
+          // Fallback: vai para o carrinho se não obtiver a URL
+          window.location.href = '/cart';
+          hideLoader();
+        }
+      })
+      .catch(function (err) {
+        console.error('[yampi-product-page] Erro ao obter checkout Yampi:', err);
+        window.location.href = '/cart';
+        hideLoader();
+      });
+  }
+
+  function bindButtons() {
+    var btns = document.querySelectorAll(
+      'button[name="add"].product-form__submit--checkout'
+    );
+
+    btns.forEach(function (btn) {
+      if (btn.dataset.yampiProductBound) return;
+      btn.dataset.yampiProductBound = 'true';
+
+      btn.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (btn.disabled) return;
+
+        var form = btn.closest('form');
+        if (!form) return;
+
+        showLoader();
+
+        fetch('/cart/add.js', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form),
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('cart/add failed: ' + res.status);
+            return res.json();
+          })
+          .then(function () {
+            redirectToYampiCheckout();
+          })
+          .catch(function (err) {
+            console.error('[yampi-product-page] Erro ao adicionar ao carrinho:', err);
+            hideLoader();
+          });
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', bindButtons);
+
+  // Re-bind quando variantes mudam (podem re-renderizar os botões)
+  var observer = new MutationObserver(bindButtons);
+  document.addEventListener('DOMContentLoaded', function () {
+    var area = document.querySelector('.buy-buttons-container, .product-form');
+    if (area) observer.observe(area, { childList: true, subtree: true });
+  });
+})();
+</script>
+{%- endif -%}

@@ -1,0 +1,829 @@
+<div class="previsao-entrega-widget-wrapper">
+<div
+    class="previsao-entrega-widget"
+    data-estimate-sp="{{ settings.estimate_sp }}"
+    data-estimate-sudeste="{{ settings.estimate_sudeste }}"
+    data-estimate-sul="{{ settings.estimate_sul }}"
+    data-estimate-centro-oeste="{{ settings.estimate_centro_oeste }}"
+    data-estimate-nordeste="{{ settings.estimate_nordeste }}"
+    data-estimate-norte="{{ settings.estimate_norte }}"
+    data-estimate-default="{{ settings.estimate_default }}"
+  >
+    {% comment %} Linha superior: ícone caminhão + previsão "Chegará entre X e Y" + ícone info {% endcomment %}
+    <div class="previsao-entrega-row previsao-entrega-dates">
+      <svg class="previsao-entrega-truck" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 30 23" fill="none" aria-hidden="true">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M3 1.5C3 0.671573 3.67157 0 4.5 0H18.4828C20.9384 0 23.0966 1.62787 23.7712 3.98903L24.6249 6.97723C24.674 7.14905 24.8111 7.28161 24.9844 7.32495L28.3489 8.16605C29.907 8.55558 31 9.95552 31 11.5616V14C31 15.4215 30.1525 16.6452 28.9352 17.1931C28.9778 17.4558 29 17.7253 29 18C29 20.7614 26.7614 23 24 23C21.2386 23 19 20.7614 19 18C19 17.8313 19.0084 17.6645 19.0247 17.5H12.9753C12.9916 17.6645 13 17.8313 13 18C13 20.7614 10.7614 23 8 23C5.23858 23 3 20.7614 3 18C3 17.2889 3.14845 16.6125 3.41604 16H2.5C1.67157 16 1 15.3284 1 14.5C1 13.6716 1.67157 13 2.5 13H7.5C7.55976 13 7.6187 13.0035 7.67663 13.0103C7.78354 13.0035 7.89136 13 8 13C9.3987 13 10.6633 13.5743 11.5707 14.5H20.4293C21.3367 13.5743 22.6013 13 24 13C25.3965 13 26.6593 13.5725 27.5664 14.4956C27.8112 14.4631 28 14.2536 28 14V11.5616C28 11.3321 27.8439 11.1321 27.6213 11.0765L24.2568 10.2354C23.0434 9.932 22.084 9.0041 21.7404 7.8014L20.8866 4.8132C20.58 3.73994 19.599 3 18.4828 3H4.5C3.67157 3 3 2.32843 3 1.5ZM8 20C9.10457 20 10 19.1046 10 18C10 16.8954 9.10457 16 8 16C6.89543 16 6 16.8954 6 18C6 19.1046 6.89543 20 8 20ZM24 20C25.1046 20 26 19.1046 26 18C26 16.8954 25.1046 16 24 16C22.8954 16 22 16.8954 22 18C22 19.1046 22.8954 20 24 20Z" fill="#B10326"/>
+        <path d="M1.5 7C0.671573 7 0 7.67157 0 8.5C0 9.32843 0.671573 10 1.5 10H11.5C12.3284 10 13 9.32843 13 8.5C13 7.67157 12.3284 7 11.5 7H1.5Z" fill="#B10326"/>
+      </svg>
+      <p id="delivery-estimate-result" class="previsao-entrega-text">
+        Calculando para a sua região...
+      </p>
+      <div class="tip-toast-info" role="button" aria-expanded="false" tabindex="0" aria-label="Mais informações">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M8.99984 12.3333V8.99999M8.99984 5.66666H9.00817M17.3332 8.99999C17.3332 13.6024 13.6022 17.3333 8.99984 17.3333C4.39746 17.3333 0.666504 13.6024 0.666504 8.99999C0.666504 4.39762 4.39746 0.666656 8.99984 0.666656C13.6022 0.666656 17.3332 4.39762 17.3332 8.99999Z" stroke="#68686E" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="tip-tooltip" role="tooltip" aria-hidden="true">
+          Estimativa calculada com base na sua localização atual. Pode variar conforme o CEP informado no checkout.
+        </div>
+      </div>
+    </div>
+
+    <h3 class="previsao-entrega-heading">Calcule seu frete</h3>
+
+    <div class="previsao-entrega-form-row" data-previsao-form hidden>
+      <input
+        type="text"
+        id="localize-ip-cep"
+        class="previsao-entrega-input"
+        placeholder="Digite seu Cep"
+        inputmode="numeric"
+        maxlength="9"
+        autocomplete="postal-code"
+        aria-label="CEP"
+      >
+      <button type="button" class="previsao-entrega-btn" id="localize-ip-calcular">
+        CALCULAR
+      </button>
+    </div>
+
+    <div id="localize-ip-opcoes" class="previsao-entrega-opcoes" hidden aria-live="polite"></div>
+
+    {%- comment -%} DEBUG: dimensões usadas no cálculo de frete {%- endcomment -%}
+    {% comment %} <div id="localize-ip-debug-dims" class="previsao-entrega-debug" aria-label="Debug dimensões">
+      <div class="previsao-entrega-debug__title">Dimensões no cálculo</div>
+      <div class="previsao-entrega-debug__grid">
+        <span class="previsao-entrega-debug__label">Comprimento:</span>
+        <span id="localize-ip-debug-length" class="previsao-entrega-debug__value">—</span>
+        <span class="previsao-entrega-debug__label">Altura:</span>
+        <span id="localize-ip-debug-height" class="previsao-entrega-debug__value">—</span>
+        <span class="previsao-entrega-debug__label">Largura:</span>
+        <span id="localize-ip-debug-width" class="previsao-entrega-debug__value">—</span>
+        <span class="previsao-entrega-debug__label">Peso:</span>
+        <span id="localize-ip-debug-weight" class="previsao-entrega-debug__value">—</span>
+      </div>
+    </div> {% endcomment %}
+  </div>
+</div>
+  
+  <style>
+    /* Wrapper: contém overflow; tooltip é posicionado via JS (fixed) para não cortar */
+    .previsao-entrega-widget-wrapper {
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: hidden;
+      overflow-y: visible;
+      box-sizing: border-box;
+    }
+
+    /* Design Figma: caixa rosa clara, bordas arredondadas */
+    .previsao-entrega-widget {
+      background: #FFE8EC;
+      border-radius: 8px;
+      border: 1px dashed #F80132;
+      padding: 20px;
+      position: relative;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    /* Linha superior: caminhão + texto + ícone i */
+    .previsao-entrega-row.previsao-entrega-dates {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .previsao-entrega-truck {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .previsao-entrega-text {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.4;
+      color: #0D0D0E;
+    }
+
+    .previsao-entrega-text strong {
+      font-weight: 700;
+    }
+
+    .tip-toast-info {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 4px;
+      color: #0D0D0E;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tip-toast-info svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .tip-tooltip {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      left: auto;
+      transform: translateY(6px);
+      max-width: min(320px, calc(100vw - 24px));
+      width: max-content;
+      min-width: 200px;
+      background: #f9f9fb;
+      color: #313135;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.3;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 150ms ease, transform 150ms ease;
+      z-index: 9999;
+      white-space: normal;
+      text-align: left;
+      box-sizing: border-box;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Seta apontando para o ícone (acima do tooltip) */
+    .tip-tooltip::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      right: 10px;
+      left: auto;
+      border: 6px solid transparent;
+      border-bottom-color: #f9f9fb;
+    }
+
+    .tip-toast-info[aria-expanded='true'] .tip-tooltip,
+    .tip-toast-info:hover .tip-tooltip,
+    .tip-toast-info:focus .tip-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Quando o JS reposiciona para ficar na tela */
+    .tip-tooltip.tip-tooltip--positioned {
+      position: fixed;
+      transform: none;
+    }
+    .tip-tooltip.tip-tooltip--positioned::after {
+      display: none;
+    }
+
+    /* Título "Calcule seu frete" */
+    .previsao-entrega-heading {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #0D0D0E;
+    }
+
+    /* Linha input + botão: input com cantos à esquerda, botão à direita, mesma altura */
+    .previsao-entrega-form-row {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      min-height: 48px;
+    }
+
+    .previsao-entrega-input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 16px;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #0D0D0E;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-right: none;
+      border-radius: 8px 0 0 8px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .previsao-entrega-input::placeholder {
+      color: #B3B3B3;
+    }
+
+    .previsao-entrega-input:focus {
+      border-color: #B10326;
+    }
+
+    .previsao-entrega-btn {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+      color: #fff;
+      background: #B10326;
+      border: none;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+
+    .previsao-entrega-btn:hover {
+      opacity: 0.9;
+    }
+
+    .previsao-entrega-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Lista de opções de frete (após CALCULAR) */
+    .previsao-entrega-opcoes {
+      margin-top: 4px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      min-width: 0;
+    }
+
+    .previsao-entrega-opcoes-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #0D0D0E;
+      min-width: 0;
+    }
+
+    .previsao-entrega-opcoes-item span:first-child {
+      min-width: 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    .previsao-entrega-opcoes-item span:last-child {
+      flex-shrink: 0;
+    }
+
+    .previsao-entrega-opcoes-item + .previsao-entrega-opcoes-item {
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .previsao-entrega-opcoes-item strong {
+      font-weight: 600;
+    }
+
+    .previsao-entrega-opcoes-empty {
+      font-size: 14px;
+      color: #6d6d6d;
+      margin: 0;
+    }
+
+    /* DEBUG: quadro de dimensões */
+    .previsao-entrega-debug {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.06);
+      border: 1px dashed #999;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .previsao-entrega-debug__title {
+      font-weight: 700;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .previsao-entrega-debug__grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2px 12px;
+      align-items: baseline;
+    }
+    .previsao-entrega-debug__label {
+      color: #666;
+    }
+    .previsao-entrega-debug__value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    @media (max-width: 640px) {
+      .previsao-entrega-widget {
+        padding: 16px;
+        gap: 12px;
+      }
+
+      .previsao-entrega-text {
+        font-size: 14px;
+      }
+
+      .previsao-entrega-heading {
+        font-size: 16px;
+      }
+
+      .previsao-entrega-form-row {
+        flex-direction: column;
+        min-height: auto;
+        gap: 8px;
+      }
+
+      .previsao-entrega-input {
+        border-radius: 8px;
+        border-right: 1px solid #e0e0e0;
+      }
+
+      .previsao-entrega-btn {
+        border-radius: 8px;
+      }
+
+      .tip-tooltip {
+        top: calc(100% + 10px);
+        right: 0;
+        left: auto;
+        transform: translateY(6px);
+        width: 280px;
+        max-width: min(280px, calc(100vw - 24px));
+      }
+
+      .tip-tooltip::after {
+        top: -6px;
+        right: 10px;
+        left: auto;
+        border-top-color: transparent;
+        border-bottom-color: #f9f9fb;
+      }
+    }
+  </style>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const estimateText = document.getElementById('delivery-estimate-result');
+      const formRow = document.querySelector('.previsao-entrega-form-row[data-previsao-form]');
+      const cepInput = document.getElementById('localize-ip-cep');
+      const btnCalcular = document.getElementById('localize-ip-calcular');
+      const opcoesContainer = document.getElementById('localize-ip-opcoes');
+      const widget = document.querySelector('.previsao-entrega-widget');
+      if (!estimateText || !widget) return;
+
+      function formatarData(diasADepois) {
+        var d = new Date();
+        d.setDate(d.getDate() + diasADepois);
+        var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        return d.getDate() + ' de ' + meses[d.getMonth()];
+      }
+
+      function mostrarFormEPreencherCep(cep) {
+        if (formRow) {
+          formRow.hidden = false;
+        }
+        if (cepInput && cep) {
+          var digits = (cep + '').replace(/\D/g, '');
+          if (digits.length >= 5) {
+            cepInput.value = digits.slice(0, 5) + (digits.length > 5 ? '-' + digits.slice(5, 8) : '');
+          } else {
+            cepInput.value = digits;
+          }
+        }
+      }
+
+      function atualizarTextoPrevisao(html) {
+        estimateText.innerHTML = html;
+      }
+
+      // Definida no escopo externo para funcionar independente da geolocalização
+      function buscarShippingPorCEP(cep, showOptions, fallbackFn) {
+        showOptions = !!showOptions;
+        console.log('[Shipping] Iniciando busca de shipping para CEP:', cep, '| showOptions:', showOptions);
+
+        if (!cep) {
+          console.log('[Shipping] CEP não fornecido, usando estimativa padrão');
+          if (!showOptions && typeof fallbackFn === 'function') fallbackFn();
+          return;
+        }
+
+        // Obter informações do produto via Liquid individual (seguro para descrições com HTML)
+        const shipmentInvoiceValue = {{ product.price | divided_by: 100.0 }};
+        {%- assign _v = product.variants.first -%}
+        {%- assign _sku_raw = _v.sku | default: '' -%}
+
+        function formatWeight(weightInGrams) {
+          return parseFloat(((weightInGrams || 0) / 1000).toFixed(3));
+        }
+
+        // Função para validar e formatar CEP (deve ter 8 dígitos)
+        function formatCEP(cep) {
+          const cepLimpo = cep.replace(/\D/g, '');
+          if (cepLimpo.length < 8) {
+            return cepLimpo.padEnd(8, '0');
+          }
+          return cepLimpo.substring(0, 8);
+        }
+
+        const defaultProductInfo = {
+          Height: 21,
+          Length: 7,
+          Weight: formatWeight({{ _v.weight | default: 300 }}),
+          Width: 14,
+          SKU: {{ _sku_raw | json }},
+          Category: {{ product.product_type | default: '' | json }}
+        };
+        {%- assign v = product.variants.first -%}
+        {%- if v != blank -%}
+          {%- assign m_altura = v.metafields.frenet.altura.value -%}
+          {%- assign m_comprimento = v.metafields.frenet.comprimento.value -%}
+          {%- assign m_largura = v.metafields.frenet.largura.value -%}
+        {%- else -%}
+          {%- assign m_altura = nil -%}
+          {%- assign m_comprimento = nil -%}
+          {%- assign m_largura = nil -%}
+        {%- endif -%}
+        {%- comment -%} .value retorna "45 cm" - extrair número com split {%- endcomment -%}
+        {%- assign num_altura = m_altura | split: ' ' | first -%}
+        {%- assign num_comprimento = m_comprimento | split: ' ' | first -%}
+        {%- assign num_largura = m_largura | split: ' ' | first -%}
+        var frenetComprimento = {% if num_comprimento != blank %}(parseFloat("{{ num_comprimento }}") || null){% else %}null{% endif %};
+        var frenetAltura = {% if num_altura != blank %}(parseFloat("{{ num_altura }}") || null){% else %}null{% endif %};
+        var frenetLargura = {% if num_largura != blank %}(parseFloat("{{ num_largura }}") || null){% else %}null{% endif %};
+        if (frenetComprimento != null) defaultProductInfo.Length = parseFloat(frenetComprimento);
+        if (frenetAltura != null) defaultProductInfo.Height = parseFloat(frenetAltura);
+        if (frenetLargura != null) defaultProductInfo.Width = parseFloat(frenetLargura);
+
+        function atualizarDebugDimensoes(info) {
+          var elLength = document.getElementById('localize-ip-debug-length');
+          var elHeight = document.getElementById('localize-ip-debug-height');
+          var elWidth = document.getElementById('localize-ip-debug-width');
+          var elWeight = document.getElementById('localize-ip-debug-weight');
+          if (elLength) elLength.textContent = info.Length + ' cm';
+          if (elHeight) elHeight.textContent = info.Height + ' cm';
+          if (elWidth) elWidth.textContent = info.Width + ' cm';
+          if (elWeight) elWeight.textContent = info.Weight + ' kg';
+        }
+        atualizarDebugDimensoes(defaultProductInfo);
+
+        const cepFormatado = formatCEP(cep);
+        console.log('[Shipping] CEP formatado:', {
+          original: cep,
+          formatted: cepFormatado
+        });
+
+        // Montar o item de shipping, omitindo SKU se for vazio
+        const shippingItem = {
+          Height: defaultProductInfo.Height,
+          Length: defaultProductInfo.Length,
+          Quantity: 1,
+          Weight: defaultProductInfo.Weight,
+          Width: defaultProductInfo.Width,
+          Category: defaultProductInfo.Category
+        };
+
+        // Só adiciona SKU se não for vazio
+        if (defaultProductInfo.SKU) {
+          shippingItem.SKU = defaultProductInfo.SKU;
+        }
+
+        const params = {
+          SellerCEP: '86065270',
+          RecipientCEP: cepFormatado,
+          ShipmentInvoiceValue: shipmentInvoiceValue,
+          ShippingItemArray: JSON.stringify([shippingItem]),
+          RecipientCountry: 'Brasil'
+        };
+
+        function toQueryString(obj, prefix) {
+          const str = [];
+          for (const p in obj) {
+            if (obj.hasOwnProperty(p)) {
+              const k = prefix ? `${prefix}[${p}]` : p,
+                v = obj[p];
+              str.push(
+                v !== null && typeof v === 'object'
+                  ? toQueryString(v, k)
+                  : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
+              );
+            }
+          }
+          return str.join('&');
+        }
+
+        console.log('[Shipping] Item de shipping montado:', shippingItem);
+        console.log('[Shipping] ShippingItemArray (JSON):', JSON.stringify([shippingItem]));
+
+        const queryString = toQueryString(params);
+        const token = '622110E8R81CER4B0DR97CBRF44173A82224';
+        const shippingUrl = `https://calc-wig.vercel.app/shipping/quote?${queryString}&token=${token}`;
+
+        console.log('[Shipping] Parâmetros finais:', params);
+        console.log('[Shipping] URL completa:', shippingUrl);
+
+        return fetch(shippingUrl)
+          .then(function (response) {
+            console.log('[Shipping] Status da resposta:', response.status, response.statusText);
+            if (!response.ok) {
+              console.error('[Shipping] Resposta não OK:', response.status, response.statusText);
+            }
+            return response.json();
+          })
+          .then(function (shippingData) {
+            console.log('[Shipping] Dados completos recebidos:', shippingData);
+
+            if (shippingData && shippingData.ShippingSevicesArray && shippingData.ShippingSevicesArray.length > 0) {
+              console.log('[Shipping] Total de serviços encontrados:', shippingData.ShippingSevicesArray.length);
+              console.log('[Shipping] Serviços brutos:', shippingData.ShippingSevicesArray);
+
+              // Filtrar apenas serviços com preço válido
+              const validServices = shippingData.ShippingSevicesArray.filter(item =>
+                item.ShippingPrice != null && item.DeliveryTime != null
+              );
+
+              console.log('[Shipping] Serviços válidos (com preço e prazo):', validServices.length, validServices);
+
+              if (validServices.length > 0) {
+                // Encontrar menor e maior prazo
+                const deliveryTimes = validServices.map(item => parseInt(item.DeliveryTime)).filter(time => !isNaN(time));
+                console.log('[Shipping] Prazos extraídos:', deliveryTimes);
+
+                if (deliveryTimes.length > 0) {
+                  const minDays = Math.min(...deliveryTimes);
+                  const maxDays = Math.max(...deliveryTimes);
+                  const maxDaysWithMargin = maxDays + 1;
+                  console.log('[Shipping] Prazo mínimo:', minDays, '| Prazo máximo (com margem):', maxDaysWithMargin);
+
+                  if (showOptions && opcoesContainer) {
+                    opcoesContainer.innerHTML = validServices.map(function (item) {
+                      const price = item.ShippingPrice != null ? parseFloat(item.ShippingPrice) : 0;
+                      const prazo = item.DeliveryTime != null ? item.DeliveryTime + ' dias' : '';
+                      const nome = item.Carrier || item.ServiceDescription || item.CarrierName || 'Entrega';
+                      return '<div class="previsao-entrega-opcoes-item"><span><strong>' + nome + '</strong> – ' + prazo + '</span><span>R$ ' + price.toFixed(2).replace('.', ',') + '</span></div>';
+                    }).join('');
+                    opcoesContainer.hidden = false;
+                  } else {
+                    const data1 = formatarData(minDays);
+                    const data2 = formatarData(maxDaysWithMargin);
+                    atualizarTextoPrevisao('Chegará entre <strong>' + data1 + '</strong> e <strong>' + data2 + '</strong>');
+                    mostrarFormEPreencherCep(cep);
+                  }
+                  return;
+                } else {
+                  console.warn('[Shipping] ⚠️ Nenhum prazo válido encontrado após parse');
+                }
+              } else {
+                console.warn('[Shipping] ⚠️ Nenhum serviço válido encontrado (sem preço ou prazo)');
+              }
+            } else {
+              console.warn('[Shipping] ⚠️ Resposta inválida ou sem serviços');
+            }
+            if (showOptions && opcoesContainer) {
+              opcoesContainer.innerHTML = '<p class="previsao-entrega-opcoes-empty">Nenhuma opção de frete encontrada para este CEP.</p>';
+              opcoesContainer.hidden = false;
+            } else {
+              console.log('[Shipping] ❌ Usando estimativa padrão (fallback)');
+              if (typeof fallbackFn === 'function') fallbackFn();
+            }
+          })
+          .catch(function (error) {
+            console.error('[Shipping] ❌ Erro ao buscar shipping:', error);
+            if (showOptions && opcoesContainer) {
+              opcoesContainer.innerHTML = '<p class="previsao-entrega-opcoes-empty">Não foi possível calcular o frete. Tente novamente.</p>';
+              opcoesContainer.hidden = false;
+            } else {
+              if (typeof fallbackFn === 'function') fallbackFn();
+            }
+          });
+      }
+
+      // Listeners registrados imediatamente — independente do resultado da geolocalização
+      if (btnCalcular && cepInput) {
+        btnCalcular.addEventListener('click', function () {
+          var raw = (cepInput.value || '').replace(/\D/g, '');
+          if (raw.length < 8) {
+            if (opcoesContainer) {
+              opcoesContainer.innerHTML = '<p class="previsao-entrega-opcoes-empty">Digite um CEP válido (8 dígitos).</p>';
+              opcoesContainer.hidden = false;
+            }
+            return;
+          }
+          btnCalcular.disabled = true;
+          var promise = buscarShippingPorCEP(raw.slice(0, 8), true);
+          if (promise && typeof promise.finally === 'function') {
+            promise.finally(function () { btnCalcular.disabled = false; });
+          } else {
+            btnCalcular.disabled = false;
+          }
+        });
+      }
+
+      if (cepInput) {
+        cepInput.addEventListener('input', function () {
+          var v = this.value.replace(/\D/g, '').slice(0, 8);
+          this.value = v.length <= 5 ? v : v.slice(0, 5) + '-' + v.slice(5);
+        });
+      }
+
+      const suaApiUrl = 'https://api-vampira-v2.vercel.app/api/proxy';
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          method: 'get',
+          url: 'http://ip-api.com/json/?fields=status,message,regionName,region,zip',
+        }),
+      };
+
+      console.log('[Localize IP] Iniciando busca de localização...');
+      fetch(suaApiUrl, requestOptions)
+        .then(function (response) {
+          console.log('[Localize IP] Resposta recebida da API proxy:', response.status);
+          return response.json();
+        })
+        .then(function (data) {
+          console.log('[Localize IP] Dados completos da API:', data);
+          const geoData = data.body;
+          console.log('[Localize IP] GeoData extraído:', geoData);
+
+          if (geoData && geoData.status === 'success' && geoData.regionName) {
+            const estado = geoData.regionName;
+            const siglaEstado = geoData.region;
+            const zip = geoData.zip;
+
+            console.log('[Localize IP] Estado:', estado, '| Sigla:', siglaEstado, '| CEP:', zip);
+
+            function usarEstimativaPadrao() {
+              console.log('[Fallback] Usando estimativa padrão para estado:', siglaEstado);
+              const estimates = {
+                sp: widget.dataset.estimateSp,
+                sudeste: widget.dataset.estimateSudeste,
+                sul: widget.dataset.estimateSul,
+                centroOeste: widget.dataset.estimateCentroOeste,
+                nordeste: widget.dataset.estimateNordeste,
+                norte: widget.dataset.estimateNorte,
+                default: widget.dataset.estimateDefault,
+              };
+              let prazo = '';
+              switch (siglaEstado) {
+                case 'SP': prazo = estimates.sp; break;
+                case 'RJ': case 'MG': case 'ES': prazo = estimates.sudeste; break;
+                case 'PR': case 'SC': case 'RS': prazo = estimates.sul; break;
+                case 'DF': case 'GO': case 'MT': case 'MS': prazo = estimates.centroOeste; break;
+                case 'AL': case 'BA': case 'CE': case 'MA': case 'PB': case 'PE': case 'PI': case 'RN': case 'SE': prazo = estimates.nordeste; break;
+                case 'AC': case 'AP': case 'AM': case 'PA': case 'RO': case 'RR': case 'TO': prazo = estimates.norte; break;
+                default: prazo = estimates.default; break;
+              }
+              var nums = (prazo || '').match(/\d+/g);
+              if (nums && nums.length >= 2) {
+                var minD = parseInt(nums[0], 10);
+                var maxD = parseInt(nums[1], 10) + 1;
+                atualizarTextoPrevisao('Chegará entre <strong>' + formatarData(minD) + '</strong> e <strong>' + formatarData(maxD) + '</strong>');
+              } else if (nums && nums.length === 1) {
+                var d = parseInt(nums[0], 10);
+                atualizarTextoPrevisao('Chegará em até <strong>' + formatarData(d) + '</strong>');
+              } else {
+                atualizarTextoPrevisao('Entrega estimada para <strong>' + estado + '</strong>: ' + (prazo || 'consulte o prazo') + '.');
+              }
+              mostrarFormEPreencherCep(zip);
+            }
+
+            if (zip) {
+              console.log('[Localize IP] ✅ CEP encontrado, buscando shipping...');
+              buscarShippingPorCEP(zip, false, usarEstimativaPadrao);
+            } else {
+              console.log('[Localize IP] ⚠️ CEP não encontrado, usando estimativa padrão');
+              usarEstimativaPadrao();
+            }
+          } else {
+            console.error('[Localize IP] ❌ Dados de geolocalização inválidos');
+            atualizarTextoPrevisao('Não foi possível estimar a entrega para sua região.');
+            if (formRow) formRow.hidden = false;
+          }
+        })
+      .catch(function (error) {
+          console.error('[Localize IP] ❌ Erro ao chamar a API proxy v2:', error);
+          atualizarTextoPrevisao('Ocorreu um erro ao calcular o prazo.');
+          if (formRow) formRow.hidden = false;
+        });
+  
+      // --- TOOLTIP: hover / focus / click / touch / ESC / click outside ---
+      const widgets = document.querySelectorAll('.previsao-entrega-widget');
+      widgets.forEach((widget, index) => {
+        const tipWrapper = widget.querySelector('.tip-toast-info');
+        const tooltip = widget.querySelector('.tip-tooltip');
+  
+        if (!tipWrapper || !tooltip) return;
+  
+        // garantir IDs únicos e associação aria
+        const tooltipId = `delivery-tooltip-${Date.now()}-${index}`;
+        tooltip.setAttribute('id', tooltipId);
+        tooltip.setAttribute('aria-hidden', 'true');
+        tipWrapper.setAttribute('aria-describedby', tooltipId);
+        tipWrapper.setAttribute('aria-expanded', 'false');
+  
+        let hideTimeout = null;
+        let isTouch = false;
+  
+        // Reposiciona o tooltip para ficar dentro da viewport
+        function positionTooltipInViewport() {
+          const iconRect = tipWrapper.getBoundingClientRect();
+          const padding = 12;
+          const gap = 10;
+          tooltip.classList.remove('tip-tooltip--positioned');
+          tooltip.removeAttribute('style');
+          function applyPosition() {
+            const tr = tooltip.getBoundingClientRect();
+            if (tr.width === 0 || tr.height === 0) {
+              requestAnimationFrame(applyPosition);
+              return;
+            }
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            let top = iconRect.bottom + gap;
+            let left = iconRect.left + (iconRect.width / 2) - (tr.width / 2);
+            if (top + tr.height > vh - padding) top = iconRect.top - tr.height - gap;
+            if (left < padding) left = padding;
+            if (left + tr.width > vw - padding) left = vw - padding - tr.width;
+            tooltip.classList.add('tip-tooltip--positioned');
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.style.maxWidth = Math.min(320, vw - padding * 2) + 'px';
+          }
+          requestAnimationFrame(applyPosition);
+        }
+        const show = () => {
+          clearTimeout(hideTimeout);
+          tipWrapper.setAttribute('aria-expanded', 'true');
+          tooltip.setAttribute('aria-hidden', 'false');
+          positionTooltipInViewport();
+        };
+        const hide = () => {
+          tipWrapper.setAttribute('aria-expanded', 'false');
+          tooltip.setAttribute('aria-hidden', 'true');
+          tooltip.classList.remove('tip-tooltip--positioned');
+          tooltip.removeAttribute('style');
+        };
+  
+        // mouse events
+        tipWrapper.addEventListener('mouseenter', (e) => {
+          if (isTouch) return;
+          show();
+        });
+        tipWrapper.addEventListener('mouseleave', () => {
+          if (isTouch) return;
+          hideTimeout = setTimeout(hide, 200);
+        });
+  
+        // focus/blur for keyboard accessibility
+        tipWrapper.addEventListener('focus', () => show());
+        tipWrapper.addEventListener('blur', () => hide());
+  
+        // click/touch toggles on mobile and desktop
+        tipWrapper.addEventListener('click', (e) => {
+          // prevent immediate blur on touch devices
+          e.stopPropagation();
+          isTouch = e.pointerType === 'touch' || 'ontouchstart' in window;
+          const expanded = tipWrapper.getAttribute('aria-expanded') === 'true';
+          if (expanded) hide();
+          else show();
+        });
+  
+        // close on ESC
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' || e.key === 'Esc') {
+            hide();
+          }
+        });
+  
+        // close when click outside
+        document.addEventListener('click', (e) => {
+          if (!widget.contains(e.target)) {
+            hide();
+          }
+        });
+  
+        // touchstart outside also closes
+        document.addEventListener(
+          'touchstart',
+          (e) => {
+            if (!widget.contains(e.target)) hide();
+          },
+          { passive: true }
+        );
+      });
+    });
+  </script>
+  

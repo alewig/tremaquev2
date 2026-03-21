@@ -1,0 +1,354 @@
+{%- comment -%}
+  Seção com abas para informações do produto em duas colunas
+  Cada block representa uma categoria/aba
+{%- endcomment -%}
+
+
+<section 
+  id="product-info-tabs-{{ section.id }}" 
+  class="product-info-tabs-section"
+  data-section-id="{{ section.id }}"
+>
+  {%- if section.blocks.size > 0 -%}
+    {%- comment -%} Seletor de Abas {%- endcomment -%}
+    <div class="product-info-tabs-selector page-width">
+      <div class="tabs-selector-wrapper">
+        {%- for block in section.blocks -%}
+          <button
+            type="button"
+            class="tab-button{% if forloop.first %} tab-button--active{% endif %}"
+            data-tab-id="{{ block.id }}"
+            data-block-id="{{ block.id }}"
+            {{ block.shopify_attributes }}
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-controls="tab-content-{{ block.id }}"
+            id="tab-button-{{ block.id }}"
+          >
+            {%- if block.settings.icon != blank -%}
+              <span class="tab-icon">
+                <img src="{{ block.settings.icon | image_url: width: 16 }}" alt="" width="16" height="16" loading="lazy">
+              </span>
+            {%- endif -%}
+            <span class="tab-label">{{ block.settings.category_name | default: 'Categoria' }}</span>
+          </button>
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- comment -%} Conteúdo das Abas {%- endcomment -%}
+    <div class="product-info-tabs-content page-width">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign is_active = forloop.first
+          assign category_id = block.settings.category_id | default: block.id
+          assign title_left = block.settings.title_esq | default: ''
+          assign title_right = block.settings.title_dir | default: ''
+          assign meta_array_esquerda_name = block.settings.meta_array_esquerda | default: ''
+          assign meta_array_direita_name = block.settings.meta_array_direita | default: ''
+          
+          assign array_left = blank
+          assign array_right = blank
+          assign has_left_data = false
+          assign has_right_data = false
+          
+          if product and meta_array_esquerda_name != blank
+            assign array_left = product.metafields.custom[meta_array_esquerda_name]
+            if array_left != blank and array_left.value != blank
+              assign has_left_data = true
+            endif
+          endif
+          
+          if product and meta_array_direita_name != blank
+            assign array_right = product.metafields.custom[meta_array_direita_name]
+            if array_right != blank and array_right.value != blank
+              assign has_right_data = true
+            endif
+          endif
+        -%}
+
+        <div
+          class="tab-content{% if is_active %} tab-content--active{% endif %}"
+          id="tab-content-{{ block.id }}"
+          data-tab-id="{{ block.id }}"
+          role="tabpanel"
+          aria-labelledby="tab-button-{{ block.id }}"
+          {% unless is_active %}hidden{% endunless %}
+        >
+          {%- if has_left_data or has_right_data -%}
+            {%- render 'colum_infos',
+              meta_array_esquerda: array_left,
+              meta_array_direita: array_right,
+              title_esq: title_left,
+              title_dir: title_right,
+              id_section: category_id
+            -%}
+          {%- else -%}
+            <div class="tab-content-empty">
+              <p>Configure os metafields para esta categoria.</p>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <style>
+    .product-info-tabs-selector{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #product-info-tabs-{{ section.id }} {
+      padding: 24px 0;
+    }
+
+    #product-info-tabs-{{ section.id }} .product-info-tabs-selector {
+      margin-bottom: 16px;
+    }
+
+    #product-info-tabs-{{ section.id }} .tabs-selector-wrapper {
+      background-color: #edfcf4;
+      border-radius: 60px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      width: 50%;
+      flex-wrap: wrap;
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 12px;
+      border: none;
+      background: transparent;
+      border-radius: 40px;
+      cursor: pointer;
+      font-family: 'League Spartan', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      color: #0a915f;
+      transition: all 0.3s ease;
+      width: 222px;
+      flex-shrink: 0;
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-button:hover {
+      background-color: rgba(114, 227, 175, 0.2);
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-button--active {
+      background-color: #72e3af;
+      color: #095e41;
+      font-weight: 700;
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-label {
+      white-space: nowrap;
+    }
+
+    #product-info-tabs-{{ section.id }} .product-info-tabs-content {
+      position: relative;
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-content--active {
+      display: block;
+    }
+
+    #product-info-tabs-{{ section.id }} .tab-content-empty {
+      padding: 40px;
+      text-align: center;
+      color: #4f4f4f;
+      font-family: 'League Spartan', sans-serif;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media screen and (max-width: 749px) {
+      #product-info-tabs-{{ section.id }} {
+        padding: 16px 0;
+      }
+
+      #product-info-tabs-{{ section.id }} .tabs-selector-wrapper {
+        padding: 6px;
+        border-radius: 40px;
+      }
+
+      #product-info-tabs-{{ section.id }} .tab-button {
+        height: 36px;
+        padding: 0 10px;
+        font-size: 13px;
+        width: auto;
+        flex: 1 1 0;
+        min-width: 0;
+      }
+
+      #product-info-tabs-{{ section.id }} .tab-icon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+  </style>
+
+  <script>
+    (function() {
+      var section = document.getElementById('product-info-tabs-{{ section.id }}');
+      if (!section) return;
+
+      var tabButtons = section.querySelectorAll('.tab-button');
+      var tabContents = section.querySelectorAll('.tab-content');
+
+      tabButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+          var tabId = this.getAttribute('data-tab-id');
+
+          // Remove active state from all buttons and contents
+          tabButtons.forEach(function(btn) {
+            btn.classList.remove('tab-button--active');
+            btn.setAttribute('aria-selected', 'false');
+          });
+
+          tabContents.forEach(function(content) {
+            content.classList.remove('tab-content--active');
+            content.setAttribute('hidden', '');
+          });
+
+          // Add active state to clicked button and corresponding content
+          this.classList.add('tab-button--active');
+          this.setAttribute('aria-selected', 'true');
+
+          var activeContent = section.querySelector('#tab-content-' + tabId);
+          if (activeContent) {
+            activeContent.classList.add('tab-content--active');
+            activeContent.removeAttribute('hidden');
+          }
+        });
+      });
+    })();
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Info Produto - Abas",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Categoria",
+      "settings": [
+        {
+          "type": "text",
+          "id": "category_name",
+          "label": "Nome da Categoria",
+          "default": "Categoria",
+          "info": "Nome exibido no botão da aba"
+        },
+        {
+          "type": "text",
+          "id": "category_id",
+          "label": "ID da Categoria",
+          "info": "ID único para esta categoria (opcional, usado no id_section)"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Ícone da Categoria",
+          "info": "Ícone exibido no botão da aba (16x16px recomendado)"
+        },
+        {
+          "type": "text",
+          "id": "title_esq",
+          "label": "Título Coluna Esquerda",
+          "default": "Ideal para confeiteiros profissionais"
+        },
+        {
+          "type": "text",
+          "id": "title_dir",
+          "label": "Título Coluna Direita",
+          "default": "Aplicações principais"
+        },
+        {
+          "type": "text",
+          "id": "meta_array_esquerda",
+          "label": "Nome do Metacampo Array (Esquerda)",
+          "info": "Nome do metacampo customizado do produto que contém o array para a coluna esquerda (ex: array_met_text)"
+        },
+        {
+          "type": "text",
+          "id": "meta_array_direita",
+          "label": "Nome do Metacampo Array (Direita)",
+          "info": "Nome do metacampo customizado do produto que contém o array para a coluna direita (ex: array_dire_text)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Informações do Produto com Abas",
+      "blocks": [
+        {
+          "type": "category",
+          "settings": {
+            "category_name": "Confeitaria",
+            "title_esq": "Ideal para confeiteiros profissionais",
+            "title_dir": "Aplicações principais"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "category_name": "Snacks",
+            "title_esq": "Ideal para snacks",
+            "title_dir": "Aplicações principais"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "category_name": "Culinária",
+            "title_esq": "Ideal para culinária",
+            "title_dir": "Aplicações principais"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+

@@ -1,0 +1,285 @@
+{% comment %}
+  Nome da Seção: Benefícios com Lista
+  Descrição: Uma seção com duas colunas. A primeira para texto e a segunda para uma lista de benefícios.
+{% endcomment %}
+
+<style>
+  .benefits-section-wrapper {
+    background-color: {{ section.settings.section_bg_color }};
+    padding: 60px 20px;
+  }
+
+  .benefits-section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 40px;
+    align-items: baseline;
+  }
+
+  .benefits-text-column .subtitle-{{ section.id }} {
+    font-size: {{ section.settings.subtitle_font_size }}rem;
+    font-weight: bold;
+    margin: 0px;
+    color: {{ section.settings.subtitle_color }};
+  }
+
+  .benefits-text-column .title-{{ section.id }} {
+    font-size: {{ section.settings.title_font_size }}rem;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: {{ section.settings.title_color }};
+  }
+
+  .benefits-text-column .description-{{ section.id }} {
+    font-size: {{ section.settings.description_font_size }}rem;
+    line-height: 1.6;
+    color: {{ section.settings.description_color }};
+  }
+
+  .benefits-list-column {
+    background-color: {{ section.settings.list_bg_color }};
+    border-radius: 16px;
+    padding: 24px 40px;
+  }
+  
+  .benefit-item {
+    padding: 24px 0;
+  }
+
+  .benefit-item:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .benefit-item-title {
+    font-size: {{ section.settings.item_title_font_size }}rem;
+    font-weight: bold;
+    margin: 0px ;
+    color: {{ section.settings.list_item_title_color }};
+  }
+
+  .benefit-item-description {
+    margin: 0;
+    font-size: {{ section.settings.item_description_font_size }}rem;
+    color: {{ section.settings.list_item_description_color }};
+  }
+
+  /* Responsividade para Dispositivos Móveis */
+  @media (max-width: 900px) {
+    .benefits-section-container {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .benefits-text-column .title-{{ section.id }} {
+      font-size: {{ section.settings.title_font_size_mobile }}rem;
+    }
+  }
+</style>
+
+<div class="benefits-section-wrapper">
+  <div class="benefits-section-container">
+    <div class="benefits-text-column">
+      {% if section.settings.subtitle != blank %}
+        <p class="subtitle-{{ section.id }}">{{ section.settings.subtitle | escape }}</p>
+      {% endif %}
+
+      {% if section.settings.title != blank %}
+        <h2 class="title-{{ section.id }}">{{ section.settings.title | escape }}</h2>
+      {% endif %}
+
+      {% if section.settings.description != blank %}
+        <div class="description-{{ section.id }}">{{ section.settings.description }}</div>
+      {% endif %}
+    </div>
+
+    {% if section.blocks.size > 0 %}
+      <div class="benefits-list-column">
+        {% for block in section.blocks %}
+          <div class="benefit-item" {{ block.shopify_attributes }}>
+            {% if block.settings.item_title != blank %}
+              <h3 class="benefit-item-title">{{ block.settings.item_title | escape }}</h3>
+            {% endif %}
+            {% if block.settings.item_description != blank %}
+              <p class="benefit-item-description">{{ block.settings.item_description | escape }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Benefícios com Lista",
+  "tag": "section",
+  "class": "section-benefits-list",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Conteúdo da Coluna de Texto"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Legenda (Subtítulo)",
+      "default": "Loja"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título Principal",
+      "default": "Benefícios que só a loja tem:"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Descrição",
+      "default": "<p>Somos os maiores especialistas.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Configurações de Tamanho da Fonte"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size",
+      "label": "Tamanho da Legenda",
+      "min": 0.5,
+      "max": 2.5,
+      "step": 0.1,
+      "unit": "rem",
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Tamanho do Título (Desktop)",
+      "min": 1.5,
+      "max": 5,
+      "step": 0.1,
+      "unit": "rem",
+      "default": 3.7
+    },
+    {
+      "type": "range",
+      "id": "title_font_size_mobile",
+      "label": "Tamanho do Título (Mobile)",
+      "min": 1.5,
+      "max": 4,
+      "step": 0.1,
+      "unit": "rem",
+      "default": 2.2
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Tamanho da Descrição",
+      "min": 0.8,
+      "max": 2.5,
+      "step": 0.1,
+      "unit": "rem",
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "item_title_font_size",
+      "label": "Tamanho do Título do Item",
+      "min": 0.8,
+      "max": 2.5,
+      "step": 0.1,
+      "unit": "rem",
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "item_description_font_size",
+      "label": "Tamanho da Descrição do Item",
+      "min": 0.8,
+      "max": 2,
+      "step": 0.1,
+      "unit": "rem",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Configurações de Cores"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Cor de Fundo da Seção",
+      "default": "#FDF0F3"
+    },
+    {
+      "type": "color",
+      "id": "list_bg_color",
+      "label": "Cor de Fundo da Lista",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Cor do Texto da Legenda",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Cor do Texto do Título",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Cor do Texto da Descrição",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "list_item_title_color",
+      "label": "Cor dos Títulos da Lista",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "list_item_description_color",
+      "label": "Cor das Descrições da Lista",
+      "default": "#555555"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit_item",
+      "name": "Item de Benefício",
+      "settings": [
+        {
+          "type": "text",
+          "id": "item_title",
+          "label": "Título do Item",
+          "default": "Título do benefício"
+        },
+        {
+          "type": "textarea",
+          "id": "item_description",
+          "label": "Descrição do Item",
+          "default": "Descreva aqui os detalhes do benefício."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Benefícios com Lista",
+      "blocks": [
+        { "type": "benefit_item" },
+        { "type": "benefit_item" },
+        { "type": "benefit_item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

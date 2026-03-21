@@ -1,0 +1,196 @@
+{% comment %}
+  Renders a megamenu for the header.
+
+  Usage:
+  {% render 'header-mega-menu' %}
+{% endcomment %}
+
+<nav class="header__inline-menu header-mega-menu-{{ section.id }}">
+  <ul class="list-menu list-menu--inline" role="list">
+    {%- for link in section.settings.menu.links -%}
+      <li>
+        {%- if link.links != blank -%}
+          <header-menu>
+            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu">
+              <summary
+                id="HeaderMenu-{{ link.handle }}"
+                class="header__menu-item list-menu__item link focus-inset"
+              >
+                <span
+                  {%- if link.child_active %}
+                    class="header__active-menu-item"
+                  {% endif %}
+                >
+                  {{- link.title | escape -}}
+                </span>
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </summary>
+              <div
+                id="MegaMenu-Content-{{ forloop.index }}"
+                class="mega-menu__content color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup"
+                tabindex="-1"
+              >
+                <ul
+                  class="mega-menu__list page-width{% if link.levels == 1 %} mega-menu__list--condensed{% endif %}"
+                  role="list"
+                >
+                  {%- for childlink in link.links -%}
+                    <li>
+                      <a
+                        id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                        href="{{ childlink.url }}"
+                        class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"
+                        {% if childlink.current %}
+                          aria-current="page"
+                        {% endif %}
+                      >
+                        {{ childlink.title | escape }}
+                      </a>
+                      {%- if childlink.links != blank -%}
+                        <ul class="list-unstyled" role="list">
+                          {%- for grandchildlink in childlink.links -%}
+                            <li>
+                              <a
+                                id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                                href="{{ grandchildlink.url }}"
+                                class="mega-menu__link link{% if grandchildlink.current %} mega-menu__link--active{% endif %}"
+                                {% if grandchildlink.current %}
+                                  aria-current="page"
+                                {% endif %}
+                              >
+                                {{ grandchildlink.title | escape }}
+                              </a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            </details>
+          </header-menu>
+        {%- else -%}
+          <a
+            id="HeaderMenu-{{ link.handle }}"
+            href="{{ link.url }}"
+            class="header__menu-item list-menu__item link link--text focus-inset"
+            {% if link.current %}
+              aria-current="page"
+            {% endif %}
+          >
+            <span
+              {%- if link.current %}
+                class="header__active-menu-item"
+              {% endif %}
+            >
+              {{- link.title | escape -}}
+            </span>
+          </a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>
+
+<style>
+  /* Mega menu - layout conforme Figma (14165:4207) */
+  .header-mega-menu-{{ section.id }} .mega-menu__content {
+    background: #ffffff !important;
+    background-image: none !important;
+    padding: 40px 0;
+  }
+
+  /* Forçar o container a parecer com padding 112px nas laterais */
+  .header-mega-menu-{{ section.id }} .mega-menu__list.page-width {
+    padding-left: 112px !important;
+    padding-right: 112px !important;
+  }
+
+  .header-mega-menu-{{ section.id }} .mega-menu__list {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+    margin: 0;
+  }
+
+  .header-mega-menu-{{ section.id }} .mega-menu__list > li {
+    width: 235px;
+    max-width: 235px;
+  }
+
+  .header-mega-menu-{{ section.id }} .mega-menu__list,
+  .header-mega-menu-{{ section.id }} .mega-menu__list ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Título de coluna (nível 2) */
+  .header-mega-menu-{{ section.id }} .mega-menu__link--level-2 {
+    display: block;
+    color: #D6002A;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.4;
+    padding: 0;
+    margin: 0 0 16px 0;
+    text-decoration: none;
+  }
+
+  /* Itens (nível 3) */
+  .header-mega-menu-{{ section.id }} .mega-menu__list ul .mega-menu__link {
+    display: block;
+    color: #6d6d6d;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.4;
+    padding: 0;
+    margin: 0 0 16px 0;
+    text-decoration: none;
+  }
+
+  .header-mega-menu-{{ section.id }} .mega-menu__list ul li:last-child .mega-menu__link {
+    margin-bottom: 0;
+  }
+
+  /* Links nível 2 que não possuem filhos (quando aparecerem) */
+  .header-mega-menu-{{ section.id }} .mega-menu__list > li > .mega-menu__link:not(.mega-menu__link--level-2) {
+    display: block;
+    color: #6d6d6d;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.4;
+    padding: 0;
+    margin: 0 0 16px 0;
+    text-decoration: none;
+  }
+
+  /* Hover */
+  .header-mega-menu-{{ section.id }} .mega-menu__list a:hover {
+    color: #D6002A;
+  }
+
+  /* Responsivo: reduzir paddings e permitir quebra em colunas */
+  @media screen and (max-width: 989px) {
+    .header-mega-menu-{{ section.id }} .mega-menu__content {
+      padding: 24px 0;
+    }
+
+    .header-mega-menu-{{ section.id }} .mega-menu__list.page-width {
+      padding-left: 24px !important;
+      padding-right: 24px !important;
+    }
+
+    .header-mega-menu-{{ section.id }} .mega-menu__list {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 24px;
+    }
+
+    .header-mega-menu-{{ section.id }} .mega-menu__list > li {
+      width: 100%;
+      max-width: 320px;
+    }
+  }
+</style>

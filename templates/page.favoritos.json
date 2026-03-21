@@ -1,0 +1,36 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "section_fav_carousel_zbaeEW": {
+      "type": "section-fav-carousel",
+      "name": "Carousel Favoritos",
+      "settings": {
+        "title": "Meus Favoritos",
+        "title_color": "#4f4f4f",
+        "title_size_desktop": 40,
+        "title_size_mobile": 32,
+        "background_color": "",
+        "view_all_text": "Ver todos",
+        "view_all_url": "",
+        "view_all_text_color": "#6d6d6d",
+        "view_all_arrow_color": "#6d6d6d",
+        "view_all_arrow_background_color": "",
+        "empty_message": "Você ainda não tem produtos favoritos. Adicione clicando no coração na página do produto.",
+        "padding_top": 40,
+        "padding_bottom": 40,
+        "space_between": 32
+      }
+    }
+  },
+  "order": [
+    "section_fav_carousel_zbaeEW"
+  ]
+}

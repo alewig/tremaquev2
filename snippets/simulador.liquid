@@ -1,0 +1,579 @@
+{% comment %}
+  Simulador de Retorno - ROI Calculator
+  Based on Figma design (14161:1480)
+
+  Usage:
+  {% render 'simulador', product: product %}
+{% endcomment %}
+
+{%- liquid
+  assign target = product.selected_or_first_available_variant | default: product
+  assign price = target.price | default: 0
+  assign price_in_reais = price | divided_by: 100.0
+-%}
+
+<div class="simulador" id="simulador-{{ section.id }}" data-product-price="{{ price_in_reais }}">
+  <!-- Header (sempre visível) -->
+  <button type="button" class="simulador__header" aria-expanded="false" aria-controls="simulador-content-{{ section.id }}">
+    <div class="simulador__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 35 35" fill="none">
+            <path d="M29.8124 7.9375C29.8124 7.21263 29.2248 6.625 28.4999 6.625C27.775 6.625 27.1874 7.21263 27.1874 7.9375V28.0625C27.1874 28.7874 27.775 29.375 28.4999 29.375C29.2248 29.375 29.8124 28.7874 29.8124 28.0625V7.9375Z" fill="#F6F6F6"/>
+            <path d="M8.81238 23.6875C8.81238 22.9626 8.22475 22.375 7.49988 22.375C6.775 22.375 6.18738 22.9626 6.18738 23.6875V28.0625C6.18738 28.7874 6.775 29.375 7.49988 29.375C8.22475 29.375 8.81238 28.7874 8.81238 28.0625V23.6875Z" fill="#F6F6F6"/>
+            <path d="M14.4999 18C15.2248 18 15.8124 18.5876 15.8124 19.3125V28.0625C15.8124 28.7874 15.2248 29.375 14.4999 29.375C13.775 29.375 13.1874 28.7874 13.1874 28.0625V19.3125C13.1874 18.5876 13.775 18 14.4999 18Z" fill="#F6F6F6"/>
+            <path d="M22.8124 14.0625C22.8124 13.3376 22.2248 12.75 21.4999 12.75C20.775 12.75 20.1874 13.3376 20.1874 14.0625V28.0625C20.1874 28.7874 20.775 29.375 21.4999 29.375C22.2248 29.375 22.8124 28.7874 22.8124 28.0625V14.0625Z" fill="#F6F6F6"/>
+          </svg>
+    </div>
+    <div class="simulador__header-text">
+      <span class="simulador__title">Simule seu retorno</span>
+      <span class="simulador__subtitle">Do papel pra prática: veja quanto dá pra faturar</span>
+    </div>
+    <div class="simulador__chevron">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 9L12 15L18 9" stroke="#101828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </button>
+
+  <!-- Content (expandível) -->
+  <div class="simulador__content" id="simulador-content-{{ section.id }}" hidden>
+    <div class="simulador__sliders">
+      <!-- Preço de venda -->
+      <div class="simulador__slider-group">
+        <div class="simulador__slider-header">
+          <span class="simulador__slider-label">Preço de venda</span>
+          <span class="simulador__slider-value simulador__slider-value--green" data-value="price">R$ 49,00</span>
+        </div>
+        <div class="simulador__slider-track">
+          <input 
+            type="range" 
+            class="simulador__range simulador__range--green" 
+            id="simulador-price-{{ section.id }}"
+            min="1" 
+            max="500" 
+            value="49"
+            data-type="price"
+          >
+        </div>
+      </div>
+
+      <!-- Unidades por dia -->
+      <div class="simulador__slider-group">
+        <div class="simulador__slider-header">
+          <span class="simulador__slider-label">Unidades por dia</span>
+          <span class="simulador__slider-value simulador__slider-value--orange" data-value="units">35 Unidades</span>
+        </div>
+        <div class="simulador__slider-track">
+          <input 
+            type="range" 
+            class="simulador__range simulador__range--orange" 
+            id="simulador-units-{{ section.id }}"
+            min="1" 
+            max="100" 
+            value="35"
+            data-type="units"
+          >
+        </div>
+      </div>
+
+      <!-- Dias trabalhados -->
+      <div class="simulador__slider-group">
+        <div class="simulador__slider-header">
+          <span class="simulador__slider-label">Dias trabalhados</span>
+          <span class="simulador__slider-value simulador__slider-value--blue" data-value="days">30 Dias</span>
+        </div>
+        <div class="simulador__slider-track">
+          <input 
+            type="range" 
+            class="simulador__range simulador__range--blue" 
+            id="simulador-days-{{ section.id }}"
+            min="1" 
+            max="31" 
+            value="30"
+            data-type="days"
+          >
+        </div>
+      </div>
+
+      <!-- Custo por unidade (inicialmente 50% do preço; deixa de ser automático se o usuário alterar) -->
+      <div class="simulador__slider-group">
+        <div class="simulador__slider-header">
+          <span class="simulador__slider-label">Custo por unidade</span>
+          <span class="simulador__slider-value simulador__slider-value--gray" data-value="cost">R$ 24,50</span>
+        </div>
+        <div class="simulador__slider-track">
+          <input 
+            type="range" 
+            class="simulador__range simulador__range--gray" 
+            id="simulador-cost-{{ section.id }}"
+            min="0.5" 
+            max="250" 
+            step="0.5"
+            value="24.5"
+            data-type="cost"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="simulador__results">
+      <div class="simulador__result simulador__result--green">
+        <div class="simulador__result-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 11 11" fill="none">
+                <path d="M4.875 2.625C4.875 2.31434 5.12684 2.0625 5.4375 2.0625C5.74816 2.0625 6 2.31434 6 2.625V2.8125H6.5625C6.87316 2.8125 7.125 3.06434 7.125 3.375C7.125 3.68566 6.87316 3.9375 6.5625 3.9375H4.875C4.66789 3.9375 4.5 4.10539 4.5 4.3125C4.5 4.51961 4.66789 4.6875 4.875 4.6875H5.625C6.45343 4.6875 7.125 5.35907 7.125 6.1875C7.125 7.01593 6.45343 7.6875 5.625 7.6875V7.875C5.625 8.18566 5.37316 8.4375 5.0625 8.4375C4.75184 8.4375 4.5 8.18566 4.5 7.875V7.6875H3.9375C3.62684 7.6875 3.375 7.43566 3.375 7.125C3.375 6.81434 3.62684 6.5625 3.9375 6.5625H5.625C5.83211 6.5625 6 6.39461 6 6.1875C6 5.98039 5.83211 5.8125 5.625 5.8125H4.875C4.04657 5.8125 3.375 5.14093 3.375 4.3125C3.375 3.48407 4.04657 2.8125 4.875 2.8125V2.625Z" fill="#00C34D"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 5.25C10.5 8.1495 8.1495 10.5 5.25 10.5C2.35051 10.5 0 8.1495 0 5.25C0 2.35051 2.35051 0 5.25 0C8.1495 0 10.5 2.35051 10.5 5.25ZM9.375 5.25C9.375 7.52817 7.52817 9.375 5.25 9.375C2.97183 9.375 1.125 7.52817 1.125 5.25C1.125 2.97183 2.97183 1.125 5.25 1.125C7.52817 1.125 9.375 2.97183 9.375 5.25Z" fill="#00C34D"/>
+              </svg>
+          <span>Faturamento/mês</span>
+        </div>
+        <span class="simulador__result-value" data-result="revenue">R$ 00.000,00</span>
+      </div>
+      <div class="simulador__result simulador__result--blue">
+        <div class="simulador__result-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <path d="M13.0624 3.6875C13.0624 3.37684 12.8105 3.125 12.4999 3.125C12.1892 3.125 11.9374 3.37684 11.9374 3.6875V12.3125C11.9374 12.6232 12.1892 12.875 12.4999 12.875C12.8105 12.875 13.0624 12.6232 13.0624 12.3125V3.6875Z" fill="#1B67FE"/>
+                <path d="M4.06238 10.4375C4.06238 10.1268 3.81054 9.875 3.49988 9.875C3.18922 9.875 2.93738 10.1268 2.93738 10.4375V12.3125C2.93738 12.6232 3.18922 12.875 3.49988 12.875C3.81054 12.875 4.06238 12.6232 4.06238 12.3125V10.4375Z" fill="#1B67FE"/>
+                <path d="M6.49988 8C6.81054 8 7.06238 8.25184 7.06238 8.5625V12.3125C7.06238 12.6232 6.81054 12.875 6.49988 12.875C6.18922 12.875 5.93738 12.6232 5.93738 12.3125V8.5625C5.93738 8.25184 6.18922 8 6.49988 8Z" fill="#1B67FE"/>
+                <path d="M10.0624 6.3125C10.0624 6.00184 9.81054 5.75 9.49988 5.75C9.18922 5.75 8.93738 6.00184 8.93738 6.3125V12.3125C8.93738 12.6232 9.18922 12.875 9.49988 12.875C9.81054 12.875 10.0624 12.6232 10.0624 12.3125V6.3125Z" fill="#1B67FE"/>
+              </svg>
+          <span>Retorno em</span>
+        </div>
+        <span class="simulador__result-value" data-result="payback">1 Mês</span>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <p class="simulador__disclaimer">
+      * Estimativa simplificada. Resultados variam por ponto e execução.
+    </p>
+  </div>
+</div>
+
+<style>
+  .simulador {
+    background: #f6f6f6;
+    border: 1px solid #d1d1d1;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .simulador__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 32px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .simulador__icon {
+    width: 50px;
+    height: 50px;
+    background: #00c34d;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .simulador__header-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .simulador__title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #101828;
+    line-height: 1.4;
+  }
+
+  .simulador__subtitle {
+    font-size: 14px;
+    color: #4a5565;
+    line-height: 1.4;
+  }
+
+  .simulador__chevron {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+
+  .simulador__header[aria-expanded="true"] .simulador__chevron {
+    transform: rotate(180deg);
+  }
+
+  .simulador__content {
+    padding: 0 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .simulador__content[hidden] {
+    display: none;
+  }
+
+  .simulador__sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .simulador__slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .simulador__slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .simulador__slider-label {
+    font-size: 14px;
+    color: #6d6d6d;
+    line-height: 1.4;
+  }
+
+  .simulador__slider-value {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .simulador__slider-value--green { color: #00c34d; }
+  .simulador__slider-value--orange { color: #fd5c00; }
+  .simulador__slider-value--blue { color: #1b67fe; }
+  .simulador__slider-value--gray { color: #6d6d6d; }
+
+  .simulador__slider-track {
+    position: relative;
+    width: 100%;
+  }
+
+  .simulador__range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 15px;
+    background: #d1d1d1;
+    border-radius: 40px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .simulador__range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .simulador__range::-moz-range-thumb {
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .simulador__range--green::-webkit-slider-thumb { background: #00c34d; }
+  .simulador__range--green::-moz-range-thumb { background: #00c34d; }
+  .simulador__range--orange::-webkit-slider-thumb { background: #fd5c00; }
+  .simulador__range--orange::-moz-range-thumb { background: #fd5c00; }
+  .simulador__range--blue::-webkit-slider-thumb { background: #1b67fe; }
+  .simulador__range--blue::-moz-range-thumb { background: #1b67fe; }
+  .simulador__range--gray::-webkit-slider-thumb { background: #6d6d6d; }
+  .simulador__range--gray::-moz-range-thumb { background: #6d6d6d; }
+
+  .simulador__results {
+    display: flex;
+    gap: 8px;
+  }
+
+  .simulador__result {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .simulador__result--green {
+    border: 1px solid rgba(0, 195, 77, 0.5);
+  }
+
+  .simulador__result--blue {
+    border: 1px solid rgba(27, 103, 254, 0.5);
+  }
+
+  .simulador__result-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #6d6d6d;
+  }
+
+  .simulador__result-header svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .simulador__result-value {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .simulador__result--green .simulador__result-value {
+    color: #00c34d;
+  }
+
+  .simulador__result--blue .simulador__result-value {
+    color: #1b67fe;
+  }
+
+  .simulador__disclaimer {
+    font-size: 12px;
+    color: #6a7282;
+    text-align: center;
+    margin: 0;
+  }
+
+  /* Mobile */
+  @media screen and (max-width: 749px) {
+    .simulador__header {
+      padding: 24px;
+    }
+
+    .simulador__title {
+      font-size: 18px;
+    }
+
+    .simulador__content {
+      padding: 0 24px 24px;
+    }
+
+    .simulador__result {
+      padding: 16px;
+    }
+
+    .simulador__result-value {
+      font-size: 20px;
+    }
+
+    .simulador__disclaimer {
+      font-size: 10px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    function initSimulador() {
+      const simulador = document.querySelector('.simulador');
+      if (!simulador) return;
+
+      const header = simulador.querySelector('.simulador__header');
+      const content = simulador.querySelector('.simulador__content');
+
+      // Função para obter o preço atual da variante
+      function getCurrentProductPrice() {
+        // Primeiro tentar do data attribute
+        let price = parseFloat(simulador.dataset.productPrice) || 0;
+
+        // Tentar obter o preço do elemento de preço do Shopify
+        const priceElement = document.querySelector('.price-item--sale.price-item--last, .price-item--regular');
+        if (priceElement) {
+          const priceText = priceElement.textContent.replace(/[^\d,]/g, '').replace(',', '.');
+          const parsedPrice = parseFloat(priceText);
+          if (!isNaN(parsedPrice) && parsedPrice > 0) {
+            price = parsedPrice;
+          }
+        }
+
+        // Também verificar no price-new se existir
+        const pixElement = document.querySelector('.price-new__pix-text strong');
+        if (pixElement) {
+          const pixText = pixElement.textContent.replace(/[^\d,]/g, '').replace(',', '.');
+          const parsedPix = parseFloat(pixText);
+          // Assumir desconto PIX de 5% e reverter
+          if (!isNaN(parsedPix) && parsedPix > 0) {
+            const pixDiscount = 5;
+            price = parsedPix / (1 - pixDiscount / 100);
+          }
+        }
+
+        return price;
+      }
+
+      // Toggle accordion
+      header.addEventListener('click', function() {
+        const expanded = this.getAttribute('aria-expanded') === 'true';
+        this.setAttribute('aria-expanded', !expanded);
+        content.hidden = expanded;
+        
+        if (!expanded) {
+          updateCalculations();
+        }
+      });
+
+      // Custo segue 50% do preço até o usuário alterar manualmente
+      let costManuallySet = false;
+
+      const priceRange = simulador.querySelector('[data-type="price"]');
+      const costRange = simulador.querySelector('[data-type="cost"]');
+
+      function syncCostFromPrice() {
+        if (costManuallySet || !priceRange || !costRange) return;
+        const price = parseFloat(priceRange.value) || 0;
+        const cost = Math.round(price * 0.5 * 2) / 2; // 50%, múltiplo de 0.5
+        costRange.value = Math.min(250, Math.max(0.5, cost));
+        updateSliderValue(costRange);
+      }
+
+      // Range inputs
+      const ranges = simulador.querySelectorAll('.simulador__range');
+      ranges.forEach(function(range) {
+        range.addEventListener('input', function() {
+          if (range.dataset.type === 'cost') costManuallySet = true;
+          if (range.dataset.type === 'price') syncCostFromPrice();
+          updateSliderValue(this);
+          updateCalculations();
+        });
+        // Initialize values
+        updateSliderValue(range);
+      });
+
+      syncCostFromPrice();
+
+      function updateSliderValue(range) {
+        const type = range.dataset.type;
+        const value = type === 'cost' || type === 'price' ? parseFloat(range.value) : parseInt(range.value, 10);
+        const valueEl = simulador.querySelector(`[data-value="${type}"]`);
+        if (!valueEl) return;
+
+        if (type === 'price' || type === 'cost') {
+          valueEl.textContent = `R$ ${Number(value).toFixed(2).replace('.', ',')}`;
+        } else if (type === 'units') {
+          valueEl.textContent = `${String(value).padStart(2, '0')} Unidades`;
+        } else if (type === 'days') {
+          valueEl.textContent = `${String(value).padStart(2, '0')} Dias`;
+        }
+
+        const min = parseFloat(range.min) || 0;
+        const max = parseFloat(range.max) || 100;
+        const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
+        range.style.background = `linear-gradient(to right, ${getColor(type)} ${percentage}%, #d1d1d1 ${percentage}%)`;
+      }
+
+      function getColor(type) {
+        const colors = {
+          price: 'rgba(0, 181, 69, 0.4)',
+          units: 'rgba(253, 92, 0, 0.4)',
+          days: 'rgba(27, 103, 254, 0.4)',
+          cost: 'rgba(109, 109, 109, 0.4)'
+        };
+        return colors[type] || '#d1d1d1';
+      }
+
+      function updateCalculations() {
+        const unitsRange = simulador.querySelector('[data-type="units"]');
+        const daysRange = simulador.querySelector('[data-type="days"]');
+        if (!priceRange || !unitsRange || !daysRange || !costRange) return;
+
+        const pricePerUnit = parseFloat(priceRange.value) || 0;
+        const costPerUnit = parseFloat(costRange.value) || 0;
+        const unitsPerDay = parseInt(unitsRange.value, 10) || 0;
+        const daysWorked = parseInt(daysRange.value, 10) || 0;
+
+        const productPrice = getCurrentProductPrice();
+
+        // Faturamento mensal = preço × unidades/dia × dias trabalhados
+        const monthlyRevenue = pricePerUnit * unitsPerDay * daysWorked;
+
+        // Lucro mensal = (preço - custo) × unidades/dia × dias trabalhados
+        const monthlyProfit = (pricePerUnit - costPerUnit) * unitsPerDay * daysWorked;
+
+        // Retorno = preço do produto ÷ lucro mensal
+        let paybackMonths = 1;
+        if (monthlyProfit > 0 && productPrice > 0) {
+          paybackMonths = Math.ceil(productPrice / monthlyProfit);
+          if (paybackMonths < 1) paybackMonths = 1;
+        }
+
+        const revenueEl = simulador.querySelector('[data-result="revenue"]');
+        const paybackEl = simulador.querySelector('[data-result="payback"]');
+
+        if (revenueEl) {
+          revenueEl.textContent = `R$ ${monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+        if (paybackEl) {
+          paybackEl.textContent = paybackMonths === 1 ? '1 Mês' : `${paybackMonths} Meses`;
+        }
+      }
+
+      // Expor função para atualização externa
+      simulador.updateCalculations = updateCalculations;
+
+      // Initialize calculations
+      updateCalculations();
+
+      // Escutar evento de mudança de variante do Shopify (pub/sub)
+      if (typeof subscribe !== 'undefined' && typeof PUB_SUB_EVENTS !== 'undefined') {
+        subscribe(PUB_SUB_EVENTS.variantChange, function(event) {
+          // Atualizar preço no data attribute
+          if (event.data && event.data.variant) {
+            simulador.dataset.productPrice = (event.data.variant.price / 100).toString();
+          }
+          // Se o simulador estiver aberto, recalcular
+          if (header.getAttribute('aria-expanded') === 'true') {
+            updateCalculations();
+          }
+        });
+      }
+
+      // MutationObserver para observar mudanças no preço (fallback)
+      const priceContainer = document.querySelector('.price-container-main-product, [id^="price-"]');
+      if (priceContainer) {
+        const priceObserver = new MutationObserver(function() {
+          // Se o simulador estiver aberto, recalcular
+          if (header.getAttribute('aria-expanded') === 'true') {
+            updateCalculations();
+          }
+        });
+        priceObserver.observe(priceContainer, { 
+          childList: true, 
+          subtree: true, 
+          characterData: true 
+        });
+      }
+    }
+
+    // Inicializar quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSimulador);
+    } else {
+      initSimulador();
+    }
+  })();
+</script>

@@ -1,0 +1,502 @@
+{%- liquid
+  assign has_items = false
+
+  for block in section.blocks
+    if block.type == 'tec_item_left' or block.type == 'tec_item_right'
+      assign label_text = block.settings.label | strip_html | strip
+      assign value_text = block.settings.value | strip_html | strip
+
+      comment
+        Treat richtext "empty" values (e.g. <p>&nbsp;</p>) as empty.
+        Also require a non-empty VALUE to consider the item valid (label-only should not render the section).
+      endcomment
+      assign label_text = label_text | replace: '&nbsp;', '' | replace: ' ', '' | strip
+      assign value_text = value_text | replace: '&nbsp;', '' | replace: ' ', '' | strip
+
+      if value_text != ''
+        assign has_items = true
+      endif
+    endif
+  endfor
+
+  assign hide_section = false
+  if section.settings.hide_if_incomplete and has_items == false
+    assign hide_section = true
+  endif
+-%}
+
+{%- unless hide_section -%}
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .tec-details-container-{{ section.id }} {
+    background-color: {{ section.settings.color_bg }};
+    border-radius: 16px;
+    padding: 60px 92px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 100%;
+  }
+
+  .tec-details-header-{{ section.id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .tec-details-title-{{ section.id }} {
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.2;
+    color: {{ section.settings.color_title }};
+    margin: 0;
+    max-width: 513px;
+  }
+
+  .tec-details-button-{{ section.id }} {
+    background-color: {{ section.settings.color_button_bg }};
+    color: {{ section.settings.color_button_text }};
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .tec-details-button-{{ section.id }}:hover {
+    opacity: 0.9;
+  }
+
+  .tec-details-button-text-{{ section.id }} {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .tec-details-button-icon-{{ section.id }} {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .tec-details-button-icon-{{ section.id }} svg,
+  .tec-details-button-icon-{{ section.id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .tec-details-content-{{ section.id }} {
+    display: flex;
+    gap: 80px;
+    width: 100%;
+  }
+
+  .tec-details-column-{{ section.id }} {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .tec-item-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .tec-item-row-{{ section.id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 0;
+    gap: 20px;
+  }
+  
+  .tec-separator-{{ section.id }} {
+    height: 1px;
+    background-color: {{ section.settings.color_separator }};
+    width: 100%;
+    display: block;
+  }
+
+  .tec-label-{{ section.id }} {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.4;
+    color: {{ section.settings.color_label }};
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .tec-value-{{ section.id }} {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5;
+    color: {{ section.settings.color_value }};
+    margin: 0;
+    text-align: right;
+    max-width: 430px;
+  }
+
+  @media screen and (max-width: 1024px) {
+    .tec-details-title-{{ section.id }} {
+      font-size: 24px;
+    }
+    .tec-details-container-{{ section.id }} {
+      padding: 30px 20px;
+    }
+    
+    .tec-details-content-{{ section.id }} {
+      flex-direction: column;
+      gap: 0;
+    }
+    
+    .tec-details-header-{{ section.id }} {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .tec-details-button-{{ section.id }} {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .tec-item-row-{{ section.id }} {
+        justify-content: space-between;
+    }
+    
+    .tec-value-{{ section.id }} {
+        text-align: right;
+    }
+  }
+{%- endstyle -%}
+
+<div class="page-width section-{{ section.id }}-padding">
+  <div class="tec-details-container-{{ section.id }}">
+    <div class="tec-details-header-{{ section.id }}">
+      <h2 class="tec-details-title-{{ section.id }}">
+        {{ section.settings.title | escape }}
+      </h2>
+      
+      {%- if section.settings.show_button and section.settings.button_link != blank -%}
+        <a href="{{ section.settings.button_link }}"  target="_blank" class="tec-details-button-{{ section.id }}">
+          <span class="tec-details-button-text-{{ section.id }}">
+            {{ section.settings.button_text | escape }}
+          </span>
+          <div class="tec-details-button-icon-{{ section.id }}">
+             {%- if section.settings.button_icon_svg != blank -%}
+                {{ section.settings.button_icon_svg }}
+             {%- else -%}
+                <svg width="18" height="18" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                   <path d="M6 13L6 1M6 13L1 8M6 13L11 8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+             {%- endif -%}
+          </div>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="tec-details-content-{{ section.id }}">
+      <!-- Coluna Esquerda -->
+      <div class="tec-details-column-{{ section.id }}">
+        <div class="tec-separator-{{ section.id }}">&nbsp;</div>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tec_item_left' -%}
+            {%- assign label_text = block.settings.label | strip_html | strip -%}
+            {%- assign value_text = block.settings.value | strip_html | strip -%}
+            {%- assign label_text = label_text | replace: '&nbsp;', '' | replace: ' ', '' | strip -%}
+            {%- assign value_text = value_text | replace: '&nbsp;', '' | replace: ' ', '' | strip -%}
+
+            {%- if value_text != '' -%}
+              <div class="tec-item-{{ section.id }}" {{ block.shopify_attributes }}>
+                <div class="tec-item-row-{{ section.id }}">
+                  {%- if label_text != '' -%}
+                    <p class="tec-label-{{ section.id }}">{{ block.settings.label | escape }}</p>
+                  {%- endif -%}
+                  <p class="tec-value-{{ section.id }}">{{ block.settings.value }}</p>
+                </div>
+                <div class="tec-separator-{{ section.id }}">&nbsp;</div>
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <!-- Coluna Direita -->
+      <div class="tec-details-column-{{ section.id }}">
+        <div class="tec-separator-{{ section.id }}" style="display: none;" class="desktop-only-separator">&nbsp;</div> <!-- Separador inicial apenas para alinhar visualmente se necessário, ou controlado via CSS -->
+        <style>
+          @media screen and (min-width: 1024px) {
+             .tec-details-column-{{ section.id }} > .tec-separator-{{ section.id }}:first-child {
+                 display: block !important;
+             }
+          }
+           @media screen and (max-width: 1023px) {
+             .tec-details-column-{{ section.id }} > .tec-separator-{{ section.id }}:first-child {
+                 display: none !important;
+             }
+          }
+        </style>
+        
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tec_item_right' -%}
+            {%- assign label_text = block.settings.label | strip_html | strip -%}
+            {%- assign value_text = block.settings.value | strip_html | strip -%}
+            {%- assign label_text = label_text | replace: '&nbsp;', '' | replace: ' ', '' | strip -%}
+            {%- assign value_text = value_text | replace: '&nbsp;', '' | replace: ' ', '' | strip -%}
+
+            {%- if value_text != '' -%}
+              <div class="tec-item-{{ section.id }}" {{ block.shopify_attributes }}>
+                <div class="tec-item-row-{{ section.id }}">
+                  {%- if label_text != '' -%}
+                    <p class="tec-label-{{ section.id }}">{{ block.settings.label | escape }}</p>
+                  {%- endif -%}
+                  <p class="tec-value-{{ section.id }}">{{ block.settings.value }}</p>
+                </div>
+                <div class="tec-separator-{{ section.id }}">&nbsp;</div>
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "Technical Details",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "hide_if_incomplete",
+      "label": "Ocultar seção se não houver itens preenchidos",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout e Cores"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Cor de Fundo",
+      "default": "#FFF0F3"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Superior",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Inferior",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Cabeçalho"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Dados Técnicos"
+    },
+    {
+      "type": "color",
+      "id": "color_title",
+      "label": "Cor do Título",
+      "default": "#4F4F4F"
+    },
+    {
+      "type": "header",
+      "content": "Botão"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button",
+      "label": "Exibir Botão",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texto do Botão",
+      "default": "Baixar Manual Técnico"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link do Botão"
+    },
+    {
+      "type": "html",
+      "id": "button_icon_svg",
+      "label": "SVG do Ícone do Botão (Opcional)"
+    },
+    {
+      "type": "color",
+      "id": "color_button_bg",
+      "label": "Fundo do Botão",
+      "default": "#B10326"
+    },
+    {
+      "type": "color",
+      "id": "color_button_text",
+      "label": "Texto do Botão",
+      "default": "#E7E7E7"
+    },
+    {
+      "type": "header",
+      "content": "Estilo da Lista"
+    },
+    {
+      "type": "color",
+      "id": "color_separator",
+      "label": "Cor da Linha Separadora",
+      "default": "#FFC0CC"
+    },
+    {
+      "type": "color",
+      "id": "color_label",
+      "label": "Cor do Rótulo (Esquerda)",
+      "default": "#5D5D5D"
+    },
+    {
+      "type": "color",
+      "id": "color_value",
+      "label": "Cor do Valor (Direita)",
+      "default": "#6D6D6D"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tec_item_left",
+      "name": "Item (Coluna Esquerda)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Rótulo",
+          "default": "Material"
+        },
+        {
+          "type": "richtext",
+          "id": "value",
+          "label": "Valor",
+          "default": "<p>Aço galvanizado com revestimento em inox brilhante.</p>"
+        }
+      ]
+    },
+    {
+      "type": "tec_item_right",
+      "name": "Item (Coluna Direita)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Rótulo",
+          "default": "Manutenção"
+        },
+        {
+          "type": "richtext",
+          "id": "value",
+          "label": "Valor",
+          "default": "<p>Limpeza simples com acesso traseiro; use água e detergente neutro.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Technical Details",
+      "blocks": [
+        {
+          "type": "tec_item_left",
+          "settings": {
+            "label": "Material",
+            "value": "<p>Aço galvanizado com revestimento em inox brilhante.</p>"
+          }
+        },
+        {
+          "type": "tec_item_left",
+          "settings": {
+            "label": "Peso unitário",
+            "value": "<p>56 kg.</p>"
+          }
+        },
+        {
+          "type": "tec_item_left",
+          "settings": {
+            "label": "Dimensões disponíveis",
+            "value": "<p>1,90 × 0,70 × 0,75 m (A×L×P).</p>"
+          }
+        },
+        {
+          "type": "tec_item_left",
+          "settings": {
+            "label": "Garantia",
+            "value": "<p>3 meses a partir do recebimento. (Vidro não incluso na garantia.)</p>"
+          }
+        },
+        {
+          "type": "tec_item_right",
+          "settings": {
+            "label": "Manutenção",
+            "value": "<p>Limpeza simples com acesso traseiro; use água e detergente neutro; secar antes do uso.</p>"
+          }
+        },
+        {
+          "type": "tec_item_right",
+          "settings": {
+            "label": "Instalação",
+            "value": "<p>Conectar 1 botijão P13 e ligar o motor 110 V ou 220 V; regular os 6 queimadores.</p>"
+          }
+        },
+        {
+          "type": "tec_item_right",
+          "settings": {
+            "label": "Resistência",
+            "value": "<p>Uso profissional diário, baixa manutenção; casos reais com +7 anos de trabalho.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+

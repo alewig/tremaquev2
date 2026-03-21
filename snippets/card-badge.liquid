@@ -1,0 +1,96 @@
+
+<div class="container-badges {{ settings.badge_position }}">
+  {%- comment -%} Badge de "Esgotado" {%- endcomment -%}
+  {%- if card_product.available == false -%}
+    <span
+      id="Badge-{{ section_id }}-{{ card_product.id }}-soldout"
+      class="badge color-{{ settings.sold_out_badge_color_scheme }}"
+    >
+      {{- 'products.product.sold_out' | t -}}
+    </span>
+  {%- comment -%} Badge de "Promoção" {%- endcomment -%}
+  {%- elsif card_product.compare_at_price > card_product.price and card_product.available -%}
+    <span
+      id="Badge-{{ section_id }}-{{ card_product.id }}-sale"
+      class="badge color-{{ settings.sale_badge_color_scheme }}"
+    >
+      <strong>
+        {{-
+          card_product.compare_at_price
+          | minus: card_product.price
+          | times: 100.0
+          | divided_by: card_product.compare_at_price
+          | round
+        }}%
+      </strong>
+      {{- settings.text_off -}}
+    </span>
+  {%- endif -%}
+
+  {%- comment -%} Badge Customizado (do Metafield) {%- endcomment -%}
+  {%- if card_product.metafields.custom.custom_tag != blank -%}
+    <span class="badge badge-custom">
+      {{- card_product.metafields.custom.custom_tag -}}
+    </span>
+  {%- endif -%}
+</div>
+
+<style>
+.container-badges {
+  position: absolute;
+  z-index: 5; 
+  display: flex;
+  gap: 0.5rem; 
+  padding: 1rem; 
+  pointer-events: none; 
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.4em 0.8em;
+  font-size: 1.2rem; 
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: {{ settings.badge_corner_radius }}px;
+  pointer-events: auto; 
+}
+
+.badge-custom {
+  background-color: {{ settings.color_badge_custom }}; 
+  color:  #ffffff; 
+}
+
+.container-badges.top-left {
+  top: 0;
+  left: 0;
+  align-items: flex-start;
+}
+
+/* Canto Superior Direito */
+.container-badges.top-right {
+  top: 0;
+  right: 0;
+  align-items: flex-end;
+}
+
+/* Canto Inferior Esquerdo */
+.container-badges.bottom-left {
+  bottom: 0;
+  left: 0;
+  align-items: flex-start;
+}
+
+/* Canto Inferior Direito */
+.container-badges.bottom-right {
+  bottom: 0;
+  right: 0;
+  align-items: flex-end;
+}
+@media(max-width: 768px){
+  .badge {
+    font-size: 10px;
+  }
+}
+</style>

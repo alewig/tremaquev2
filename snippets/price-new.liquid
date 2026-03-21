@@ -1,0 +1,506 @@
+{% comment %}
+  Renders a new price layout for product page
+  Based on Figma design: Desktop (14050:2195) and Mobile (14160:2743)
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - use_variant: {Boolean} Renders selected or first variant price instead of overall product pricing (optional)
+  - show_badges: {Boolean} Renders 'Sale' badge if the product matches the condition (optional)
+  - price_class: {String} Adds a price class to the price element (optional)
+
+  Usage:
+  {% render 'price-new', product: product, use_variant: true %}
+{% endcomment %}
+
+{%- liquid
+  if use_variant
+    assign target = product.selected_or_first_available_variant
+  else
+    assign target = product
+  endif
+
+  assign compare_at_price = target.compare_at_price
+  assign price = target.price | default: 1999
+  assign available = target.available | default: false
+  assign money_price = price | money
+  if settings.currency_code_enabled
+    assign money_price = price | money_with_currency
+  endif
+
+  assign has_discount = false
+  assign discount_percentage = 0
+  if compare_at_price > price
+    assign has_discount = true
+    assign discount_percentage = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+  endif
+  assign money_compare_price = compare_at_price | money
+  if settings.currency_code_enabled
+    assign money_compare_price = compare_at_price | money_with_currency
+  endif
+
+  assign pix_enabled = settings.pix_enabled
+  assign pix_discount = settings.pix_discount | default: 0
+  if pix_enabled and pix_discount > 0
+    assign discount_multiplier = pix_discount | times: 0.01
+    assign pix_discount_amount = price | times: discount_multiplier
+    assign money_pix_discount_amount = pix_discount_amount | money
+    if settings.currency_code_enabled
+      assign money_pix_discount_amount = pix_discount_amount | money_with_currency
+    endif
+    assign pix_price = price | minus: pix_discount_amount
+    assign money_pix_price = pix_price | money
+    if settings.currency_code_enabled
+      assign money_pix_price = pix_price | money_with_currency
+    endif
+  endif
+
+  assign parcelas = settings.parcelas_sem_juros | default: 12
+  assign installment_price = price | divided_by: parcelas
+  assign money_installment_price = installment_price | money
+  if settings.currency_code_enabled
+    assign money_installment_price = installment_price | money_with_currency
+  endif
+-%}
+
+<div class="price-new {{ price_class }}" id="price-new-{{ section.id }}">
+  {%- unless available == false -%}
+    <div class="price-new__container">
+      <div class="price-new__main">
+        <!-- Price Info -->
+        <div class="price-new__info">
+          {%- if has_discount -%}
+            <div class="price-new__compare-row">
+              <span class="price-new__compare-price">
+                De <s>{{ money_compare_price }}</s>
+              </span>
+              <span class="price-new__discount-badge">
+                <svg width="7" height="9" viewBox="0 0 7 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3.5 9L0 5.5H2.5V0H4.5V5.5H7L3.5 9Z" fill="#00973c"/>
+                </svg>
+                {{ discount_percentage }}% Desconto
+              </span>
+            </div>
+          {%- endif -%}
+
+          <div class="price-new__installment-row">
+            <span class="price-new__installment-value">
+              {{ parcelas }}x de {{ money_installment_price }}
+            </span>
+           
+            <span class="price-new__installment-label">
+              <span>sem</span>
+              <span>juros</span>
+            </span>
+          
+          </div>
+          <div class="price-value-total">
+            <span>
+              {{ money_price }} ou
+            </span>
+          </div>
+
+          <div class="price-new__pix-row">
+            {%- if pix_enabled and pix_discount > 0 -%}
+              <span class="price-new__pix-text">
+                <strong>{{ money_pix_price }}</strong> via PIX
+              </span>
+              <div class="price-new_tag">
+                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none">
+                  <path d="M4.55518 5.39453L5.87061 6.70898C6.02109 6.86004 6.19997 6.97995 6.39697 7.06152C6.44083 7.07968 6.48563 7.09519 6.53076 7.10938L5.25342 8.3877C4.83699 8.80397 4.161 8.80407 3.74463 8.3877L2.49365 7.13672C2.56681 7.11791 2.63937 7.09639 2.70947 7.06738C2.8573 7.00618 2.99559 6.9236 3.11865 6.82227L3.23584 6.71484L4.55518 5.39453ZM4.49951 0.299805C4.74707 0.299853 4.98543 0.386485 5.17529 0.541992L5.25342 0.612305L6.53076 1.88965C6.48567 1.90383 6.44079 1.91934 6.39697 1.9375C6.20042 2.01895 6.02177 2.13838 5.87158 2.28906L4.55615 3.60449L3.23584 2.28418C3.0279 2.07627 2.77197 1.93362 2.49365 1.8623L3.74463 0.612305C3.94478 0.412293 4.21656 0.299805 4.49951 0.299805Z" stroke="#00C34D" stroke-width="0.6"/>
+                  <path d="M2.08789 2.80542C2.21269 2.80575 2.33415 2.8427 2.43652 2.91089L2.53125 2.98901L3.88574 4.34351V4.34448C3.94735 4.40639 4.01791 4.45813 4.09375 4.50073C4.0206 4.54069 3.95198 4.59075 3.89062 4.64917L3.88574 4.65405L2.53125 6.00952C2.4154 6.12537 2.25384 6.19214 2.08887 6.19214H1.5498L0.612305 5.25464C0.195649 4.83748 0.195965 4.16122 0.612305 3.74487L1.55078 2.80542H2.08789ZM7.01855 2.81128H7.45312L8.38672 3.74487C8.80314 4.16129 8.80314 4.83725 8.38672 5.25366L7.4541 6.18628H7.01855C6.85409 6.18628 6.69203 6.11986 6.57715 6.00464V6.00366L5.22656 4.65405L5.22168 4.64917L5.15137 4.58862C5.10924 4.55558 5.0642 4.52714 5.01758 4.50171C5.09415 4.45892 5.16444 4.40594 5.22656 4.34351L6.57715 2.99487V2.9939C6.6924 2.8783 6.85463 2.81128 7.01855 2.81128Z" stroke="#00C34D" stroke-width="0.6"/>
+                </svg>
+              </div>
+             
+            {%- else -%}
+              <span class="price-new__pix-text">
+                <strong>{{ money_price }}</strong> à vista
+              </span>
+            {%- endif -%}
+          </div>
+        
+        </div>
+        {%- if pix_enabled and pix_discount > 0 -%}
+        <div class="price-new_tag_text">
+          <svg viewBox="-0.5 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M18 3.91992H6C3.79086 3.91992 2 5.71078 2 7.91992V17.9199C2 20.1291 3.79086 21.9199 6 21.9199H18C20.2091 21.9199 22 20.1291 22 17.9199V7.91992C22 5.71078 20.2091 3.91992 18 3.91992Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M7 17.9199L17 7.91992" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M8 11.9199C9.10457 11.9199 10 11.0245 10 9.91992C10 8.81535 9.10457 7.91992 8 7.91992C6.89543 7.91992 6 8.81535 6 9.91992C6 11.0245 6.89543 11.9199 8 11.9199Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M16 17.9199C17.1046 17.9199 18 17.0245 18 15.9199C18 14.8154 17.1046 13.9199 16 13.9199C14.8954 13.9199 14 14.8154 14 15.9199C14 17.0245 14.8954 17.9199 16 17.9199Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+          <p>Economize {{ money_pix_discount_amount }} no PIX</p>
+        </div>
+        {%- endif -%}
+
+        {% comment %} <!-- Boleto Box -->
+        <div class="price-new__boleto-box">
+          <div class="price-new__boleto-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="30" viewBox="0 0 26 30" fill="none">
+                <path d="M3.5 0C1.567 0 0 1.567 0 3.5V24.5C0 26.433 1.567 28 3.5 28H12.5C13.3284 28 14 27.3284 14 26.5C14 25.6716 13.3284 25 12.5 25H3.5C3.22386 25 3 24.7761 3 24.5V3.5C3 3.22386 3.22386 3 3.5 3H19.5C19.7761 3 20 3.22386 20 3.5V9C20 9.82843 20.6716 10.5 21.5 10.5C22.3284 10.5 23 9.82843 23 9V3.5C23 1.567 21.433 0 19.5 0H3.5Z" fill="#1F6EFF"/>
+                <path d="M6 7.5C6 6.67157 6.67157 6 7.5 6H15.5C16.3284 6 17 6.67157 17 7.5C17 8.32843 16.3284 9 15.5 9H7.5C6.67157 9 6 8.32843 6 7.5Z" fill="#1F6EFF"/>
+                <path d="M23 14.5C23 13.6716 22.3284 13 21.5 13C20.6716 13 20 13.6716 20 14.5V15C17.7909 15 16 16.7909 16 19C16 21.2091 17.7909 23 20 23H22C22.5523 23 23 23.4477 23 24C23 24.5523 22.5523 25 22 25H17.5C16.6716 25 16 25.6716 16 26.5C16 27.3284 16.6716 28 17.5 28H19C19 28.8284 19.6716 29.5 20.5 29.5C21.3284 29.5 22 28.8284 22 28C24.2091 28 26 26.2091 26 24C26 21.7909 24.2091 20 22 20H20C19.4477 20 19 19.5523 19 19C19 18.4477 19.4477 18 20 18H24.5C25.3284 18 26 17.3284 26 16.5C26 15.6716 25.3284 15 24.5 15H23V14.5Z" fill="#1F6EFF"/>
+                <path d="M7.5 12C6.67157 12 6 12.6716 6 13.5C6 14.3284 6.67157 15 7.5 15H13C13.8284 15 14.5 14.3284 14.5 13.5C14.5 12.6716 13.8284 12 13 12H7.5Z" fill="#1F6EFF"/>
+                <path d="M6 19.5C6 18.6716 6.67157 18 7.5 18H12.5C13.3284 18 14 18.6716 14 19.5C14 20.3284 13.3284 21 12.5 21H7.5C6.67157 21 6 20.3284 6 19.5Z" fill="#1F6EFF"/>
+              </svg>
+          </div>
+          {% comment %} <div class="price-new__boleto-info">
+            <span class="price-new__boleto-title">Boleto Parcelado</span>
+            <div class="price-new__boleto-details">
+              <span class="price-new__boleto-description">Preço original + 40%</span>
+              <span class="price-new__boleto-badge">Até 3x no boleto</span>
+            </div>
+          </div> {% endcomment %}
+        </div> {% endcomment %}
+      </div>
+
+      <!-- Payment Link -->
+      <button type="button" class="price-new__payment-link" data-open-payment-modal>
+        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="14" viewBox="0 0 19 14" fill="none">
+            <path d="M4.6875 8.4375C4.16973 8.4375 3.75 8.85723 3.75 9.375C3.75 9.89277 4.16973 10.3125 4.6875 10.3125H8.125C8.64277 10.3125 9.0625 9.89277 9.0625 9.375C9.0625 8.85723 8.64277 8.4375 8.125 8.4375H4.6875Z" fill="#4A4A4A"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M0 3.4375C0 1.53902 1.53902 0 3.4375 0H15.3125C17.211 0 18.75 1.53902 18.75 3.4375V10.3125C18.75 12.211 17.211 13.75 15.3125 13.75H3.4375C1.53902 13.75 0 12.211 0 10.3125V3.4375ZM15.3125 1.875C16.1754 1.875 16.875 2.57455 16.875 3.4375L1.875 3.4375C1.875 2.57455 2.57455 1.875 3.4375 1.875H15.3125ZM16.875 5.9375H1.875V10.3125C1.875 11.1754 2.57455 11.875 3.4375 11.875H15.3125C16.1754 11.875 16.875 11.1754 16.875 10.3125V5.9375Z" fill="#4A4A4A"/>
+          </svg>
+        <span>Ver formas de pagamento</span>
+      </button>
+    </div>
+  {%- else -%}
+    <div class="price-new__sold-out">
+      <span>{{ 'products.product.sold_out' | t }}</span>
+    </div>
+  {%- endunless -%}
+</div>
+
+<style>
+  .price-value-total{
+    text-align: end;
+    padding-right: 5px;
+    font-size: 14px;
+    color: var(--gray-400, #888);
+  }
+  .price-new_tag_text{
+    color: black;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    background: #D5E4FF;
+    border-radius: 8px;
+    padding: 4px 8px;
+  }
+  .price-new_tag_text svg{
+    width: 16px;
+    height: 16px;
+  }
+  .price-new {
+    width: 100%;
+  }
+
+  /* Base - Container com fundo verde */
+  .price-new__container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: #edfff1;
+    border: 1px dashed #1c8b38;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .price-new__main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .price-new__info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Compare Row */
+  .price-new__compare-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .price-new__compare-price {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+  }
+
+  .price-new__compare-price s {
+    text-decoration: line-through;
+  }
+
+  .price-new__discount-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ceffe1;
+    color: #00973c;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    height: 20px;
+    line-height: 1;
+  }
+
+  .price-new__discount-badge svg {
+    width: 6.33px;
+    height: 8.67px;
+  }
+
+  /* Installment Row */
+  .price-new__installment-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .price-new__installment-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #00c34d;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .price-new__installment-label {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    color: #6d6d6d;
+    line-height: 1;
+  }
+
+  /* PIX Row */
+  .price-new__pix-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .price-new__pix-text {
+    font-size: 14px;
+    color: #888;
+  }
+
+  .price-new__pix-text strong {
+    font-weight: 700;
+  }
+
+  .price-new__pix-icon {
+    width: 9px;
+    height: 9px;
+  }
+
+  /* Boleto Box */
+  .price-new__boleto-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #d5e4ff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    align-self: stretch;
+  }
+
+  .price-new__boleto-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .price-new__boleto-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .price-new__boleto-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #4f4f4f;
+    line-height: 1;
+  }
+
+  .price-new__boleto-details {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .price-new__boleto-description {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #6d6d6d;
+  }
+
+  .price-new__boleto-badge {
+    background-color: #1f6eff;
+    color: white;
+    font-size: 10px;
+    padding: 6px 8px;
+    border-radius: 40px;
+    white-space: nowrap;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  /* Payment Link */
+  .price-new__payment-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .price-new__payment-link span {
+    font-size: 16px;
+    font-weight: 700;
+    color: #5d5d5d;
+    text-decoration: underline;
+  }
+
+  .price-new__payment-link:hover span {
+    color: #4f4f4f;
+  }
+
+  /* Sold Out */
+  .price-new__sold-out {
+    padding: 16px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #888;
+  }
+
+  /* Tablet e Laptop (750px - 1199px) */
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .price-new__main {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .price-new__info {
+      width: 100%;
+    }
+
+    .price-new__installment-value {
+      font-size: 22px;
+    }
+
+    .price-new__boleto-box {
+      width: 100%;
+    }
+
+    .price-new__boleto-title {
+      font-size: 16px;
+    }
+
+    .price-new__boleto-description {
+      font-size: 11px;
+    }
+  }
+
+  /* Mobile (<=749px) */
+  @media screen and (max-width: 749px) {
+    .price-new__container {
+      align-items: center;
+    }
+
+    .price-new__main {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .price-new__info {
+      align-items: center;
+      width: 100%;
+    }
+
+    .price-new__compare-row,
+    .price-new__installment-row,
+    .price-new__pix-row {
+      justify-content: center;
+    }
+
+    .price-new__installment-value {
+      font-size: 24px;
+    }
+
+    .price-new__boleto-box {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .price-new__boleto-title {
+      font-size: 18px;
+    }
+
+    .price-new__payment-link {
+      justify-content: center;
+    }
+  }
+
+  /* Small Mobile (<=480px) */
+  @media screen and (max-width: 480px) {
+    .price-new__installment-value {
+      font-size: 20px;
+    }
+
+    .price-new__boleto-box {
+      padding: 12px;
+    }
+
+    .price-new__boleto-title {
+      font-size: 16px;
+    }
+
+    .price-new__boleto-details {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .price-new__payment-link span {
+      font-size: 14px;
+    }
+  }
+
+  /* Price class variations */
+  .price-new.price--large .price-new__installment-value {
+    font-size: 28px;
+  }
+
+  .price-new.price--large .price-new__boleto-title {
+    font-size: 20px;
+  }
+
+  @media screen and (max-width: 989px) {
+    .price-new.price--large .price-new__installment-value {
+      font-size: 24px;
+    }
+
+    .price-new.price--large .price-new__boleto-title {
+      font-size: 18px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .price-new.price--large .price-new__installment-value {
+      font-size: 20px;
+    }
+
+    .price-new.price--large .price-new__boleto-title {
+      font-size: 16px;
+    }
+  }
+</style>

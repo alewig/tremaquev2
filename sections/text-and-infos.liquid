@@ -1,0 +1,499 @@
+{%- style -%}
+  .text-and-infos-section-{{ section.id }} {
+    position: relative;
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    {% if section.settings.background_image != blank %}
+      background-image: url('{{ section.settings.background_image | image_url: width: 1920 }}');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    {% endif %}
+  }
+
+  {% if section.settings.background_image != blank %}
+    .text-and-infos-section-{{ section.id }}::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, {{ section.settings.overlay_opacity | divided_by: 100.0 }});
+      z-index: 1;
+    }
+  {% endif %}
+
+  @media screen and (min-width: 750px) {
+    .text-and-infos-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .text-and-infos-container-{{ section.id }} {
+    position: relative;
+    z-index: 2;
+    {% if section.settings.style_container == 'page-width' %}
+      max-width: {{ settings.page_width }}px;
+      margin: 0 auto;
+      padding: 0 20px;
+    {% else %}
+      width: 100%;
+      padding: 0 20px;
+    {% endif %}
+  }
+
+  .text-and-infos-content-{{ section.id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .text-and-infos-text-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .text-and-infos-text-{{ section.id }}__title {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: {{ section.settings.title_color | default: '#0C6E51' }};
+    margin: 0;
+  }
+
+  .text-and-infos-text-{{ section.id }}__description {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: {{ section.settings.text_color | default: '#FFFFFF' }};
+    margin: 0;
+  }
+
+  .text-and-infos-text-{{ section.id }}__description p {
+    margin: 0 0 16px 0;
+  }
+
+  .text-and-infos-text-{{ section.id }}__description p:last-child {
+    margin-bottom: 0;
+  }
+
+  .text-and-infos-card-{{ section.id }} {
+    background-color: {{ section.settings.card_background_color | default: '#F7FCF5' }};
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-and-infos-card-{{ section.id }}__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .text-and-infos-card-{{ section.id }}__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .text-and-infos-card-{{ section.id }}__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .text-and-infos-card-{{ section.id }}__title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: {{ section.settings.card_title_color | default: '#0C6E51' }};
+    margin: 0;
+  }
+
+  .text-and-infos-card-{{ section.id }}__items {
+    display: flex;
+        width: 478px;
+        align-items: center;
+        align-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+  }
+
+  .text-and-infos-item-{{ section.id }} {
+    display: flex;
+    width: 231px;
+    height: 39.987px;
+    align-items: flex-start;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .text-and-infos-item-{{ section.id }}__icon {
+    display: flex;
+    width: 32px;
+    height: 32px;
+    padding-left: 0;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: 100%;
+    background: {{ section.settings.item_icon_color  }};
+  }
+
+  .text-and-infos-item-{{ section.id }}__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .text-and-infos-item-{{ section.id }}__label {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: {{ section.settings.item_label_color | default: '#388E3C' }};
+    margin: 0;
+  }
+
+  .text-and-infos-item-{{ section.id }}__value {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: {{ section.settings.item_value_color | default: '#4A4A4A' }};
+    margin: 0;
+  }
+
+  .text-and-infos-item-{{ section.id }}__value a {
+    color: {{ section.settings.item_label_color | default: '#388E3C' }};
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .text-and-infos-item-{{ section.id }}__value a:hover {
+    opacity: 0.8;
+  }
+
+  @media screen and (max-width: 749px) {
+    .text-and-infos-container-{{ section.id }} {
+      padding: 0 16px;
+    }
+
+    .text-and-infos-content-{{ section.id }} {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .text-and-infos-text-{{ section.id }}__title {
+      font-size: 32px;
+    }
+
+    .text-and-infos-text-{{ section.id }}__description {
+      font-size: 14px;
+    }
+
+    .text-and-infos-card-{{ section.id }} {
+      padding: 32px 24px;
+      border-radius: 16px;
+    }
+
+    .text-and-infos-card-{{ section.id }}__title {
+      font-size: 18px;
+    }
+
+    .text-and-infos-card-{{ section.id }}__items {
+      gap: 20px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="text-and-infos-section-{{ section.id }}">
+  <div class="text-and-infos-container-{{ section.id }}">
+    <div class="text-and-infos-content-{{ section.id }}">
+      <!-- Text Block (Left) -->
+      <div class="text-and-infos-text-{{ section.id }}">
+        {% if section.settings.title != blank %}
+          <h2 class="text-and-infos-text-{{ section.id }}__title">
+            {{ section.settings.title }}
+          </h2>
+        {% endif %}
+
+        {% if section.settings.description_1 != blank %}
+          <div class="text-and-infos-text-{{ section.id }}__description">
+            {{ section.settings.description_1 }}
+          </div>
+        {% endif %}
+
+        {% if section.settings.description_2 != blank %}
+          <div class="text-and-infos-text-{{ section.id }}__description">
+            {{ section.settings.description_2 }}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Info Card (Right) -->
+      {% if section.settings.card_title != blank or section.blocks.size > 0 %}
+        <div class="text-and-infos-card-{{ section.id }}">
+          {% if section.settings.card_title != blank %}
+            <div class="text-and-infos-card-{{ section.id }}__header">
+              <div class="text-and-infos-card-{{ section.id }}__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M12.8973 10.7417L14.1598 17.8467C14.1739 17.9304 14.1622 18.0163 14.1261 18.0932C14.0901 18.17 14.0315 18.2339 13.9581 18.2765C13.8847 18.3191 13.8 18.3383 13.7155 18.3315C13.6309 18.3246 13.5504 18.2922 13.4848 18.2384L10.5015 15.9992C10.3574 15.8916 10.1825 15.8335 10.0027 15.8335C9.82294 15.8335 9.64798 15.8916 9.50396 15.9992L6.51563 18.2375C6.45006 18.2912 6.36968 18.3237 6.28521 18.3305C6.20073 18.3373 6.11619 18.3182 6.04285 18.2758C5.9695 18.2333 5.91086 18.1695 5.87473 18.0928C5.83859 18.0162 5.8267 17.9303 5.84063 17.8467L7.10229 10.7417" stroke="#15B475" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 11.6667C12.7614 11.6667 15 9.42811 15 6.66669C15 3.90526 12.7614 1.66669 10 1.66669C7.23858 1.66669 5 3.90526 5 6.66669C5 9.42811 7.23858 11.6667 10 11.6667Z" stroke="#15B475" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+              </div>
+              <h3 class="text-and-infos-card-{{ section.id }}__title">
+                {{ section.settings.card_title }}
+              </h3>
+            </div>
+          {% endif %}
+
+          {% if section.blocks.size > 0 %}
+            <div class="text-and-infos-card-{{ section.id }}__items">
+              {% for block in section.blocks %}
+                {% if block.settings.item_label != blank or block.settings.item_value != blank %}
+                  <div class="text-and-infos-item-{{ section.id }}" {{ block.shopify_attributes }}>
+                    {% if block.settings.icon_svg != blank %}
+                      <div class="text-and-infos-item-{{ section.id }}__icon">
+                        {{ block.settings.icon_svg }}
+                      </div>
+                    {% endif %}
+
+                    <div class="text-and-infos-item-{{ section.id }}__content">
+                      {% if block.settings.item_label != blank %}
+                        <p class="text-and-infos-item-{{ section.id }}__label">
+                          {{ block.settings.item_label }}
+                        </p>
+                      {% endif %}
+
+                      {% if block.settings.item_value != blank %}
+                        <div class="text-and-infos-item-{{ section.id }}__value">
+                          {% if block.settings.item_link != blank %}
+                            <a href="{{ block.settings.item_link }}" target="_blank" rel="noopener noreferrer">
+                              {{ block.settings.item_value }}
+                            </a>
+                          {% else %}
+                            {{ block.settings.item_value }}
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Text and Infos",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay Opacity",
+      "default": 0,
+      "info": "Dark overlay to improve text readability"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Safra Premium Harmony"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#0C6E51"
+    },
+    {
+      "type": "richtext",
+      "id": "description_1",
+      "label": "Description Paragraph 1",
+      "default": "<p>A qualidade começa na origem. Nossa Safra Premium reúne os melhores lotes de cada colheita, selecionados em parceria com produtores que compartilham o mesmo cuidado com a terra e o sabor.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "description_2",
+      "label": "Description Paragraph 2",
+      "default": "<p>Ao lado, você encontra a tabela da safra, com informações sobre procedência, período de colheita e notas sensoriais, um convite para conhecer o que há de mais puro e autêntico em cada ingrediente Harmony.</p>"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Card Settings"
+    },
+    {
+      "type": "text",
+      "id": "card_title",
+      "label": "Card Title",
+      "default": "Cartão Técnico do Produto"
+    },
+    {
+      "type": "color",
+      "id": "card_title_color",
+      "label": "Card Title Color",
+      "default": "#0C6E51"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card Background Color",
+      "default": "#F7FCF5"
+    },
+    {
+      "type": "color",
+      "id": "item_icon_color",
+      "label": "Item Icon Color",
+      "default": "#388E3C"
+    },
+    {
+      "type": "color",
+      "id": "item_label_color",
+      "label": "Item Label Color",
+      "default": "#737373"
+    },
+    {
+      "type": "color",
+      "id": "item_value_color",
+      "label": "Item Value Color",
+      "default": "#4A4A4A"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "select",
+      "id": "style_container",
+      "label": "Style Container",
+      "default": "page-width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Espaçamento Padrão"
+        },
+        {
+          "value": "full-width",
+          "label": "Sem Espaçamento"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "info_item",
+      "name": "Info Item",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "icon_svg",
+          "label": "Icon SVG",
+          "info": "Cole o código SVG do ícone aqui. Exemplo: <svg viewBox=\"0 0 24 24\"><path d=\"...\"/></svg>"
+        },
+        {
+          "type": "text",
+          "id": "item_label",
+          "label": "Item Label",
+          "default": "Origem"
+        },
+        {
+          "type": "text",
+          "id": "item_value",
+          "label": "Item Value",
+          "default": "Califórnia, EUA"
+        },
+        {
+          "type": "url",
+          "id": "item_link",
+          "label": "Item Link",
+          "info": "Optional: If provided, the value will be a clickable link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text and Infos",
+      "blocks": [
+        {
+          "type": "info_item",
+          "settings": {
+            "icon_svg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z\"/></svg>",
+            "item_label": "Origem",
+            "item_value": "Califórnia, EUA"
+          }
+        },
+        {
+          "type": "info_item",
+          "settings": {
+            "icon_svg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M19 4H5C3.89 4 3 4.9 3 6V20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 20H5V9H19V20ZM7 11H9V13H7V11ZM11 11H13V13H11V11ZM15 11H17V13H15V11Z\"/></svg>",
+            "item_label": "Safra",
+            "item_value": "Outubro 2024"
+          }
+        },
+        {
+          "type": "info_item",
+          "settings": {
+            "icon_svg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M19 4H5C3.89 4 3 4.9 3 6V20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 20H5V9H19V20ZM7 11H9V13H7V11ZM11 11H13V13H11V11ZM15 11H17V13H15V11Z\"/></svg>",
+            "item_label": "Tempo de Vida",
+            "item_value": "15/10/2024"
+          }
+        },
+        {
+          "type": "info_item",
+          "settings": {
+            "icon_svg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M19 12V19H5V12H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12H19ZM13 12.67L15.59 10.09L17 11.5L12 16.5L7 11.5L8.41 10.09L11 12.67V3H13V12.67Z\"/></svg>",
+            "item_label": "",
+            "item_value": "Baixar laudo completo (PDF)",
+            "item_link": "#"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,516 @@
+{%- liquid
+  assign has_spec = false
+  assign has_include = false
+
+  for block in section.blocks
+    if block.type == 'spec_item'
+      if block.settings.title != blank or block.settings.description != blank
+        assign has_spec = true
+      endif
+    endif
+
+    if block.type == 'include_item'
+      if block.settings.text != blank
+        assign has_include = true
+      endif
+    endif
+  endfor
+
+  assign hide_section = false
+  if section.settings.hide_if_incomplete and has_spec == false and has_include == false
+    assign hide_section = true
+  endif
+-%}
+
+{%- unless hide_section -%}
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .about-product-container-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 100%;
+  }
+
+  .about-product-title-{{ section.id }} {
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.2;
+    color: {{ section.settings.color_title }};
+    margin: 0;
+  }
+
+  .about-product-content-{{ section.id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    width: 100%;
+  }
+
+  /* Esquerda - Especificações */
+  .about-product-specs-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+    /* max-width: 696px; */
+  }
+
+  .spec-card-{{ section.id }} {
+    background-color: {{ section.settings.color_card_bg }};
+    border: 0.8px solid {{ section.settings.color_card_border }};
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .spec-item-{{ section.id }} {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .spec-icon-{{ section.id }} {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .spec-icon-{{ section.id }} svg,
+  .spec-icon-{{ section.id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .spec-text-container-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .spec-title-{{ section.id }} {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+    color: {{ section.settings.color_spec_title }};
+    margin: 0;
+  }
+
+  .spec-description-{{ section.id }} {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: {{ section.settings.color_spec_desc }};
+    margin: 0;
+  }
+
+  /* Direita - O que vem na compra */
+  .about-product-includes-{{ section.id }} {
+    background-color: {{ section.settings.color_includes_bg }};
+    border: 2px dashed {{ section.settings.color_includes_border }};
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 472px;
+    flex-shrink: 0;
+    
+    /* Sticky behavior */
+    position: sticky;
+    top: 40px; /* Ajuste conforme a altura do header da sua loja, se for fixo */
+    height: fit-content;
+  }
+
+  .includes-header-{{ section.id }} {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .includes-icon-{{ section.id }} {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .includes-icon-{{ section.id }} svg,
+  .includes-icon-{{ section.id }} img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+  }
+
+  .includes-title-{{ section.id }} {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 28px;
+    color: {{ section.settings.color_includes_title }};
+    margin: 0;
+  }
+
+  .includes-list-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .includes-item-{{ section.id }} {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .check-icon-{{ section.id }} {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .check-icon-{{ section.id }} svg,
+  .check-icon-{{ section.id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .includes-text-{{ section.id }} {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: {{ section.settings.color_includes_text }};
+    margin: 0;
+  }
+
+  @media screen and (max-width: 1024px) {
+    .about-product-title-{{ section.id }} {
+      font-size: 24px;
+    }
+    .about-product-content-{{ section.id }} {
+      flex-direction: column;
+    }
+
+    .about-product-specs-{{ section.id }},
+    .about-product-includes-{{ section.id }} {
+      max-width: 100%;
+    }
+  }
+{%- endstyle -%}
+
+<div class="page-width section-{{ section.id }}-padding">
+  <div class="about-product-container-{{ section.id }}">
+    {%- if section.settings.title != blank -%}
+      <h2 class="about-product-title-{{ section.id }}">
+        {{ section.settings.title | escape }}
+      </h2>
+    {%- endif -%}
+
+    <div class="about-product-content-{{ section.id }}">
+
+      {%- if has_spec -%}
+        <!-- Lado Esquerdo: Especificações -->
+        <div class="about-product-specs-{{ section.id }}">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'spec_item' -%}
+              {%- if block.settings.title != blank or block.settings.description != blank -%}
+                <div class="spec-card-{{ section.id }}" {{ block.shopify_attributes }}>
+                  <div class="spec-item-{{ section.id }}">
+                    <div class="spec-icon-{{ section.id }}">
+                      {%- if block.settings.icon_image != blank -%}
+                        <img src="{{ block.settings.icon_image | image_url: width: 30 }}" alt="{{ block.settings.title | escape }}" width="30" height="30">
+                      {%- endif -%}
+                    </div>
+                    <div class="spec-text-container-{{ section.id }}">
+                      {%- if block.settings.title != blank -%}
+                        <p class="spec-title-{{ section.id }}">
+                          {{ block.settings.title | escape }}
+                        </p>
+                      {%- endif -%}
+                      {%- if block.settings.description != blank -%}
+                        <div class="spec-description-{{ section.id }}">
+                          {{ block.settings.description }}
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if has_include -%}
+        <!-- Lado Direito: O que vem na compra -->
+        <div class="about-product-includes-{{ section.id }}">
+          <div class="includes-header-{{ section.id }}">
+            <div class="includes-icon-{{ section.id }}">
+              {%- if section.settings.includes_icon_svg != blank -%}
+                {{ section.settings.includes_icon_svg }}
+              {%- else -%}
+                <!-- Icone Default Caixa -->
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 16.5C21 16.88 20.79 17.21 20.47 17.38L12.57 21.82C12.41 21.94 12.21 22 12 22C11.79 22 11.59 21.94 11.43 21.82L3.53 17.38C3.21 17.21 3 16.88 3 16.5V7.5C3 7.12 3.21 6.79 3.53 6.62L11.43 2.18C11.59 2.06 11.79 2 12 2C12.21 2 12.41 2.06 12.57 2.18L20.47 6.62C20.79 6.79 21 7.12 21 7.5V16.5Z" stroke="#1F6EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3.27 6.96L12 12.01L20.73 6.96" stroke="#1F6EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 22.08V12" stroke="#1F6EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- endif -%}
+            </div>
+            <p class="includes-title-{{ section.id }}">
+              {{ section.settings.includes_title | escape }}
+            </p>
+          </div>
+
+          <div class="includes-list-{{ section.id }}">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'include_item' -%}
+                {%- if block.settings.text != blank -%}
+                  <div class="includes-item-{{ section.id }}" {{ block.shopify_attributes }}>
+                    <div class="check-icon-{{ section.id }}">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 6L9 17L4 12" stroke="#00C34D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <p class="includes-text-{{ section.id }}">
+                      {{ block.settings.text | escape }}
+                    </p>
+                  </div>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "About Product",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "hide_if_incomplete",
+      "label": "Ocultar seção se não houver itens (especificações/itens inclusos)",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Superior",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Inferior",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Título Principal"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "O que você precisa saber"
+    },
+    {
+      "type": "color",
+      "id": "color_title",
+      "label": "Cor do Título",
+      "default": "#4F4F4F"
+    },
+    {
+      "type": "header",
+      "content": "Cards de Especificação (Esquerda)"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Fundo do Card",
+      "default": "#FFF0F3"
+    },
+    {
+      "type": "color",
+      "id": "color_card_border",
+      "label": "Borda do Card",
+      "default": "#FF95AA"
+    },
+    {
+      "type": "color",
+      "id": "color_spec_title",
+      "label": "Cor do Título Spec",
+      "default": "#5D5D5D"
+    },
+    {
+      "type": "color",
+      "id": "color_spec_desc",
+      "label": "Cor da Descrição Spec",
+      "default": "#6D6D6D"
+    },
+    {
+      "type": "header",
+      "content": "Caixa 'O que vem' (Direita)"
+    },
+    {
+      "type": "text",
+      "id": "includes_title",
+      "label": "Título da Caixa",
+      "default": "O que vem na compra"
+    },
+    {
+      "type": "html",
+      "id": "includes_icon_svg",
+      "label": "SVG do Ícone da Caixa (Opcional)",
+      "info": "Cole o código SVG aqui"
+    },
+    {
+      "type": "color",
+      "id": "color_includes_bg",
+      "label": "Fundo da Caixa",
+      "default": "#EDF3FF"
+    },
+    {
+      "type": "color",
+      "id": "color_includes_border",
+      "label": "Borda da Caixa",
+      "default": "#1F6EFF"
+    },
+    {
+      "type": "color",
+      "id": "color_includes_title",
+      "label": "Cor do Título da Caixa",
+      "default": "#5D5D5D"
+    },
+    {
+      "type": "color",
+      "id": "color_includes_text",
+      "label": "Cor do Texto da Lista",
+      "default": "#6D6D6D"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "spec_item",
+      "name": "Especificação",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "SVG do Ícone",
+          "info": "Cole o código SVG aqui para o ícone"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título",
+          "default": "Assa até 64 frangos por ciclo"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Descrição",
+          "default": "<p>Aproximadamente 3h30 para frangos de +/-2,1 kg</p>"
+        }
+      ]
+    },
+    {
+      "type": "include_item",
+      "name": "Item Incluso",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texto do Item",
+          "default": "<p>Máquina BR-64 montada</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Product",
+      "blocks": [
+        {
+          "type": "spec_item"
+        },
+        {
+          "type": "spec_item"
+        },
+        {
+          "type": "spec_item"
+        },
+        {
+          "type": "spec_item"
+        },
+        {
+          "type": "spec_item"
+        },
+        {
+          "type": "include_item"
+        },
+        {
+          "type": "include_item"
+        },
+        {
+          "type": "include_item"
+        },
+        {
+          "type": "include_item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+

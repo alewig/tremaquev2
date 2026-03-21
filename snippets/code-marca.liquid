@@ -1,0 +1,30 @@
+{% assign codigo = product.metafields.custom.codigo_produto %}
+{% assign marca = product.metafields.custom.marca_produto %}
+
+{% if codigo != blank or marca != blank %}
+    <div class="marca-codigo-container">
+        <div class="marca-codigo-item">
+            <span class="marca-codigo-item-label"><strong>Código:</strong> {{ codigo }}</span>
+        </div>
+        <div class="marca-codigo-item">
+            <span class="marca-codigo-item-label"><strong>Marca:</strong> {{ marca }}</span>
+        </div>
+    </div>
+{% endif %}
+
+<style>
+    .marca-codigo-item span{
+        color: var(--gray-600, #5D5D5D);
+        font-size: 12px;
+        font-style: normal;
+        line-height: 120%; /* 14.4px */
+    }
+    .marca-codigo-container{
+        display: flex;
+        height: 16px;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+        align-self: stretch;
+    }
+</style>

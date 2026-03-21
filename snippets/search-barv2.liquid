@@ -1,0 +1,589 @@
+{%- liquid
+  assign search_always_open = always_open | default: false
+  assign whatsapp_number = settings.number_contato | default: ''
+
+  # WhatsApp template for predictive-search empty state
+  assign whatsapp_empty_template = settings.mensagem_search_empty
+  if whatsapp_empty_template == blank
+    assign whatsapp_empty_template = settings.mensagem_padrao
+  endif
+-%}
+
+<div
+  class="search-container-v2"
+  data-predictive-search-container
+  data-search-always-open="{{ search_always_open }}"
+  data-whatsapp-number="{{ whatsapp_number | escape }}"
+  data-whatsapp-empty-template="{{ whatsapp_empty_template | escape }}"
+  data-page-url="{{ request.origin | append: request.path | escape }}"
+>
+  {% comment %} Botão de ícone para mobile (aparece apenas quando fechado) {% endcomment %}
+  {%- unless search_always_open -%}
+    <button type="button" class="search-mobile-toggle" aria-label="Abrir busca" data-search-toggle>
+      {% render 'search-icon-v2' %}
+    </button>
+  {%- endunless -%}
+
+  {% comment %} O formulário agora tem um atributo 'data-predictive-search-form' para o JS encontrá-lo {% endcomment %}
+  <form action="{{ routes.search_url }}" method="get" role="search" class="search-form-v2" data-predictive-search-form>
+    <div class="main-container-search-v2">
+      <input
+        type="search-custom"
+        id="{{ input_id }}"
+        name="q"
+        class="search-input-v2"
+        placeholder="O que você está buscando?"
+        aria-label="Buscar"
+        aria-expanded="false"
+        data-predictive-search-input
+      >
+      {%- unless search_always_open -%}
+        <button
+          type="button"
+          class="search-close-mobile"
+          aria-label="Fechar busca"
+          data-search-close
+          style="display: none;"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M15 5L5 15M5 5L15 15" stroke="#0D0D0E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      {%- endunless -%}
+
+      <button type="submit" class="search-button-v2" aria-label="Buscar">
+        <span class="search-icon-default">
+          {% render 'search-icon-v2' %}
+        </span>
+        <span class="search-icon-expanded">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M8.82264 9.8833C7.89957 10.5841 6.74835 11 5.5 11C2.46243 11 0 8.53757 0 5.5C0 2.46243 2.46243 0 5.5 0C8.53757 0 11 2.46243 11 5.5C11 6.74835 10.5841 7.89957 9.8833 8.82264L12.7803 11.7197C13.0732 12.0126 13.0732 12.4874 12.7803 12.7803C12.4874 13.0732 12.0126 13.0732 11.7197 12.7803L8.82264 9.8833ZM9.5 5.5C9.5 7.70914 7.70914 9.5 5.5 9.5C3.29086 9.5 1.5 7.70914 1.5 5.5C1.5 3.29086 3.29086 1.5 5.5 1.5C7.70914 1.5 9.5 3.29086 9.5 5.5Z" fill="#B10326"/>
+          </svg>
+        </span>
+      </button>
+      <div class="voice-search-toggle-container">
+        {% render 'search-via-voz', search_input_id: input_id %}
+      </div>
+    </div>
+  </form>
+
+  {% comment %} Este container vai guardar os resultados da busca {% endcomment %}
+  <div class="predictive-search-results-v2" data-predictive-search-results hidden></div>
+</div>
+
+<style>
+  .search-form-v2{
+    display: inline-block;          /* importante para width funcionar como esperado */
+    box-sizing: border-box;
+    width: 250px;                   /* valor inicial explícito (não auto) */
+    transition: width 0.4s ease;   /* anima apenas width */
+    min-width: 0;                   /* evita overflow em telas pequenas */
+  }
+
+  .search-form-v2.expanded {
+    width: 340px;
+  }
+      /* Container principal para posicionar a lista de resultados corretamente */
+  .search-container-v2 {
+    position: relative;
+    max-width: 500px; /* Defina a largura máxima que desejar */
+    margin: 0 auto; /* Opcional: para centralizar */
+  }
+
+  /* Estilos da barra de busca (reutilizando e ajustando o anterior) */
+  .main-container-search-v2 {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--PRODUCT-CARD, #F1F1F1);
+    border: 1px solid #F1F1F1;
+    transition: border-color 0.2s;
+    position: relative; /* Para garantir que fique acima dos resultados */
+    z-index: 3;
+  }
+
+  .search-input-v2 {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    color: #000;
+    leading-trim: both;
+    text-edge: cap;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    /* Força o navegador a desenhar a seleção via CSS (evita seleção nativa invisível) */
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .search-input-v2::placeholder {
+    color: #B3B3B3; /* cor cinza do placeholder */
+  }
+
+  /* Destacar seleção de texto no input (bem visível, sobrescreve global) */
+  .search-input-v2::selection {
+    background: #7EB8F5 !important;
+    color: #0D0D0E !important;
+  }
+
+  .search-input-v2::-moz-selection {
+    background: #7EB8F5 !important;
+    color: #0D0D0E !important;
+  }
+
+  .search-button-v2 {
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    position: relative;
+  }
+
+  /* Por padrão no desktop, sempre mostrar ícone com fundo verde (expanded) */
+  .search-button-v2 .search-icon-default {
+    display: none;
+  }
+
+  .search-button-v2 .search-icon-expanded {
+    display: flex;
+  }
+
+
+  /* --- ESTILOS DA LISTA DE RESULTADOS PREDITIVOS --- */
+  .old_price_predictive{
+      color: var(--Gray-500, #4B4B53);
+      leading-trim: both;
+      text-edge: cap;
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 300;
+      line-height: normal;
+      text-decoration-line: line-through;
+  }
+  .predictive-price-search{
+      display: grid;
+  }
+  .predictive-search-results-v2 {
+    position: absolute;
+    top: calc(100% - 0px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 8px;
+  background: var(--PRODUCT-CARD, #F1F1F1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 16px;
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  /* Estilo para cada item da lista de resultados */
+  .predictive-search-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s;
+  }
+
+  .predictive-search-item:hover {
+    background-color: #f5f5f5;
+  }
+
+  .predictive-search-item__image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    margin-right: 12px;
+    border-radius: 4px;
+  }
+
+  .predictive-search-item__info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .predictive-search-item__title {
+    color: var(--BLACK, #0D0D0E);
+    leading-trim: both;
+    text-edge: cap;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    margin: 0px;
+  }
+
+  .predictive-search-item__price {
+      color: {{ settings.color_price_search }};
+      leading-trim: both;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+  }
+
+  /* Estado vazio (sem resultados) + botão WhatsApp */
+  .predictive-search-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    text-align: center;
+  }
+
+  .predictive-search-empty__text {
+    margin: 0;
+    font-size: 14px;
+    color: #6d6d6d;
+    line-height: 1.4;
+  }
+
+  .predictive-search-whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #25D366;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .predictive-search-whatsapp-btn:hover {
+    opacity: 0.9;
+    color: #fff;
+  }
+
+  .predictive-search-whatsapp-btn svg {
+    flex-shrink: 0;
+  }
+
+  /* Estilos para o botão de toggle no mobile */
+  .search-mobile-toggle {
+    display: none;
+    border: none;
+    background: transparent;
+    padding: 8px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .search-mobile-toggle svg {
+    width: 20px;
+    height: 21px;
+  }
+
+  /* Botão de fechar no mobile */
+  .search-close-mobile {
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+  }
+
+  /* Garantir que os ícones SVG tenham o tamanho correto */
+  .search-icon-default svg,
+  .search-icon-expanded svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* Estilos mobile - comportamento colapsado/expandido */
+  @media(max-width:989px){
+    .search-container-v2 {
+      max-width: 100%;
+      padding: 0;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    {%- if search_always_open -%}
+      /* Mobile/Tablet: sempre aberto (sem toggle) */
+      .search-container-v2 {
+        justify-content: stretch;
+      }
+
+      .search-form-v2 {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        transition: none;
+      }
+
+      .search-mobile-toggle {
+        display: none !important;
+      }
+
+    {%- else -%}
+      /* Mostrar botão de toggle no mobile */
+      .search-mobile-toggle {
+        display: flex;
+        width: auto;
+      }
+
+      /* Estado colapsado: esconder formulário, mostrar apenas ícone */
+      .search-container-v2:not(.search-expanded) .search-form-v2 {
+        display: none;
+      }
+
+      .search-container-v2:not(.search-expanded) .search-mobile-toggle {
+        display: flex;
+      }
+
+      .search-container-v2:not(.search-expanded) {
+        justify-content: center;
+      }
+
+      /* Estado expandido: mostrar formulário, esconder botão de toggle */
+      .search-container-v2.search-expanded {
+        position: fixed;
+        top: var(--header-height, 200px);
+        left: 0;
+        right: 0;
+        width: 100vw;
+        padding: 20px 1.6rem;
+        background: #fff;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .search-container-v2.search-expanded .search-form-v2 {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .search-container-v2.search-expanded .main-container-search-v2 {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+
+      .search-container-v2.search-expanded .search-input-v2 {
+        width: 100%;
+        min-width: 0;
+        flex: 1;
+      }
+
+      .search-container-v2.search-expanded .search-mobile-toggle {
+        display: none;
+      }
+
+      .search-container-v2.search-expanded .search-close-mobile {
+        display: flex !important;
+      }
+
+      .search-form-v2 {
+        width: 100%;
+      }
+
+      /* Quando expandido, garantir que o input tenha foco */
+      .search-container-v2.search-expanded .search-input-v2 {
+        display: block;
+      }
+    {%- endif -%}
+  }
+
+  /* Desktop: sempre mostrar formulário, nunca mostrar botão de toggle */
+  @media(min-width:990px){
+    .search-mobile-toggle {
+      display: none !important;
+    }
+
+    .search-form-v2 {
+      display: inline-block !important;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const allSearchContainers = document.querySelectorAll('[data-predictive-search-container]');
+
+    if (allSearchContainers.length === 0) {
+      return;
+    }
+
+    allSearchContainers.forEach((searchContainer) => {
+      const alwaysOpen = searchContainer.dataset.searchAlwaysOpen === 'true';
+      const searchInput = searchContainer.querySelector('[data-predictive-search-input]');
+      const searchResultsContainer = searchContainer.querySelector('[data-predictive-search-results]');
+      const searchToggle = searchContainer.querySelector('[data-search-toggle]');
+      let searchTimeout;
+      let resultsShownAt = 0;
+      let ignoreNextOutsideClick = false;
+
+      if (!searchInput || !searchResultsContainer) return;
+
+      // Função para buscar e exibir os resultados
+      const fetchAndRenderResults = (query) => {
+        fetch(
+          `/search/suggest.json?q=${encodeURIComponent(
+            query
+          )}&resources[type]=product&resources[limit]=5&resources[options][fields]=title,body,variants.sku,variants.title,product_type,vendor,tag`
+        )
+          .then((response) => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+          })
+          .then((data) => {
+            const products = data.resources.results.products;
+            searchResultsContainer.innerHTML = '';
+
+            if (products && products.length > 0) {
+              products.forEach((product) => {
+                const format = (value) =>
+                  parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const priceMin = parseFloat(product.price_min);
+                const priceMax = parseFloat(product.price_max);
+                const compareMin = parseFloat(product.compare_at_price_min);
+                const compareMax = parseFloat(product.compare_at_price_max);
+                let priceHtml = '';
+                priceHtml =
+                  priceMin !== priceMax
+                    ? `<span class="predictive-search-item__price">${format(priceMin)}</span>`
+                    : `<span class="predictive-search-item__price">${format(priceMin)}</span>`;
+                if (compareMax > priceMax || compareMin > priceMin) {
+                  priceHtml = `<s class="old_price_predictive">${format(compareMax)}</s> ${priceHtml}`;
+                }
+                const itemHtml = `<a href="${product.url}" class="predictive-search-item"><img src="${product.image}" alt="${product.title}" class="predictive-search-item__image" width="50" height="50"><div class="predictive-search-item__info"><p class="predictive-search-item__title">${product.title}</p><div class="predictive-price-search">${priceHtml}</div></div></a>`;
+                searchResultsContainer.insertAdjacentHTML('beforeend', itemHtml);
+              });
+              showResults();
+            } else {
+              const whatsappNumber = (searchContainer.dataset.whatsappNumber || '').trim().replace(/\D/g, '');
+              const template = (searchContainer.dataset.whatsappEmptyTemplate || '').trim();
+              const pageUrl = (searchContainer.dataset.pageUrl || '').trim();
+
+              if (whatsappNumber && query) {
+                // Build WhatsApp message from theme template.
+                // Supported placeholders: {search_terms} {page_url} {shop_name}
+                // (shop_name is resolved server-side in Liquid if present in the template string.)
+                const raw = template || `Olá! Procurei por: {search_terms}\nNão encontrei e preciso de ajuda.`;
+                const message = raw
+                  .replaceAll('{search_terms}', query)
+                  .replaceAll('{page_url}', pageUrl);
+
+                const encodedMessage = encodeURIComponent(message);
+                const waUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+                searchResultsContainer.innerHTML = `
+                <div class="predictive-search-empty">
+                  <p class="predictive-search-empty__text">Nenhum produto encontrado.</p>
+                  <a href="${waUrl}" target="_blank" rel="noopener" class="predictive-search-whatsapp-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" fill="currentColor"/>
+                    </svg>
+                    Perguntar no WhatsApp
+                  </a>
+                </div>`;
+                showResults();
+              } else {
+                hideResults();
+              }
+            }
+          })
+          .catch((error) => {
+            console.error('Erro no processo de busca preditiva:', error);
+            hideResults();
+          });
+      };
+
+      const showResults = () => {
+        resultsShownAt = Date.now();
+        ignoreNextOutsideClick = true;
+        searchResultsContainer.hidden = false;
+        searchInput.setAttribute('aria-expanded', 'true');
+        searchContainer.querySelector('.search-form-v2').classList.add('expanded');
+      };
+
+      const hideResults = () => {
+        searchResultsContainer.hidden = true;
+        searchInput.setAttribute('aria-expanded', 'false');
+        searchContainer.querySelector('.search-form-v2').classList.remove('expanded');
+      };
+
+      // Toggle para mobile: abrir busca
+      if (!alwaysOpen && searchToggle) {
+        searchToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          searchContainer.classList.add('search-expanded');
+          // Focar no input após expandir
+          setTimeout(() => {
+            searchInput.focus();
+          }, 100);
+        });
+      }
+
+      // Botão de fechar busca no mobile
+      const searchClose = searchContainer.querySelector('[data-search-close]');
+      if (!alwaysOpen && searchClose) {
+        searchClose.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          searchContainer.classList.remove('search-expanded');
+          searchInput.value = '';
+          hideResults();
+        });
+      }
+
+      // Fechar busca ao clicar fora (ignora o próximo clique após abrir resultados para evitar fechar sozinho)
+      const closeMobileSearch = (event) => {
+        if (event.target.closest('[data-search-toggle]') || event.target.closest('[data-search-close]')) {
+          return;
+        }
+        if (!searchContainer.contains(event.target) && searchContainer.classList.contains('search-expanded')) {
+          if (ignoreNextOutsideClick) {
+            ignoreNextOutsideClick = false;
+            return;
+          }
+          if (window.innerWidth <= 989) {
+            searchContainer.classList.remove('search-expanded');
+            searchInput.value = '';
+          }
+          hideResults();
+        }
+      };
+
+      if (!alwaysOpen) {
+        document.addEventListener('click', closeMobileSearch);
+      }
+
+      // "Ouve" o que o usuário digita
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim();
+        clearTimeout(searchTimeout);
+        if (query.length < 2) {
+          if (Date.now() - resultsShownAt > 400) hideResults();
+          return;
+        }
+        searchTimeout = setTimeout(() => fetchAndRenderResults(query), 300);
+      });
+    });
+  });
+</script>

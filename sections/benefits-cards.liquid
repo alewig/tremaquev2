@@ -1,0 +1,504 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .benefits-container-{{ section.id }} {
+    display: flex;
+    gap: 21px;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .benefit-card-{{ section.id }} {
+    background-color: {{ section.settings.color_card_bg }};
+    border: 1px solid {{ section.settings.color_card_border }};
+    border-radius: 8px;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .benefit-content-{{ section.id }} {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .benefit-icon-container-{{ section.id }} {
+    width: 50px;
+    height: 50px;
+    border-radius: 13.272px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .benefit-icon-{{ section.id }} {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .benefit-icon-{{ section.id }} img,
+  .benefit-icon-{{ section.id }} svg {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .benefit-text-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .benefit-title-{{ section.id }} {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.6;
+    color: {{ section.settings.color_title }};
+    margin: 0;
+  }
+
+  .benefit-description-{{ section.id }} {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: normal;
+    color: {{ section.settings.color_description }};
+    margin: 0;
+  }
+
+  /* Card Empresa Verificada */
+  .verified-card-{{ section.id }} {
+    background-color: {{ section.settings.color_card_bg }};
+    border: 1px solid {{ section.settings.color_card_border }};
+    border-radius: 8px;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .verified-content-{{ section.id }} {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .verified-icon-{{ section.id }} {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .verified-icon-{{ section.id }} img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .verified-icon-desktop-{{ section.id }} {
+    display: block;
+  }
+
+  .verified-icon-mobile-{{ section.id }} {
+    display: none;
+  }
+
+  .verified-text-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .verified-title-{{ section.id }} {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 31.852px; 
+    color: {{ section.settings.color_title }};
+    margin: 0;
+  }
+
+  .verified-title-desktop-{{ section.id }} {
+    display: block;
+  }
+
+  .verified-title-mobile-{{ section.id }} {
+    display: none;
+  }
+
+  .verified-logo-{{ section.id }} {
+    width: 100%;
+    display: block;
+  }
+
+  .verified-logo-{{ section.id }} img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Mobile */
+  @media screen and (max-width: 768px) {
+    .benefits-container-{{ section.id }} {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .benefit-card-{{ section.id }} {
+      width: 100%;
+      padding: 16px;
+    }
+
+    .benefit-content-{{ section.id }} {
+      align-items: center;
+    }
+
+    .benefit-icon-container-{{ section.id }} {
+      width: 40px;
+      height: 40px;
+      border-radius: 10.617px;
+    }
+
+    .benefit-icon-{{ section.id }} {
+      width: 32px;
+      height: 32px;
+    }
+
+    .benefit-title-{{ section.id }} {
+      font-size: 16px;
+      line-height: normal;
+    }
+
+    /* Verified Card Mobile */
+    .verified-card-{{ section.id }} {
+      width: 100%;
+      max-width: none;
+      padding: 16px;
+    }
+
+    .verified-content-{{ section.id }} {
+      align-items: center;
+    }
+
+    .verified-icon-{{ section.id }} {
+      width: 40px;
+      height: 40px;
+    }
+
+    .verified-title-{{ section.id }} {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .verified-logo-{{ section.id }} {
+      width: auto;
+      height: 32px;
+    }
+
+    .verified-logo-{{ section.id }} img {
+      width: auto;
+      height: 100%;
+    }
+  }
+{%- endstyle -%}
+
+<div class="page-width section-{{ section.id }}-padding">
+  <div class="benefits-container-{{ section.id }}">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'benefit_card' -%}
+        {%- if block.settings.title != blank or block.settings.description != blank -%}
+          <div class="benefit-card-{{ section.id }}" {{ block.shopify_attributes }}>
+            <div class="benefit-content-{{ section.id }}">
+              <div class="benefit-icon-container-{{ section.id }}" style="background: {{ block.settings.icon_bg }};">
+                <div class="benefit-icon-{{ section.id }}">
+                  {%- if block.settings.icon_image != blank -%}
+                    {{ block.settings.icon_image | image_url: width: 80 | image_tag: loading: 'lazy' }}
+                  {%- elsif block.settings.icon_svg != blank -%}
+                    {{ block.settings.icon_svg }}
+                  {%- else -%}
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="15" stroke="white" stroke-width="2"/>
+                      <path d="M15 20L18 23L25 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  {%- endif -%}
+                </div>
+              </div>
+
+              <div class="benefit-text-{{ section.id }}">
+                {%- if block.settings.title != blank -%}
+                  <p class="benefit-title-{{ section.id }}">
+                    {{ block.settings.title | escape }}
+                  </p>
+                {%- endif -%}
+                
+                {%- if block.settings.description != blank -%}
+                  <p class="benefit-description-{{ section.id }}">
+                    {{ block.settings.description | escape }}
+                  </p>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if section.settings.show_verified_card -%}
+      <div class="verified-card-{{ section.id }}">
+        <div class="verified-content-{{ section.id }}">
+          <div class="verified-icon-{{ section.id }}">
+            <!-- Ícone Desktop -->
+            <div class="verified-icon-desktop-{{ section.id }}">
+              {%- if section.settings.verified_icon != blank -%}
+                {{ section.settings.verified_icon | image_url: width: 100 | image_tag: loading: 'lazy' }}
+              {%- else -%}
+                <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="25" cy="25" r="20" fill="#1E88E5"/>
+                  <path d="M20 25L23 28L30 21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- endif -%}
+            </div>
+
+            <!-- Ícone Mobile -->
+            <div class="verified-icon-mobile-{{ section.id }}">
+              {%- if section.settings.verified_icon_mobile != blank -%}
+                {{ section.settings.verified_icon_mobile | image_url: width: 80 | image_tag: loading: 'lazy' }}
+              {%- elsif section.settings.verified_icon != blank -%}
+                {{ section.settings.verified_icon | image_url: width: 80 | image_tag: loading: 'lazy' }}
+              {%- else -%}
+                <svg width="40" height="40" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="25" cy="25" r="20" fill="#1E88E5"/>
+                  <path d="M20 25L23 28L30 21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- endif -%}
+            </div>
+          </div>
+
+          <div class="verified-text-{{ section.id }}">
+            <!-- Título Desktop -->
+            {%- if section.settings.verified_title != blank -%}
+              <p class="verified-title-{{ section.id }} verified-title-desktop-{{ section.id }}">
+                {{ section.settings.verified_title | escape }}
+              </p>
+            {%- endif -%}
+
+            <!-- Título Mobile -->
+            {%- if section.settings.verified_title_mobile != blank -%}
+              <p class="verified-title-{{ section.id }} verified-title-mobile-{{ section.id }}">
+                {{ section.settings.verified_title_mobile | escape }}
+              </p>
+            {%- elsif section.settings.verified_title != blank -%}
+              <p class="verified-title-{{ section.id }} verified-title-mobile-{{ section.id }}">
+                {{ section.settings.verified_title | escape }}
+              </p>
+            {%- endif -%}
+          </div>
+        </div>
+
+        {%- if section.settings.verified_logo != blank -%}
+          <div class="verified-logo-{{ section.id }}">
+            {{ section.settings.verified_logo | image_url: height: 84 | image_tag: loading: 'lazy' }}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Benefits Cards",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Superior",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Inferior",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Estilo dos Cards"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Cor de Fundo do Card",
+      "default": "#F6F6F6"
+    },
+    {
+      "type": "color",
+      "id": "color_card_border",
+      "label": "Cor da Borda do Card",
+      "default": "#D1D1D1"
+    },
+    {
+      "type": "color",
+      "id": "color_title",
+      "label": "Cor do Título",
+      "default": "#3D3D3D"
+    },
+    {
+      "type": "color",
+      "id": "color_description",
+      "label": "Cor da Descrição",
+      "default": "#6D6D6D"
+    },
+    {
+      "type": "header",
+      "content": "Card Empresa Verificada"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_verified_card",
+      "label": "Exibir Card Verificado",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "verified_title",
+      "label": "Título (Desktop)",
+      "default": "Verificado por"
+    },
+    {
+      "type": "text",
+      "id": "verified_title_mobile",
+      "label": "Título (Mobile)",
+      "info": "Se não preenchido, usa o título do desktop"
+    },
+    {
+      "type": "image_picker",
+      "id": "verified_icon",
+      "label": "Ícone Verificado (Desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "verified_icon_mobile",
+      "label": "Ícone Verificado (Mobile)",
+      "info": "Se não preenchido, usa o ícone do desktop"
+    },
+    {
+      "type": "image_picker",
+      "id": "verified_logo",
+      "label": "Logo (Reclame Aqui, etc)",
+      "info": "Aparece apenas no desktop"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit_card",
+      "name": "Card de Benefício",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Ícone"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Imagem do Ícone",
+          "info": "Use imagem OU SVG, não ambos"
+        },
+        {
+          "type": "html",
+          "id": "icon_svg",
+          "label": "SVG do Ícone",
+          "info": "Cole o código SVG aqui (alternativa à imagem)"
+        },
+        {
+          "type": "color_background",
+          "id": "icon_bg",
+          "label": "Fundo do Ícone",
+          "default": "#F80132",
+          "info": "Suporta cor sólida ou gradiente"
+        },
+        {
+          "type": "header",
+          "content": "Conteúdo"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título",
+          "default": "Entrega segura"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Descrição",
+          "default": "Garantia de Entrega. Se chegar com dano, trocamos ou reembolsamos."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Benefits Cards",
+      "blocks": [
+        {
+          "type": "benefit_card",
+          "settings": {
+            "title": "Entrega segura",
+            "description": "Garantia de Entrega. Se chegar com dano, trocamos ou reembolsamos.",
+            "icon_bg": "#F80132"
+          }
+        },
+        {
+          "type": "benefit_card",
+          "settings": {
+            "title": "Garantia Dinheiro de volta",
+            "description": "Ambiente seguro. Cartão, Pix com desconto e boleto parcelado.",
+            "icon_bg": "linear-gradient(135deg, #00C34D 0%, #00AC41 100%)"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,149 @@
+{%- liquid
+  assign logo_w_desk = section.settings.logo_width_desktop | default: 150
+  assign logo_h_desk = section.settings.logo_height_desktop | default: 0
+  assign logo_w_mob  = section.settings.logo_width_mobile | default: 120
+  assign logo_h_mob  = section.settings.logo_height_mobile | default: 0
+-%}
+
+<div class="main-section-pre-footer">
+    <div class="pre-footer-main-section  page-width">
+        <div class="logo-and-social">
+            <img
+              class="pre-footer__logo"
+              src="{{ section.settings.imagem_logo | image_url: width: 400 }}"
+              alt="{{ section.settings.imagem_logo.alt | default: shop.name }}"
+              loading="lazy"
+              width="{{ logo_w_desk }}"
+              {% if logo_h_desk > 0 %}height="{{ logo_h_desk }}"{% endif %}
+            >
+            {%- render 'social-icons', class: 'footer__list-social' -%}
+        </div>
+    </div>
+</div>
+
+<style>
+    .list-social__link{
+        color: {{ section.settings.color_text }} !important;
+    }
+    .pre-footer-main-section{
+        background: {{ section.settings.color_background }};
+        padding-top: 40px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid {{ section.settings.color_border }};
+     }
+     .main-section-pre-footer{
+        background: {{ section.settings.color_background }};
+     }
+     .logo-and-social{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+     }
+
+     .pre-footer__logo {
+        width: {{ logo_w_desk }}px;
+        {%- if logo_h_desk > 0 -%}
+        height: {{ logo_h_desk }}px;
+        {%- else -%}
+        height: auto;
+        {%- endif -%}
+        object-fit: contain;
+     }
+
+     @media screen and (max-width: 749px) {
+       .pre-footer__logo {
+         width: {{ logo_w_mob }}px;
+         {%- if logo_h_mob > 0 -%}
+         height: {{ logo_h_mob }}px;
+         {%- else -%}
+         height: auto;
+         {%- endif -%}
+       }
+     }
+</style>
+
+{% schema %}
+   {
+    "name": "Pre Footer",
+    "settings": [
+        {
+            "type": "image_picker",
+            "id": "imagem_logo",
+            "label": "Logo"
+        },
+        {
+            "type": "header",
+            "content": "Tamanho da logo – Desktop"
+        },
+        {
+            "type": "range",
+            "id": "logo_width_desktop",
+            "min": 50,
+            "max": 400,
+            "step": 5,
+            "unit": "px",
+            "label": "Largura (desktop)",
+            "default": 150
+        },
+        {
+            "type": "range",
+            "id": "logo_height_desktop",
+            "min": 0,
+            "max": 200,
+            "step": 5,
+            "unit": "px",
+            "label": "Altura (desktop)",
+            "info": "0 = automático (mantém proporção)",
+            "default": 0
+        },
+        {
+            "type": "header",
+            "content": "Tamanho da logo – Mobile"
+        },
+        {
+            "type": "range",
+            "id": "logo_width_mobile",
+            "min": 40,
+            "max": 300,
+            "step": 5,
+            "unit": "px",
+            "label": "Largura (mobile)",
+            "default": 120
+        },
+        {
+            "type": "range",
+            "id": "logo_height_mobile",
+            "min": 0,
+            "max": 150,
+            "step": 5,
+            "unit": "px",
+            "label": "Altura (mobile)",
+            "info": "0 = automático (mantém proporção)",
+            "default": 0
+        },
+        {
+            "type": "header",
+            "content": "Cores"
+        },
+        {
+            "type": "color",
+            "id": "color_background",
+            "label": "Cor de fundo"
+        },
+        {
+            "type": "color",
+            "id": "color_text",
+            "label": "Cor do texto"
+        },
+        {
+            "type": "color",
+            "id": "color_border",
+            "label": "Cor do borda"
+        }
+    ],"presets": [
+        {
+            "name": "Pre Footer"
+        }
+    ]
+   }
+{% endschema %}

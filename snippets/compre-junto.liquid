@@ -1,0 +1,138 @@
+{% comment %}
+  Acessamos as configurações através da variável 'cj_block' que passamos no render.
+{% endcomment %}
+
+{%- liquid
+  assign products_list = cj_block.settings.product_cj
+  assign section_title = cj_block.settings.title_section_cj
+  assign card_background_color = cj_block.settings.color_background_cj | default: 'rgba(252, 234, 239, 0.4)'
+  assign button_background_color = cj_block.settings.color_background_qk_buy_button_cj | default: '#F86C9B'
+  assign texto_botao = cj_block.settings.text_button_cj
+-%}
+
+<div class="cj-wrapper-{{ cj_block.id }}">
+
+  {%- if section_title != blank -%}
+    <h2 class="cj-main-title-{{ cj_block.id }}">{{ section_title }}</h2>
+  {%- endif -%}
+
+  <div class="cj-products-list-{{ cj_block.id }}">
+    {%- for product_item in products_list -%}
+      <div class="cj-card-{{ cj_block.id }}">
+        <a href="{{ product_item.url }}" class="cj-image-wrapper-{{ cj_block.id }}">
+          <img
+            class="cj-image-{{ cj_block.id }}"
+            src="{{ product_item.featured_image | image_url: width: 150 }}"
+            alt="{{ product_item.featured_image.alt | escape }}"
+            loading="lazy"
+            width="75"
+            height="75"
+          >
+        </a>
+
+        <div class="cj-info-{{ cj_block.id }}">
+          <a href="{{ product_item.url }}" class="cj-product-title-{{ cj_block.id }}">{{ product_item.title }}</a>
+          <div class="cj-price-{{ cj_block.id }}">
+            {%- if product_item.compare_at_price > product_item.price -%}
+              <s class="cj-price-compare-{{ cj_block.id }}">{{ product_item.compare_at_price | money }}</s>
+            {%- endif -%}
+            <span class="cj-price-final-{{ cj_block.id }}">{{ product_item.price | money }}</span>
+          </div>
+        </div>
+
+        {% render 'buy-modal', item: product_item, card_product: product_item, custom_text: texto_botao %}
+      </div>
+    {%- else -%}
+      {%- if products_list.size == 0 -%}
+       
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+</div>
+
+{%- style -%}
+  :root {
+    --cj-card-bg-{{ cj_block.id }}: {{ card_background_color }};
+    --cj-button-bg-{{ cj_block.id }}: {{ button_background_color }};
+  }
+  .cj-wrapper-{{ cj_block.id }} {
+    width: 100%;
+    margin-top: 30px;
+  }
+  .cj-main-title-{{ cj_block.id }} {
+    font-size: 16px; /* 20px */
+    font-weight: 900;
+    margin-bottom: 1rem;
+  }
+  .cj-products-list-{{ cj_block.id }} {
+    display: grid;
+    gap: 0.75rem; /* 12px */
+  }
+  .cj-card-{{ cj_block.id }} {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* 16px */
+    background-color: var(--cj-card-bg-{{ cj_block.id }});
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  .cj-image-wrapper-{{ cj_block.id }} {
+    flex-shrink: 0;
+    width: 75px;
+    height: 75px;
+    background-color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .cj-image-{{ cj_block.id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .cj-info-{{ cj_block.id }} {
+    flex-grow: 1; /* Faz esta div ocupar o espaço restante */
+  }
+  .cj-product-title-{{ cj_block.id }} {
+    display: block;
+    font-size: 16px; /* 16px */
+    font-weight: 600;
+    text-decoration: none;
+    color: #111;
+    margin-bottom: 0.25rem;
+  }
+  .cj-product-title-{{ cj_block.id }}:hover {
+    text-decoration: underline;
+  }
+  .cj-price-{{ cj_block.id }} {
+    font-size: 0.9rem; /* 14.4px */
+  }
+  .cj-price-compare-{{ cj_block.id }} {
+    font-size: 12px;
+    color: #757575;
+    margin-right: 0.5rem;
+  }
+  .cj-price-final-{{ cj_block.id }} {
+    font-size: 14px;
+    color: #111;
+    font-weight: 900;
+  }
+  .cj-button-{{ cj_block.id }} {
+    background-color: var(--cj-button-bg-{{ cj_block.id }});
+    color: white;
+    border: none;
+    border-radius: 50px; /* Canto bem arredondado */
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap; /* Impede que o texto quebre */
+    transition: opacity 0.2s ease;
+  }
+  .cj-button-{{ cj_block.id }}:hover {
+    opacity: 0.85;
+  }
+{%- endstyle -%}

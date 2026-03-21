@@ -1,0 +1,85 @@
+{% unless template == 'index' or template == 'cart' or template == 'list-collections' %}
+  <div class="breadcrumb-container">
+    <nav class="breadcrumb " role="navigation" aria-label="breadcrumbs">
+      <a href="/" title="Home">Home</a>
+
+      {% if template contains 'page' %}
+        <span aria-hidden="true">&rsaquo;</span>
+        <span>{{ page.title }}</span>
+
+      {% elsif template contains 'product' %}
+        {% assign display_collection = null %}
+        {% for collection in product.collections %}
+          {% unless collection.handle == 'all' or collection.handle == 'frontpage' %}
+            {% assign display_collection = collection %}
+            {% break %}
+          {% endunless %}
+        {% endfor %}
+
+        {% if display_collection %}
+          <span aria-hidden="true">&rsaquo;</span>
+          {{ display_collection.title | link_to: display_collection.url }}
+        {% endif %}
+
+        <span aria-hidden="true">&rsaquo;</span>
+        <span class="product-title-breadcrumb">{{ product.title }}</span>
+
+      {% elsif template contains 'collection' and collection.handle %}
+        <span aria-hidden="true">&rsaquo;</span>
+        {% if current_tags %}
+          {% capture url %}/collections/{{ collection.handle }}{% endcapture %}
+          {{ collection.title | link_to: url }}
+          <span aria-hidden="true">&rsaquo;</span>
+          <span>{{ current_tags | join: ' + ' }}</span>
+        {% else %}
+          <span>{{ collection.title }}</span>
+        {% endif %}
+
+      {% elsif template == 'blog' %}
+        <span aria-hidden="true">&rsaquo;</span>
+        {% if current_tags %}
+          {{ blog.title | link_to: blog.url }}
+          <span aria-hidden="true">&rsaquo;</span>
+          <span>{{ current_tags | join: ' + ' }}</span>
+        {% else %}
+          <span>{{ blog.title }}</span>
+        {% endif %}
+
+      {% elsif template == 'article' %}
+        <span aria-hidden="true">&rsaquo;</span>
+        {{ blog.title | link_to: blog.url }}
+        <span aria-hidden="true">&rsaquo;</span>
+        <span>{{ article.title }}</span>
+
+      {% else %}
+        <span aria-hidden="true">&rsaquo;</span>
+        <span>{{ page_title }}</span>
+      {% endif %}
+    </nav>
+  </div>
+{% endunless %}
+
+<style>
+  .product-title-breadcrumb{
+    font-weight: 700;
+    color: var(--BLACK, #1D1D1F);
+  }
+  .breadcrumb-container{
+    margin-bottom: 25px;
+  }
+  .breadcrumb{
+    color:#9F9F9F;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 0px 0px;
+    line-height: normal;
+  }
+  .breadcrumb a {
+    text-decoration: none;
+    color:#9F9F9F;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 0px 0px;
+    line-height: normal;
+  }
+</style>
