@@ -271,6 +271,8 @@
 
 <script>
   (function () {
+    var productDimensionsCache = {};
+
     function maskCep(value) {
       var digits = value.replace(/\D/g, '').slice(0, 8);
       if (digits.length <= 5) return digits;
@@ -317,6 +319,82 @@
       var normalized = String(value == null ? '' : value).replace(',', '.');
       var parsed = parseFloat(normalized);
       return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    function normalizeDimensionValue(value) {
+      if (value == null || value === '') return '';
+      return String(value).replace(',', '.');
+    }
+
+    async function fetchCartJson() {
+      var response = await fetch('/cart.js', { credentials: 'same-origin' });
+      if (!response.ok) throw new Error('cart.js request failed');
+      return response.json();
+    }
+
+    async function fetchProductDimensions(itemUrl) {
+      if (!itemUrl) return null;
+      if (productDimensionsCache[itemUrl]) return productDimensionsCache[itemUrl];
+
+      var request = fetch(itemUrl, { credentials: 'same-origin' })
+        .then(function (response) {
+          if (!response.ok) throw new Error('product page request failed');
+          return response.text();
+        })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+
+          function readInput(name) {
+            var selector = 'input[name="properties[' + name + ']"]';
+            var input = doc.querySelector(selector);
+            return input ? normalizeDimensionValue(input.value) : '';
+          }
+
+          return {
+            height: readInput('_frenet_altura'),
+            length: readInput('_frenet_comprimento'),
+            width: readInput('_frenet_largura')
+          };
+        })
+        .catch(function () {
+          return null;
+        });
+
+      productDimensionsCache[itemUrl] = request;
+      return request;
+    }
+
+    async function buildLiveCartShippingData() {
+      var cart = await fetchCartJson();
+      var items = await Promise.all((cart.items || []).map(async function(item) {
+        var properties = item.properties || {};
+        var height = normalizeDimensionValue(properties._frenet_altura);
+        var length = normalizeDimensionValue(properties._frenet_comprimento);
+        var width = normalizeDimensionValue(properties._frenet_largura);
+
+        if (!height || !length || !width) {
+          var fallbackDimensions = await fetchProductDimensions(item.url);
+          if (fallbackDimensions) {
+            height = height || fallbackDimensions.height;
+            length = length || fallbackDimensions.length;
+            width = width || fallbackDimensions.width;
+          }
+        }
+
+        return {
+          sku: item.sku || '',
+          height: height || '21',
+          length: length || '7',
+          width: width || '14',
+          weightGrams: item.grams || 300,
+          quantity: item.quantity || 1
+        };
+      }));
+
+      return {
+        shipmentInvoiceValueCents: cart.total_price || 0,
+        items: items
+      };
     }
 
     function toQueryString(obj, prefix) {
@@ -373,25 +451,17 @@
       }
     }
 
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', async function (e) {
       var btn = e.target.id === 'shipping-calc-cart-button' ? e.target : (e.target.closest && e.target.closest('#shipping-calc-cart-button'));
       if (!btn) return;
       e.preventDefault();
       var input = document.getElementById('shipping-calc-cart-cep');
       var opcoesEl = document.getElementById('shipping-calc-cart-opcoes');
       if (!input || !opcoesEl) return;
-      var cartShippingData = getCartShippingData();
-      if (!cartShippingData) return;
 
       var raw = input.getAttribute('data-cep-raw') || input.value.replace(/\D/g, '');
       if (raw.length < 8) {
         opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Digite um CEP válido (8 dígitos).</p>';
-        opcoesEl.hidden = false;
-        return;
-      }
-
-      if (!cartShippingData.items || cartShippingData.items.length === 0 || cartShippingData.shipmentInvoiceValueCents === 0) {
-        opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Adicione produtos ao carrinho para calcular o frete.</p>';
         opcoesEl.hidden = false;
         return;
       }
@@ -401,82 +471,98 @@
       opcoesEl.hidden = false;
       btn.disabled = true;
 
-      var shipmentInvoiceValue = cartShippingData.shipmentInvoiceValueCents / 100;
-      var shippingItemArray = cartShippingData.items.map(function(item) {
-        return {
-          Height: formatDimension(item.height, 21),
-          Length: formatDimension(item.length, 7),
-          Quantity: item.quantity || 1,
-          Weight: formatWeight(item.weightGrams || 300),
-          Width: formatDimension(item.width, 14),
-          SKU: item.sku || '',
-          Category: 'Produto'
+      try {
+        var cartShippingData = await buildLiveCartShippingData();
+        if ((!cartShippingData.items || cartShippingData.items.length === 0) || cartShippingData.shipmentInvoiceValueCents === 0) {
+          var fallbackCartShippingData = getCartShippingData();
+          cartShippingData = fallbackCartShippingData || cartShippingData;
+        }
+
+        if (!cartShippingData.items || cartShippingData.items.length === 0 || cartShippingData.shipmentInvoiceValueCents === 0) {
+          opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Adicione produtos ao carrinho para calcular o frete.</p>';
+          return;
+        }
+
+        var shipmentInvoiceValue = cartShippingData.shipmentInvoiceValueCents / 100;
+        var shippingItemArray = cartShippingData.items.map(function(item) {
+          return {
+            Height: formatDimension(item.height, 21),
+            Length: formatDimension(item.length, 7),
+            Quantity: item.quantity || 1,
+            Weight: formatWeight(item.weightGrams || 300),
+            Width: formatDimension(item.width, 14),
+            SKU: item.sku || '',
+            Category: 'Produto'
+          };
+        });
+
+        var params = {
+          SellerCEP: '86065270',
+          RecipientCEP: cepFormatado,
+          ShipmentInvoiceValue: shipmentInvoiceValue,
+          ShippingItemArray: JSON.stringify(shippingItemArray),
+          RecipientCountry: 'Brasil'
         };
-      });
 
-      var params = {
-        SellerCEP: '86065270',
-        RecipientCEP: cepFormatado,
-        ShipmentInvoiceValue: shipmentInvoiceValue,
-        ShippingItemArray: JSON.stringify(shippingItemArray),
-        RecipientCountry: 'Brasil'
-      };
+        var token = '622110E8R81CER4B0DR97CBRF44173A82224';
+        var shippingUrl = 'https://calc-wig.vercel.app/shipping/quote?' + toQueryString(params) + '&token=' + token;
 
-      var token = '622110E8R81CER4B0DR97CBRF44173A82224';
-      var shippingUrl = 'https://calc-wig.vercel.app/shipping/quote?' + toQueryString(params) + '&token=' + token;
-
-      fetch(shippingUrl)
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          if (data && data.ShippingSevicesArray && data.ShippingSevicesArray.length > 0) {
-            var valid = data.ShippingSevicesArray.filter(function (item) {
-              return item.ShippingPrice != null && item.DeliveryTime != null;
-            });
-            if (valid.length > 0) {
-              opcoesEl.innerHTML = valid.map(function (item, index) {
-                var price = parseFloat(item.ShippingPrice);
-                var prazo = item.DeliveryTime + ' dias úteis';
-                var nome = item.Carrier || item.ServiceDescription || item.CarrierName || 'Forma de Entrega';
-                var priceStr = 'R$ ' + price.toFixed(2).replace('.', ',');
-                var checked = index === 0 ? ' checked' : '';
-                var value = index;
-                return '<label class="shipping-calc-cart__opcoes-item">' +
-                  '<input type="radio" name="shipping-calc-cart-option" value="' + value + '" data-price="' + price + '" data-name="' + nome.replace(/"/g, '&quot;') + '" data-prazo="' + prazo.replace(/"/g, '&quot;') + '"' + checked + '>' +
-                  '<span class="shipping-calc-cart__opcoes-item-radio" aria-hidden="true"></span>' +
-                  '<span class="shipping-calc-cart__opcoes-item-text">' +
-                    '<strong>' + nome + '</strong>' +
-                    '<span class="shipping-calc-cart__opcoes-item-prazo">' + prazo + '</span>' +
-                  '</span>' +
-                  '<span class="shipping-calc-cart__opcoes-item-price">' + priceStr + '</span>' +
-                '</label>';
-              }).join('');
-              opcoesEl.setAttribute('role', 'radiogroup');
-              opcoesEl.setAttribute('aria-label', 'Opções de frete');
-              var radios = opcoesEl.querySelectorAll('input[name="shipping-calc-cart-option"]');
-              function updateSelected() {
-                var r = opcoesEl.querySelector('input[name="shipping-calc-cart-option"]:checked');
-                if (r) {
-                  opcoesEl.dataset.selectedPrice = r.dataset.price || '';
-                  opcoesEl.dataset.selectedName = r.dataset.name || '';
-                  opcoesEl.dataset.selectedPrazo = r.dataset.prazo || '';
+        fetch(shippingUrl)
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data && data.ShippingSevicesArray && data.ShippingSevicesArray.length > 0) {
+              var valid = data.ShippingSevicesArray.filter(function (item) {
+                return item.ShippingPrice != null && item.DeliveryTime != null;
+              });
+              if (valid.length > 0) {
+                opcoesEl.innerHTML = valid.map(function (item, index) {
+                  var price = parseFloat(item.ShippingPrice);
+                  var prazo = item.DeliveryTime + ' dias úteis';
+                  var nome = item.Carrier || item.ServiceDescription || item.CarrierName || 'Forma de Entrega';
+                  var priceStr = 'R$ ' + price.toFixed(2).replace('.', ',');
+                  var checked = index === 0 ? ' checked' : '';
+                  var value = index;
+                  return '<label class="shipping-calc-cart__opcoes-item">' +
+                    '<input type="radio" name="shipping-calc-cart-option" value="' + value + '" data-price="' + price + '" data-name="' + nome.replace(/"/g, '&quot;') + '" data-prazo="' + prazo.replace(/"/g, '&quot;') + '"' + checked + '>' +
+                    '<span class="shipping-calc-cart__opcoes-item-radio" aria-hidden="true"></span>' +
+                    '<span class="shipping-calc-cart__opcoes-item-text">' +
+                      '<strong>' + nome + '</strong>' +
+                      '<span class="shipping-calc-cart__opcoes-item-prazo">' + prazo + '</span>' +
+                    '</span>' +
+                    '<span class="shipping-calc-cart__opcoes-item-price">' + priceStr + '</span>' +
+                  '</label>';
+                }).join('');
+                opcoesEl.setAttribute('role', 'radiogroup');
+                opcoesEl.setAttribute('aria-label', 'Opções de frete');
+                var radios = opcoesEl.querySelectorAll('input[name="shipping-calc-cart-option"]');
+                function updateSelected() {
+                  var r = opcoesEl.querySelector('input[name="shipping-calc-cart-option"]:checked');
+                  if (r) {
+                    opcoesEl.dataset.selectedPrice = r.dataset.price || '';
+                    opcoesEl.dataset.selectedName = r.dataset.name || '';
+                    opcoesEl.dataset.selectedPrazo = r.dataset.prazo || '';
+                  }
+                  updateCartFooterTotal();
                 }
-                updateCartFooterTotal();
+                radios.forEach(function (r) { r.addEventListener('change', updateSelected); });
+                updateSelected();
+              } else {
+                opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Nenhuma opção de frete encontrada para este CEP.</p>';
               }
-              radios.forEach(function (r) { r.addEventListener('change', updateSelected); });
-              updateSelected();
             } else {
               opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Nenhuma opção de frete encontrada para este CEP.</p>';
             }
-          } else {
-            opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Nenhuma opção de frete encontrada para este CEP.</p>';
-          }
-        })
-        .catch(function () {
-          opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Não foi possível calcular o frete. Tente novamente.</p>';
-        })
-        .finally(function () {
-          btn.disabled = false;
-        });
+          })
+          .catch(function () {
+            opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Não foi possível calcular o frete. Tente novamente.</p>';
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      } catch (error) {
+        opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Não foi possível calcular o frete. Tente novamente.</p>';
+        btn.disabled = false;
+      }
     });
 
     // Preencher CEP pelo IP (mesma lógica do localize-ip.liquid)
