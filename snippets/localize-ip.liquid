@@ -385,16 +385,16 @@
 
       const variantShippingData = {
         {%- for variant in product.variants -%}
-          {%- assign variant_altura = variant.metafields.frenet.altura.value | split: ' ' | first -%}
-          {%- assign variant_comprimento = variant.metafields.frenet.comprimento.value | split: ' ' | first -%}
-          {%- assign variant_largura = variant.metafields.frenet.largura.value | split: ' ' | first -%}
+          {%- assign variant_altura = variant.metafields.frenet.altura.value | split: ' ' | first | replace: ',', '.' -%}
+          {%- assign variant_comprimento = variant.metafields.frenet.comprimento.value | split: ' ' | first | replace: ',', '.' -%}
+          {%- assign variant_largura = variant.metafields.frenet.largura.value | split: ' ' | first | replace: ',', '.' -%}
           "{{ variant.id }}": {
             "priceCents": {{ variant.price | default: 0 }},
             "weightGrams": {{ variant.weight | default: 300 }},
             "sku": {{ variant.sku | default: '' | json }},
-            "height": {% if variant_altura != blank %}{{ variant_altura }}{% else %}null{% endif %},
-            "length": {% if variant_comprimento != blank %}{{ variant_comprimento }}{% else %}null{% endif %},
-            "width": {% if variant_largura != blank %}{{ variant_largura }}{% else %}null{% endif %}
+            "height": {{ variant_altura | json }},
+            "length": {{ variant_comprimento | json }},
+            "width": {{ variant_largura | json }}
           }{%- unless forloop.last -%},{%- endunless -%}
         {%- endfor -%}
       };

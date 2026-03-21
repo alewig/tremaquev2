@@ -254,16 +254,16 @@
     {%- for item in cart.items -%}
       {%- assign w_grams = item.variant.weight -%}
       {%- if w_grams == nil or w_grams == 0 -%}{%- assign w_grams = 300 -%}{%- endif -%}
-      {%- assign num_altura = item.properties._frenet_altura | default: item.product.metafields.frenet.altura.value | split: ' ' | first -%}
-      {%- assign num_comprimento = item.properties._frenet_comprimento | default: item.product.metafields.frenet.comprimento.value | split: ' ' | first -%}
-      {%- assign num_largura = item.properties._frenet_largura | default: item.product.metafields.frenet.largura.value | split: ' ' | first -%}
-      {%- if num_altura == blank -%}{%- assign num_altura = item.variant.metafields.frenet.altura.value | split: ' ' | first -%}{%- endif -%}
-      {%- if num_comprimento == blank -%}{%- assign num_comprimento = item.variant.metafields.frenet.comprimento.value | split: ' ' | first -%}{%- endif -%}
-      {%- if num_largura == blank -%}{%- assign num_largura = item.variant.metafields.frenet.largura.value | split: ' ' | first -%}{%- endif -%}
+      {%- assign num_altura = item.properties._frenet_altura | default: item.product.metafields.frenet.altura.value | split: ' ' | first | replace: ',', '.' -%}
+      {%- assign num_comprimento = item.properties._frenet_comprimento | default: item.product.metafields.frenet.comprimento.value | split: ' ' | first | replace: ',', '.' -%}
+      {%- assign num_largura = item.properties._frenet_largura | default: item.product.metafields.frenet.largura.value | split: ' ' | first | replace: ',', '.' -%}
+      {%- if num_altura == blank -%}{%- assign num_altura = item.variant.metafields.frenet.altura.value | split: ' ' | first | replace: ',', '.' -%}{%- endif -%}
+      {%- if num_comprimento == blank -%}{%- assign num_comprimento = item.variant.metafields.frenet.comprimento.value | split: ' ' | first | replace: ',', '.' -%}{%- endif -%}
+      {%- if num_largura == blank -%}{%- assign num_largura = item.variant.metafields.frenet.largura.value | split: ' ' | first | replace: ',', '.' -%}{%- endif -%}
       {%- assign item_h = num_altura | default: 21 -%}
       {%- assign item_l = num_comprimento | default: 7 -%}
       {%- assign item_w = num_largura | default: 14 -%}
-      {"sku":{{ item.variant.sku | json }},"height":{{ item_h }},"length":{{ item_l }},"width":{{ item_w }},"weightGrams":{{ w_grams }},"quantity":{{ item.quantity }}}{% unless forloop.last %},{% endunless %}
+      {"sku":{{ item.variant.sku | json }},"height":{{ item_h | json }},"length":{{ item_l | json }},"width":{{ item_w | json }},"weightGrams":{{ w_grams }},"quantity":{{ item.quantity }}}{% unless forloop.last %},{% endunless %}
     {%- endfor -%}
   ]
 }
@@ -311,6 +311,12 @@
 
     function formatWeight(weightGrams) {
       return parseFloat(((Number(weightGrams) || 0) / 1000).toFixed(3));
+    }
+
+    function formatDimension(value, fallback) {
+      var normalized = String(value == null ? '' : value).replace(',', '.');
+      var parsed = parseFloat(normalized);
+      return Number.isFinite(parsed) ? parsed : fallback;
     }
 
     function toQueryString(obj, prefix) {
@@ -398,11 +404,11 @@
       var shipmentInvoiceValue = cartShippingData.shipmentInvoiceValueCents / 100;
       var shippingItemArray = cartShippingData.items.map(function(item) {
         return {
-          Height: item.height || 21,
-          Length: item.length || 7,
+          Height: formatDimension(item.height, 21),
+          Length: formatDimension(item.length, 7),
           Quantity: item.quantity || 1,
           Weight: formatWeight(item.weightGrams || 300),
-          Width: item.width || 14,
+          Width: formatDimension(item.width, 14),
           SKU: item.sku || '',
           Category: 'Produto'
         };
