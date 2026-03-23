@@ -141,6 +141,11 @@
       </div>
     </div>
 
+    <!-- Custo mensal -->
+    <p class="simulador__monthly-cost">
+      Custo mensal estimado: <strong data-result="monthly-cost">R$ 00.000,00</strong>
+    </p>
+
     <!-- Disclaimer -->
     <p class="simulador__disclaimer">
       * Estimativa simplificada. Resultados variam por ponto e execução.
@@ -352,6 +357,17 @@
     color: #1b67fe;
   }
 
+  .simulador__monthly-cost {
+    font-size: 14px;
+    color: #6d6d6d;
+    text-align: center;
+    margin: 0;
+  }
+
+  .simulador__monthly-cost strong {
+    color: #101828;
+  }
+
   .simulador__disclaimer {
     font-size: 12px;
     color: #6a7282;
@@ -521,14 +537,20 @@
           if (paybackMonths < 1) paybackMonths = 1;
         }
 
+        const monthlyCost = costPerUnit * unitsPerDay * daysWorked;
+
         const revenueEl = simulador.querySelector('[data-result="revenue"]');
         const paybackEl = simulador.querySelector('[data-result="payback"]');
+        const monthlyCostEl = simulador.querySelector('[data-result="monthly-cost"]');
 
         if (revenueEl) {
           revenueEl.textContent = `R$ ${monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
         if (paybackEl) {
           paybackEl.textContent = paybackMonths === 1 ? '1 Mês' : `${paybackMonths} Meses`;
+        }
+        if (monthlyCostEl) {
+          monthlyCostEl.textContent = `R$ ${monthlyCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
       }
 
