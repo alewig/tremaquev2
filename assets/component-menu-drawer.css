@@ -291,4 +291,6 @@ details[open].menu-opening > .menu-drawer__submenu {
 .menu-drawer__minha-conta .svg-wrapper svg {
   width: 2rem;
   height: 2rem;
+  color: #000;
+  fill: #000;
 }
