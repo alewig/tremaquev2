@@ -628,6 +628,68 @@
         { passive: true }
       );
 
+      // Yampi checkout: intercepta clique nos botões do sticky bar
+      var YAMPI_CART_ENDPOINT = 'https://api.dooki.com.br/v2/public/shopify/cart';
+      var SHOP_HOST = window.location.host;
+
+      function redirectToYampiCheckout() {
+        fetch('/cart.json', { credentials: 'same-origin' })
+          .then(function (r) { return r.json(); })
+          .then(function (cartPayload) {
+            return fetch(YAMPI_CART_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ shop: SHOP_HOST, cart_payload: cartPayload })
+            });
+          })
+          .then(function (r) { return r.json(); })
+          .then(function (resp) {
+            if (resp && resp.checkout_direct_url) {
+              window.location.href = resp.checkout_direct_url;
+            } else {
+              window.location.href = '/cart';
+            }
+          })
+          .catch(function () {
+            window.location.href = '/cart';
+          });
+      }
+
+      root.querySelectorAll('[data-sticky-buy-button]').forEach(function (btn) {
+        btn.addEventListener('click', function (event) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          if (btn.disabled) return;
+
+          var form = btn.closest('form');
+          if (!form) return;
+
+          btn.setAttribute('aria-disabled', 'true');
+          btn.classList.add('loading');
+          var spinner = btn.querySelector('.loading__spinner');
+          if (spinner) spinner.classList.remove('hidden');
+
+          fetch('/cart/add.js', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json' },
+            body: new FormData(form),
+          })
+            .then(function (res) {
+              if (!res.ok) throw new Error('cart/add failed');
+              return res.json();
+            })
+            .then(function () {
+              redirectToYampiCheckout();
+            })
+            .catch(function () {
+              btn.classList.remove('loading');
+              btn.removeAttribute('aria-disabled');
+              if (spinner) spinner.classList.add('hidden');
+            });
+        });
+      });
+
       // Atualização de variante via pubsub do tema
       function trySubscribeToVariantChange() {
         // No tema, `PUB_SUB_EVENTS` é `const` (escopo global), então não existe em `window.PUB_SUB_EVENTS`
