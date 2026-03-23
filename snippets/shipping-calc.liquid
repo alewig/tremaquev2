@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const params = {
-      SellerCEP: '30510080',
+      SellerCEP: '86065270',
       RecipientCEP: cep,
       ShipmentInvoiceValue: shipmentInvoiceValue,
       ShippingItemArray: JSON.stringify([{
@@ -177,11 +177,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const queryString = toQueryString(params);
-    const token = '7C429332RD2ACR4833R890ARD43CFC37B1FD';
+    const token = '622110E8R81CER4B0DR97CBRF44173A82224';
 
     fetch(`https://calc-wig.vercel.app/shipping/quote?${queryString}&token=${token}`)
       .then(response => response.json())
       .then(data => {
+        console.log('[FRETE DEBUG produto] Resposta completa da API:', JSON.stringify(data, null, 2));
+        console.log('[FRETE DEBUG produto] ShippingSevicesArray:', data && data.ShippingSevicesArray);
         const tabelaResultados = document.getElementById('unique-tabela-resultados');
         tabelaResultados.innerHTML = '';
 

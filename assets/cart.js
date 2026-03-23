@@ -658,6 +658,9 @@ if (!customElements.get('cart-note')) {
         );
         var data = await response.json();
 
+        console.log('[FRETE DEBUG carrinho] Resposta completa da API:', JSON.stringify(data, null, 2));
+        console.log('[FRETE DEBUG carrinho] ShippingSevicesArray:', data && data.ShippingSevicesArray);
+
         renderShippingOptions(opcoesEl, data && data.ShippingSevicesArray);
       } catch (error) {
         opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Não foi possível calcular o frete. Tente novamente.</p>';
