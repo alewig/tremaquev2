@@ -49,3 +49,23 @@
     justify-content: flex-start;
   }
 }
+
+.cart-shipping-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  font-size: 1.4rem;
+  color: rgba(var(--color-foreground), 0.75);
+  border-top: 1px solid rgba(var(--color-foreground), 0.08);
+  margin-bottom: 0.4rem;
+}
+
+.cart-shipping-summary__label {
+  flex: 1;
+}
+
+.cart-shipping-summary__value {
+  font-weight: 600;
+  color: rgb(var(--color-foreground));
+}

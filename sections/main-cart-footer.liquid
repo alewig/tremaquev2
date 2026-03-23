@@ -74,6 +74,11 @@
                   {% render 'cart-cupom-cart' %}
                 </div>
 
+                <div class="cart-shipping-summary" id="cart-shipping-total-row" style="display:none">
+                  <span class="cart-shipping-summary__label">Frete (<span id="cart-shipping-carrier-name">-</span>):</span>
+                  <span class="cart-shipping-summary__value" id="cart-shipping-total-value">R$ 0,00</span>
+                </div>
+
                 {%- liquid
                   assign cart_total = cart.total_price | default: 0
                   assign pix_discount_pct = settings.pix_discount | default: 0

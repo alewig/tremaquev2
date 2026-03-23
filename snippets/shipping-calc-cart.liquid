@@ -424,15 +424,31 @@
     function updateCartFooterTotal() {
       var footer = document.getElementById('main-cart-footer');
       var totalsDiv = footer && footer.querySelector('.totals');
-      var totalValueEl = totalsDiv && (totalsDiv.querySelector('#cart-footer-estimated-total') || totalsDiv.querySelector('.totals__total-value'));
-      if (!totalsDiv || !totalValueEl) return;
+      if (!totalsDiv) return;
+      var totalValueEl = document.getElementById('cart-footer-estimated-total') || totalsDiv.querySelector('.totals__total-value');
+      if (!totalValueEl) return;
       var cartTotalCents = parseInt(totalsDiv.getAttribute('data-cart-total-cents') || '0', 10);
       var symbol = totalsDiv.getAttribute('data-currency-symbol') || 'R$';
       var opcoesEl = document.getElementById('shipping-calc-cart-opcoes');
-      var selectedPrice = opcoesEl && opcoesEl.getAttribute('data-selected-price');
-      var shippingCents = selectedPrice ? Math.round(parseFloat(selectedPrice) * 100) : 0;
+      var selectedPrice = opcoesEl ? opcoesEl.getAttribute('data-selected-price') : null;
+      var selectedName = opcoesEl ? (opcoesEl.getAttribute('data-selected-name') || '') : '';
+      var shippingCents = (selectedPrice !== null && selectedPrice !== '') ? Math.round(parseFloat(selectedPrice) * 100) : 0;
       var totalCents = cartTotalCents + shippingCents;
       totalValueEl.textContent = formatMoneyCents(totalCents, symbol);
+
+      // Update shipping summary line
+      var shippingRow = document.getElementById('cart-shipping-total-row');
+      var shippingPriceEl = document.getElementById('cart-shipping-total-value');
+      var shippingNameEl = document.getElementById('cart-shipping-carrier-name');
+      if (shippingRow) {
+        if (selectedPrice !== null && selectedPrice !== '') {
+          if (shippingNameEl) shippingNameEl.textContent = selectedName || 'Entrega';
+          if (shippingPriceEl) shippingPriceEl.textContent = shippingCents > 0 ? formatMoneyCents(shippingCents, symbol) : 'Grátis';
+          shippingRow.style.display = '';
+        } else {
+          shippingRow.style.display = 'none';
+        }
+      }
 
       var pixValueEl = document.getElementById('totals-pix-value');
       var parcelasValueEl = document.getElementById('totals-parcelas-value');
