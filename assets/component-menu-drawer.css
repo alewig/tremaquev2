@@ -262,3 +262,33 @@ details[open].menu-opening > .menu-drawer__submenu {
     transition: none !important;
   }
 }
+
+.menu-drawer__minha-conta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 3rem;
+  text-decoration: none;
+  font-size: 1.5rem;
+  color: rgb(var(--color-foreground));
+  border-top: 1px solid rgba(var(--color-foreground), 0.08);
+  border-bottom: 1px solid rgba(var(--color-foreground), 0.08);
+  margin-bottom: 1.6rem;
+}
+
+.menu-drawer__minha-conta:hover {
+  background-color: rgba(var(--color-foreground), 0.04);
+}
+
+.menu-drawer__minha-conta .svg-wrapper {
+  display: flex;
+  align-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+}
+
+.menu-drawer__minha-conta .svg-wrapper svg {
+  width: 2rem;
+  height: 2rem;
+}
