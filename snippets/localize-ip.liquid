@@ -579,6 +579,10 @@
                   const maxDaysWithMargin = maxDays + 1;
                   console.log('[Shipping] Prazo mínimo:', minDays, '| Prazo máximo (com margem):', maxDaysWithMargin);
 
+                  const data1 = formatarData(minDays);
+                  const data2 = formatarData(maxDaysWithMargin);
+                  atualizarTextoPrevisao('Chegará entre <strong>' + data1 + '</strong> e <strong>' + data2 + '</strong>');
+
                   if (showOptions && opcoesContainer) {
                     opcoesContainer.innerHTML = validServices.map(function (item) {
                       const price = item.ShippingPrice != null ? parseFloat(item.ShippingPrice) : 0;
@@ -588,9 +592,6 @@
                     }).join('');
                     opcoesContainer.hidden = false;
                   } else {
-                    const data1 = formatarData(minDays);
-                    const data2 = formatarData(maxDaysWithMargin);
-                    atualizarTextoPrevisao('Chegará entre <strong>' + data1 + '</strong> e <strong>' + data2 + '</strong>');
                     mostrarFormEPreencherCep(cep);
                   }
                   return;
