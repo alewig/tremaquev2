@@ -580,7 +580,7 @@
                   console.log('[Shipping] Prazo mínimo:', minDays, '| Prazo máximo (com margem):', maxDaysWithMargin);
 
                   const data1 = formatarData(minDays);
-                  const data2 = formatarData(maxDaysWithMargin);
+                  const data2 = formatarData(minDays + 1);
                   atualizarTextoPrevisao('Chegará entre <strong>' + data1 + '</strong> e <strong>' + data2 + '</strong>');
 
                   if (showOptions && opcoesContainer) {
