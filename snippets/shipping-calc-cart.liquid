@@ -482,7 +482,6 @@
         return;
       }
 
-      sessionStorage.setItem('tremaque_shipping_cep', raw);
       var cepFormatado = formatCEP(raw);
       opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-loading">Calculando frete...</p>';
       opcoesEl.hidden = false;
@@ -629,47 +628,5 @@
       }
     });
 
-    // Re-calcular frete após atualização do carrinho (ex: remoção de item)
-    if (typeof subscribe === 'function' && window.PUB_SUB_EVENTS && window.PUB_SUB_EVENTS.cartUpdate) {
-      subscribe(window.PUB_SUB_EVENTS.cartUpdate, function(event) {
-        if (event && event.source === 'cart-items') {
-          var savedCep = sessionStorage.getItem('tremaque_shipping_cep');
-          if (!savedCep) return;
-          setTimeout(function() {
-            var input = document.getElementById('shipping-calc-cart-cep');
-            var btn = document.getElementById('shipping-calc-cart-button');
-            if (input && btn) {
-              input.setAttribute('data-cep-raw', savedCep);
-              btn.click();
-            }
-          }, 300);
-        }
-      });
-    }
-
-    // Preencher CEP pelo IP (mesma lógica do localize-ip.liquid)
-    var cepInputForIp = document.getElementById('shipping-calc-cart-cep');
-    if (cepInputForIp) {
-      fetch('https://api-vampira-v2.vercel.app/api/proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          method: 'get',
-          url: 'http://ip-api.com/json/?fields=status,message,regionName,region,zip'
-        })
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          var geoData = data && data.body;
-          if (geoData && geoData.status === 'success' && geoData.zip) {
-            var digits = String(geoData.zip).replace(/\D/g, '').padEnd(8, '0').slice(0, 8);
-            cepInputForIp.setAttribute('data-cep-raw', digits);
-            sessionStorage.setItem('tremaque_shipping_cep', digits);
-            var calcBtn = document.getElementById('shipping-calc-cart-button');
-            if (calcBtn) calcBtn.click();
-          }
-        })
-        .catch(function () {});
-    }
   })();
 </script>
