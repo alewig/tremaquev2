@@ -582,7 +582,8 @@
                   updateCartFooterTotal();
                 }
                 radios.forEach(function (r) { r.addEventListener('change', updateSelected); });
-                updateSelected();
+                // Usar setTimeout para garantir que o browser processou o estado checked
+                setTimeout(updateSelected, 0);
               } else {
                 opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Nenhuma opção de frete encontrada para este CEP.</p>';
               }
