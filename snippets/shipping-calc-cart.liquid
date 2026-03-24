@@ -558,6 +558,26 @@
                     opcoesEl.dataset.selectedPrice = r.dataset.price || '';
                     opcoesEl.dataset.selectedName = r.dataset.name || '';
                     opcoesEl.dataset.selectedPrazo = r.dataset.prazo || '';
+                    var footer = document.getElementById('main-cart-footer');
+                    var totalsDiv = footer && footer.querySelector('.totals');
+                    var totalValueEl = document.getElementById('cart-footer-estimated-total');
+                    if (totalsDiv && totalValueEl) {
+                      var cartTotalCents = parseInt(totalsDiv.getAttribute('data-cart-total-cents') || '0', 10);
+                      var symbol = totalsDiv.getAttribute('data-currency-symbol') || 'R$';
+                      var shippingCents = Math.round(parseFloat(r.dataset.price || '0') * 100);
+                      var totalCents = cartTotalCents + shippingCents;
+                      totalValueEl.textContent = formatMoneyCents(totalCents, symbol);
+                      var pixDiscountPct = parseInt(totalsDiv.getAttribute('data-pix-discount-pct') || '0', 10);
+                      var parcelas = parseInt(totalsDiv.getAttribute('data-parcelas') || '3', 10);
+                      var pixValueEl = document.getElementById('totals-pix-value');
+                      var parcelasValueEl = document.getElementById('totals-parcelas-value');
+                      if (pixValueEl && pixDiscountPct > 0) {
+                        pixValueEl.textContent = formatMoneyCents(Math.round(totalCents * (1 - pixDiscountPct * 0.01)), symbol);
+                      }
+                      if (parcelasValueEl && parcelas > 0) {
+                        parcelasValueEl.textContent = formatMoneyCents(Math.floor(totalCents / parcelas), symbol);
+                      }
+                    }
                   }
                   updateCartFooterTotal();
                 }
