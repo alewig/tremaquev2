@@ -622,17 +622,10 @@
         .then(function (data) {
           var geoData = data && data.body;
           if (geoData && geoData.status === 'success' && geoData.zip) {
-            var digits = String(geoData.zip).replace(/\D/g, '').slice(0, 8);
-            if (digits.length >= 5) {
-              cepInputForIp.value = digits.length <= 5
-                ? digits
-                : digits.slice(0, 5) + '-' + digits.slice(5, 8);
-              cepInputForIp.setAttribute('data-cep-raw', digits.length >= 8 ? digits.slice(0, 8) : digits);
-              if (digits.length >= 8) {
-                var calcBtn = document.getElementById('shipping-calc-cart-button');
-                if (calcBtn) calcBtn.click();
-              }
-            }
+            var digits = String(geoData.zip).replace(/\D/g, '').padEnd(8, '0').slice(0, 8);
+            cepInputForIp.setAttribute('data-cep-raw', digits);
+            var calcBtn = document.getElementById('shipping-calc-cart-button');
+            if (calcBtn) calcBtn.click();
           }
         })
         .catch(function () {});
