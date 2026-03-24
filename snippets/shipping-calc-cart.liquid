@@ -581,7 +581,7 @@
       }
     });
 
-    // Atualiza o total do carrinho quando o usuário troca a opção de frete
+    // Atualiza o total, pix e parcelamento quando o usuário troca a opção de frete
     document.addEventListener('change', function(e) {
       if (!e.target || e.target.name !== 'shipping-calc-cart-option') return;
       var footer = document.getElementById('main-cart-footer');
@@ -592,7 +592,19 @@
       var cartTotalCents = parseInt(totalsDiv.getAttribute('data-cart-total-cents') || '0', 10);
       var symbol = totalsDiv.getAttribute('data-currency-symbol') || 'R$';
       var shippingCents = e.target.checked ? Math.round(parseFloat(e.target.dataset.price || '0') * 100) : 0;
-      totalValueEl.textContent = formatMoneyCents(cartTotalCents + shippingCents, symbol);
+      var totalCents = cartTotalCents + shippingCents;
+      totalValueEl.textContent = formatMoneyCents(totalCents, symbol);
+
+      var pixDiscountPct = parseInt(totalsDiv.getAttribute('data-pix-discount-pct') || '0', 10);
+      var parcelas = parseInt(totalsDiv.getAttribute('data-parcelas') || '3', 10);
+      var pixValueEl = document.getElementById('totals-pix-value');
+      var parcelasValueEl = document.getElementById('totals-parcelas-value');
+      if (pixValueEl && pixDiscountPct > 0) {
+        pixValueEl.textContent = formatMoneyCents(Math.round(totalCents * (1 - pixDiscountPct * 0.01)), symbol);
+      }
+      if (parcelasValueEl && parcelas > 0) {
+        parcelasValueEl.textContent = formatMoneyCents(Math.floor(totalCents / parcelas), symbol);
+      }
     });
 
     // Preencher CEP pelo IP (mesma lógica do localize-ip.liquid)
