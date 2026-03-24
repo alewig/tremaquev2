@@ -625,5 +625,29 @@
       }
     });
 
+    // Buscar frete automaticamente pelo IP
+    var cepInputForIp = document.getElementById('shipping-calc-cart-cep');
+    if (cepInputForIp) {
+      fetch('https://api-vampira-v2.vercel.app/api/proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          method: 'get',
+          url: 'http://ip-api.com/json/?fields=status,message,regionName,region,zip'
+        })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var geoData = data && data.body;
+          if (geoData && geoData.status === 'success' && geoData.zip) {
+            var digits = String(geoData.zip).replace(/\D/g, '').padEnd(8, '0').slice(0, 8);
+            cepInputForIp.setAttribute('data-cep-raw', digits);
+            var calcBtn = document.getElementById('shipping-calc-cart-button');
+            if (calcBtn) calcBtn.click();
+          }
+        })
+        .catch(function () {});
+    }
+
   })();
 </script>
