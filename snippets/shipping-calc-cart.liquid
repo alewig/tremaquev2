@@ -536,10 +536,9 @@
                   var prazo = item.DeliveryTime + ' dias úteis';
                   var nome = item.Carrier || item.ServiceDescription || item.CarrierName || 'Forma de Entrega';
                   var priceStr = 'R$ ' + price.toFixed(2).replace('.', ',');
-                  var checked = index === 0 ? ' checked' : '';
                   var value = index;
                   return '<label class="shipping-calc-cart__opcoes-item">' +
-                    '<input type="radio" name="shipping-calc-cart-option" value="' + value + '" data-price="' + price + '" data-name="' + nome.replace(/"/g, '&quot;') + '" data-prazo="' + prazo.replace(/"/g, '&quot;') + '"' + checked + '>' +
+                    '<input type="radio" name="shipping-calc-cart-option" value="' + value + '" data-price="' + price + '" data-name="' + nome.replace(/"/g, '&quot;') + '" data-prazo="' + prazo.replace(/"/g, '&quot;') + '">' +
                     '<span class="shipping-calc-cart__opcoes-item-radio" aria-hidden="true"></span>' +
                     '<span class="shipping-calc-cart__opcoes-item-text">' +
                       '<strong>' + nome + '</strong>' +
@@ -581,11 +580,6 @@
                   updateCartFooterTotal();
                 }
                 radios.forEach(function (r) { r.addEventListener('change', updateSelected); });
-                // Selecionar o primeiro radio explicitamente e atualizar totais
-                if (radios.length > 0) {
-                  radios[0].checked = true;
-                  updateSelected(radios[0]);
-                }
               } else {
                 opcoesEl.innerHTML = '<p class="shipping-calc-cart__opcoes-empty">Nenhuma opção de frete encontrada para este CEP.</p>';
               }
