@@ -423,14 +423,6 @@
         if (formRow) {
           formRow.hidden = false;
         }
-        if (cepInput && cep) {
-          var digits = (cep + '').replace(/\D/g, '');
-          if (digits.length >= 5) {
-            cepInput.value = digits.slice(0, 5) + (digits.length > 5 ? '-' + digits.slice(5, 8) : '');
-          } else {
-            cepInput.value = digits;
-          }
-        }
       }
 
       function atualizarTextoPrevisao(html) {
