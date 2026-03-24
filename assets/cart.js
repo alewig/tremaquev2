@@ -551,8 +551,6 @@ if (!customElements.get('cart-note')) {
         var price = parseFloat(item.ShippingPrice);
         var prazo = item.DeliveryTime + ' dias úteis';
         var nome = item.Carrier || item.ServiceDescription || item.CarrierName || 'Forma de Entrega';
-        var checked = index === 0 ? ' checked' : '';
-
         return (
           '<label class="shipping-calc-cart__opcoes-item">' +
           '<input type="radio" name="shipping-calc-cart-option" value="' +
@@ -563,9 +561,7 @@ if (!customElements.get('cart-note')) {
           nome.replace(/"/g, '&quot;') +
           '" data-prazo="' +
           prazo.replace(/"/g, '&quot;') +
-          '"' +
-          checked +
-          '>' +
+          '">' +
           '<span class="shipping-calc-cart__opcoes-item-radio" aria-hidden="true"></span>' +
           '<span class="shipping-calc-cart__opcoes-item-text"><strong>' +
           nome +
@@ -595,8 +591,6 @@ if (!customElements.get('cart-note')) {
     opcoesEl.querySelectorAll('input[name="shipping-calc-cart-option"]').forEach(function (radio) {
       radio.addEventListener('change', updateSelected);
     });
-
-    updateSelected();
   }
 
   document.addEventListener(
