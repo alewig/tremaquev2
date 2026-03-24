@@ -581,6 +581,20 @@
       }
     });
 
+    // Atualiza o total do carrinho quando o usuário troca a opção de frete
+    document.addEventListener('change', function(e) {
+      if (!e.target || e.target.name !== 'shipping-calc-cart-option') return;
+      var footer = document.getElementById('main-cart-footer');
+      var totalsDiv = footer && footer.querySelector('.totals');
+      if (!totalsDiv) return;
+      var totalValueEl = document.getElementById('cart-footer-estimated-total');
+      if (!totalValueEl) return;
+      var cartTotalCents = parseInt(totalsDiv.getAttribute('data-cart-total-cents') || '0', 10);
+      var symbol = totalsDiv.getAttribute('data-currency-symbol') || 'R$';
+      var shippingCents = e.target.checked ? Math.round(parseFloat(e.target.dataset.price || '0') * 100) : 0;
+      totalValueEl.textContent = formatMoneyCents(cartTotalCents + shippingCents, symbol);
+    });
+
     // Preencher CEP pelo IP (mesma lógica do localize-ip.liquid)
     var cepInputForIp = document.getElementById('shipping-calc-cart-cep');
     if (cepInputForIp) {
