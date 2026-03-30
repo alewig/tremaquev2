@@ -266,8 +266,8 @@ if (!customElements.get('product-info')) {
       updateMedia(html, variantFeaturedMediaId) {
         if (!variantFeaturedMediaId) return;
 
-        const mediaGallerySource = this.querySelector('media-gallery ul');
-        const mediaGalleryDestination = html.querySelector(`media-gallery ul`);
+        const mediaGallerySource = this.querySelector('[id^="Slider-Gallery"]');
+        const mediaGalleryDestination = html.querySelector('[id^="Slider-Gallery"]');
 
         const refreshSourceData = () => {
           if (this.hasAttribute('data-zoom-on-hover')) enableZoomOnHover(2);
