@@ -458,7 +458,8 @@
 
       if (pixValueEl && pixEnabled && pixDiscountPct > 0) {
         var discountMultiplier = pixDiscountPct * 0.01;
-        var pixPriceCents = Math.round(totalCents * (1 - discountMultiplier));
+        var pixProductsCents = Math.round(cartTotalCents * (1 - discountMultiplier));
+        var pixPriceCents = pixProductsCents + shippingCents;
         pixValueEl.textContent = formatMoneyCents(pixPriceCents, symbol);
       }
       if (parcelasValueEl && parcelas > 0) {
@@ -570,7 +571,8 @@
                       var pixValueEl = document.getElementById('totals-pix-value');
                       var parcelasValueEl = document.getElementById('totals-parcelas-value');
                       if (pixValueEl && pixDiscountPct > 0) {
-                        pixValueEl.textContent = formatMoneyCents(Math.round(totalCents * (1 - pixDiscountPct * 0.01)), symbol);
+                        var pixProductsCents = Math.round(cartTotalCents * (1 - pixDiscountPct * 0.01));
+                        pixValueEl.textContent = formatMoneyCents(pixProductsCents + shippingCents, symbol);
                       }
                       if (parcelasValueEl && parcelas > 0) {
                         parcelasValueEl.textContent = formatMoneyCents(Math.floor(totalCents / parcelas), symbol);
@@ -618,7 +620,8 @@
       var pixValueEl = document.getElementById('totals-pix-value');
       var parcelasValueEl = document.getElementById('totals-parcelas-value');
       if (pixValueEl && pixDiscountPct > 0) {
-        pixValueEl.textContent = formatMoneyCents(Math.round(totalCents * (1 - pixDiscountPct * 0.01)), symbol);
+        var pixProductsCents = Math.round(cartTotalCents * (1 - pixDiscountPct * 0.01));
+        pixValueEl.textContent = formatMoneyCents(pixProductsCents + shippingCents, symbol);
       }
       if (parcelasValueEl && parcelas > 0) {
         parcelasValueEl.textContent = formatMoneyCents(Math.floor(totalCents / parcelas), symbol);
