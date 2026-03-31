@@ -450,10 +450,11 @@ if (!customElements.get('cart-note')) {
     var pixEnabled = totalsDiv.getAttribute('data-pix-enabled') === 'true';
 
     if (pixValueEl && pixEnabled && pixDiscountPct > 0) {
+      var pixProductsCents = Math.round(cartTotalCents * (1 - pixDiscountPct * 0.01));
       pixValueEl.textContent = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
-      }).format((Math.round(totalCents * (1 - pixDiscountPct * 0.01))) / 100).replace('R$', symbol);
+      }).format((pixProductsCents + shippingCents) / 100).replace('R$', symbol);
     }
 
     if (parcelasValueEl && parcelas > 0) {
